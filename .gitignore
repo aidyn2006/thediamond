@@ -1,8 +1,31 @@
-HELP.md
+# --- Java / Maven ---
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+
+# --- Node / Next.js ---
+node_modules/
+.next/
+out/
+next-env.d.ts
+npm-debug.log*
+
+# --- Env / secrets ---
+.env
+.env*.local
+*.env
+
+# --- Uploads (local storage) ---
+backend/uploads/
+uploads/
+
+### IDE ###
+.idea
+*.iws
+*.iml
+*.ipr
+.vscode/
 
 ### STS ###
 .apt_generated
@@ -13,21 +36,8 @@ target/
 .springBeans
 .sts4-cache
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
+### misc ###
+.DS_Store
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
-
-### VS Code ###
-.vscode/

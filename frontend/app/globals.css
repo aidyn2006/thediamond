@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   TheDiamond design tokens (design spec 2.2). These are the ONLY
+   source of color/geometry values — components must never hardcode hex.
+------------------------------------------------------------------ */
+@theme {
+  /* palette */
+  --color-bg: #101114;
+  --color-surface: #17181d;
+  --color-surface-2: #1e2026;
+  --color-border: #2a2c34;
+  --color-text: #f2f3f5;
+  --color-text-dim: #9a9da7;
+  --color-accent: #7fd4ff;
+
+  /* status colors (muted) */
+  --color-success: #6fdd9b;
+  --color-error: #ff7a85;
+  --color-warning: #ffc46b;
+
+  /* radii */
+  --radius-card: 10px;
+  --radius-btn: 8px;
+  --radius-pill: 999px;
+
+  /* type scale (13 / 15 base / 17 / 22 / 28 / 40 / 56) */
+  --text-13: 13px;
+  --text-15: 15px;
+  --text-17: 17px;
+  --text-22: 22px;
+  --text-28: 28px;
+  --text-40: 40px;
+  --text-56: 56px;
+
+  /* line-heights */
+  --leading-body: 1.5;
+  --leading-heading: 1.15;
+
+  /* fonts (next/font sets the CSS variables on <html>) */
+  --font-display: var(--font-unbounded), system-ui, sans-serif;
+  --font-sans: var(--font-manrope), system-ui, sans-serif;
+}
+
+/* base */
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--text-15);
+  line-height: var(--leading-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* tabular numerals for money / follower counts / counters */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* display font helper (use sparingly: max one per screen) */
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+  line-height: var(--leading-heading);
+}
+
+/* ------------------------------------------------------------------
+   Signature "prism" gradient — ONLY three places (logo D, hero stone
+   edges, single key button per screen). Never as generic decoration.
+------------------------------------------------------------------ */
+.bg-prism {
+  background-image: linear-gradient(135deg, #7fd4ff 0%, #c3b5ff 50%, #ffd9a0 100%);
+}
+.text-prism {
+  background-image: linear-gradient(135deg, #7fd4ff 0%, #c3b5ff 50%, #ffd9a0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* visible focus ring on all interactive elements (accessibility 2.7) */
+*:focus-visible {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(127, 212, 255, 0.25);
+}
+
+/* respect reduced motion: kill all long/decorative animation */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

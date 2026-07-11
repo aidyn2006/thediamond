@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: thediamond-postgres
+    environment:
+      POSTGRES_DB: thediamond
+      POSTGRES_USER: thediamond
+      POSTGRES_PASSWORD: thediamond
+    ports:
+      - "5433:5432"
+    volumes:
+      - thediamond_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U thediamond -d thediamond"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  thediamond_pgdata:
