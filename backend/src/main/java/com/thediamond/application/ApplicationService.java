@@ -22,15 +22,18 @@ public class ApplicationService {
     private final CreatorProfileRepository creators;
     private final BrandProfileRepository brands;
     private final CampaignService campaignService;
+    private final com.thediamond.notify.NotificationService notifier;
 
     public ApplicationService(ApplicationRepository applications, CampaignRepository campaigns,
                               CreatorProfileRepository creators, BrandProfileRepository brands,
-                              CampaignService campaignService) {
+                              CampaignService campaignService,
+                              com.thediamond.notify.NotificationService notifier) {
         this.applications = applications;
         this.campaigns = campaigns;
         this.creators = creators;
         this.brands = brands;
         this.campaignService = campaignService;
+        this.notifier = notifier;
     }
 
     // ---------- Creator ----------
@@ -59,6 +62,7 @@ public class ApplicationService {
         a.setCreator(creator);
         a.setStatus(ApplicationStatus.APPLIED);
         applications.save(a);
+        notifier.newApplication(c.getBrand().getUser().getEmail(), creator.getName(), c.getTitle());
         return toMyApplication(a);
     }
 
@@ -92,6 +96,7 @@ public class ApplicationService {
         a.setStatus(ApplicationStatus.ACCEPTED);
         a.setReviewedAt(Instant.now());
         applications.save(a);
+        notifier.applicationAccepted(a.getCreator().getUser().getEmail(), a.getCampaign().getTitle());
         return toBrandApplication(a);
     }
 
@@ -104,6 +109,60 @@ public class ApplicationService {
         a.setStatus(ApplicationStatus.DECLINED);
         a.setReviewedAt(Instant.now());
         applications.save(a);
+        return toBrandApplication(a);
+    }
+
+    // ---------- Work submission & review (stage 5) ----------
+
+    @Transactional
+    public MyApplication submitWork(Long userId, Long applicationId, String url) {
+        CreatorProfile creator = requireCreator(userId);
+        Application a = applications.findById(applicationId)
+                .orElseThrow(() -> ApiException.notFound("Отклик не найден"));
+        if (!a.getCreator().getId().equals(creator.getId())) {
+            throw ApiException.forbidden("Это не ваш отклик");
+        }
+        boolean firstSubmit = a.getStatus() == ApplicationStatus.ACCEPTED;
+        boolean resubmit = a.getStatus() == ApplicationStatus.REJECTED && !a.isResubmitUsed();
+        if (!firstSubmit && !resubmit) {
+            throw ApiException.badRequest("BAD_STATE", "Сейчас работу сдать нельзя");
+        }
+        a.setSubmissionUrl(url.trim());
+        a.setStatus(ApplicationStatus.SUBMITTED);
+        a.setSubmittedAt(Instant.now());
+        a.setRejectReason(null);
+        if (resubmit) a.setResubmitUsed(true);
+        applications.save(a);
+        return toMyApplication(a);
+    }
+
+    @Transactional
+    public BrandApplication approveWork(Long userId, Long applicationId) {
+        Application a = requireOwnedApplication(userId, applicationId);
+        if (a.getStatus() != ApplicationStatus.SUBMITTED) {
+            throw ApiException.badRequest("BAD_STATE", "Работа не на проверке");
+        }
+        a.setStatus(ApplicationStatus.APPROVED);
+        a.setReviewedAt(Instant.now());
+        applications.save(a);
+        notifier.workApproved(a.getCreator().getUser().getEmail(), a.getCampaign().getTitle());
+        return toBrandApplication(a);
+    }
+
+    @Transactional
+    public BrandApplication rejectWork(Long userId, Long applicationId, String reason) {
+        Application a = requireOwnedApplication(userId, applicationId);
+        if (a.getStatus() != ApplicationStatus.SUBMITTED) {
+            throw ApiException.badRequest("BAD_STATE", "Работа не на проверке");
+        }
+        if (reason == null || reason.isBlank()) {
+            throw ApiException.badRequest("REASON_REQUIRED", "Укажите причину");
+        }
+        a.setStatus(ApplicationStatus.REJECTED);
+        a.setRejectReason(reason.trim());
+        a.setReviewedAt(Instant.now());
+        applications.save(a);
+        notifier.workRejected(a.getCreator().getUser().getEmail(), a.getCampaign().getTitle(), reason.trim());
         return toBrandApplication(a);
     }
 

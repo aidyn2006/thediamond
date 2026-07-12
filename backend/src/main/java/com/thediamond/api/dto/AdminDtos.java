@@ -15,4 +15,12 @@ public final class AdminDtos {
             long activeCampaigns,
             long applications
     ) {}
+
+    public record AdminUser(
+            Long id,
+            String email,
+            String role,
+            boolean banned,
+            java.time.Instant createdAt
+    ) {}
 }

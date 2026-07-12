@@ -1,5 +1,6 @@
 package com.thediamond.admin;
 
+import com.thediamond.api.dto.AdminDtos.AdminUser;
 import com.thediamond.api.dto.AdminDtos.ModerationDecision;
 import com.thediamond.api.dto.AdminDtos.StatsResponse;
 import com.thediamond.api.dto.CampaignDtos.CampaignFull;
@@ -60,6 +61,23 @@ public class AdminController {
     @GetMapping("/stats")
     public StatsResponse stats() {
         return service.stats();
+    }
+
+    // ---- Users ----
+
+    @GetMapping("/users")
+    public List<AdminUser> users(@RequestParam(required = false) String search) {
+        return service.listUsers(search);
+    }
+
+    @PostMapping("/users/{id}/ban")
+    public AdminUser ban(@PathVariable Long id) {
+        return service.setBan(id, true);
+    }
+
+    @PostMapping("/users/{id}/unban")
+    public AdminUser unban(@PathVariable Long id) {
+        return service.setBan(id, false);
     }
 
     // ---- Campaign moderation ----

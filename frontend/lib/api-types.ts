@@ -41,6 +41,14 @@ export interface Stats {
   applications: number;
 }
 
+export interface AdminUser {
+  id: number;
+  email: string;
+  role: "CREATOR" | "BRAND" | "ADMIN";
+  banned: boolean;
+  createdAt: string;
+}
+
 export interface CampaignSummary {
   id: number;
   title: string;
@@ -85,23 +93,48 @@ export interface BrandCampaignItem {
   counters: CampaignCounters;
 }
 
-export interface CampaignDetail extends CampaignSummary {
+export interface CampaignDetail {
+  id: number;
+  title: string;
+  brandName: string;
+  category: Category;
+  platforms: Platform[];
+  rewardPerCreator: number;
+  creatorsNeeded: number;
+  slotsLeft: number;
+  deadline: string;
+  status: CampaignStatus;
+  createdAt: string;
   description: string;
   requirements: string;
-  rejectReason: string | null;
   budget: number;
   myApplicationStatus: ApplicationStatus | null;
   canApply: boolean;
   applyBlockReason: string | null;
 }
 
-export interface ApplicationView {
+export interface CampaignFeedItem {
+  campaign: CampaignSummary;
+  myApplicationStatus: ApplicationStatus | null;
+}
+
+export interface MyApplication {
   id: number;
   status: ApplicationStatus;
   submissionUrl: string | null;
   rejectReason: string | null;
   resubmitUsed: boolean;
   appliedAt: string;
-  creator?: CreatorProfileResponse;
-  campaign?: CampaignSummary;
+  campaign: CampaignSummary;
+}
+
+export interface BrandApplication {
+  id: number;
+  status: ApplicationStatus;
+  submissionUrl: string | null;
+  rejectReason: string | null;
+  resubmitUsed: boolean;
+  appliedAt: string;
+  submittedAt: string | null;
+  creator: CreatorProfileResponse;
 }

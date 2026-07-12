@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
@@ -22,7 +22,7 @@ const ROLES: { value: Role; title: string; subtitle: string }[] = [
   { value: "BRAND", title: "Бренд", subtitle: "Ищу креаторов" },
 ];
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter();
   const params = useSearchParams();
   const initialRole = (params.get("role") as Role) ?? "CREATOR";
@@ -150,5 +150,13 @@ export default function RegisterPage() {
         </p>
       </div>
     </main>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense>
+      <RegisterForm />
+    </Suspense>
   );
 }

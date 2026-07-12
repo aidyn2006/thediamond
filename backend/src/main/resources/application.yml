@@ -35,6 +35,10 @@ app:
     # local filesystem dir for uploaded avatars (abstracted behind StorageService)
     upload-dir: ${UPLOAD_DIR:./uploads}
     public-base-url: ${UPLOAD_PUBLIC_BASE_URL:http://localhost:8080/uploads}
+  mail:
+    # Without an API key, emails are logged to the console (never fail the request).
+    resend-api-key: ${RESEND_API_KEY:}
+    from: ${MAIL_FROM:TheDiamond <onboarding@resend.dev>}
 
 logging:
   level:

@@ -21,13 +21,16 @@ public class CampaignService {
     private final BrandProfileRepository brands;
     private final CreatorProfileRepository creators;
     private final ApplicationRepository applications;
+    private final com.thediamond.notify.NotificationService notifier;
 
     public CampaignService(CampaignRepository campaigns, BrandProfileRepository brands,
-                           CreatorProfileRepository creators, ApplicationRepository applications) {
+                           CreatorProfileRepository creators, ApplicationRepository applications,
+                           com.thediamond.notify.NotificationService notifier) {
         this.campaigns = campaigns;
         this.brands = brands;
         this.creators = creators;
         this.applications = applications;
+        this.notifier = notifier;
     }
 
     // ---------- Creator feed ----------
@@ -183,6 +186,7 @@ public class CampaignService {
         c.setStatus(CampaignStatus.ACTIVE);
         c.setRejectReason(null);
         campaigns.save(c);
+        notifier.campaignApproved(c.getBrand().getUser().getEmail(), c.getTitle());
         return toFull(c);
     }
 
@@ -199,6 +203,7 @@ public class CampaignService {
         c.setStatus(CampaignStatus.REJECTED);
         c.setRejectReason(reason.trim());
         campaigns.save(c);
+        notifier.campaignRejected(c.getBrand().getUser().getEmail(), c.getTitle(), reason.trim());
         return toFull(c);
     }
 

@@ -1,27 +1,31 @@
 import Link from "next/link";
 import { cn } from "@/lib/cn";
+import { LogoMark } from "./LogoMark";
 
 /**
- * Signature #1 — the TheDiamond wordmark. The capital "D" carries the prism
- * gradient (faceted glyph). Kept in the display font, used sparingly.
+ * Signature #1 — the TheDiamond logo: brand mark (monoline D + gem) + wordmark.
  */
 export function Logo({
   href = "/",
   className,
+  showText = true,
 }: {
   href?: string;
   className?: string;
+  showText?: boolean;
 }) {
   return (
     <Link
       href={href}
-      className={cn(
-        "font-display text-17 font-semibold tracking-tight text-text",
-        className,
-      )}
+      className={cn("inline-flex items-center gap-2 text-text", className)}
       aria-label="TheDiamond"
     >
-      The<span className="text-prism">D</span>iamond
+      <LogoMark size={26} className="text-accent" />
+      {showText && (
+        <span className="font-display text-17 font-semibold tracking-tight">
+          TheDiamond
+        </span>
+      )}
     </Link>
   );
 }

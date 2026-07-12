@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { signOut } from "@/auth";
 import { Logo } from "@/components/ui/Logo";
+import { MobileTabBar } from "./MobileTabBar";
 
 export interface NavItem {
   href: string;
@@ -51,6 +52,7 @@ export function AppHeader({
           </form>
         </div>
       </div>
+      <MobileTabBar items={items} />
     </header>
   );
 }

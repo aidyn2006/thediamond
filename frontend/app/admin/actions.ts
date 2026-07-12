@@ -34,3 +34,12 @@ export async function rejectCampaign(id: number, reason: string) {
   const data = res.ok ? null : await res.json().catch(() => null);
   return { ok: res.ok, message: data?.message };
 }
+
+export async function setUserBan(id: number, banned: boolean) {
+  const res = await apiFetch(`/api/admin/users/${id}/${banned ? "ban" : "unban"}`, {
+    method: "POST",
+  });
+  revalidatePath("/admin/users");
+  const data = res.ok ? null : await res.json().catch(() => null);
+  return { ok: res.ok, message: data?.message };
+}

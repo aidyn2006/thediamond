@@ -1,12 +1,14 @@
 package com.thediamond.campaign;
 
 import com.thediamond.api.dto.ApplicationDtos.MyApplication;
+import com.thediamond.api.dto.ApplicationDtos.SubmitWorkRequest;
 import com.thediamond.api.dto.CampaignDtos.CampaignDetail;
 import com.thediamond.api.dto.CampaignDtos.CampaignFeedItem;
 import com.thediamond.application.ApplicationService;
 import com.thediamond.domain.Category;
 import com.thediamond.domain.Platform;
 import com.thediamond.security.AuthPrincipal;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -49,5 +51,11 @@ public class CreatorCampaignController {
     @GetMapping("/my-applications")
     public List<MyApplication> myApplications(@AuthenticationPrincipal AuthPrincipal me) {
         return applicationService.myApplications(me.userId());
+    }
+
+    @PostMapping("/applications/{id}/submit")
+    public MyApplication submitWork(@AuthenticationPrincipal AuthPrincipal me, @PathVariable Long id,
+                                    @Valid @RequestBody SubmitWorkRequest req) {
+        return applicationService.submitWork(me.userId(), id, req.submissionUrl());
     }
 }
