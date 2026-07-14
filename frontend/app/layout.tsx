@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Unbounded, Manrope } from "next/font/google";
 import "./globals.css";
 
+const siteUrl = "https://thediamond.kz";
+
 const display = Unbounded({
   subsets: ["latin", "cyrillic"],
   weight: ["500", "600"],
@@ -17,6 +19,7 @@ const sans = Manrope({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "TheDiamond — контент, который работает",
   description:
     "Платформа, где бренды Казахстана находят креаторов, а креаторы — заработок.",
