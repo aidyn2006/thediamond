@@ -118,18 +118,18 @@ export default async function WalletPage() {
           <div className="flex flex-col gap-6">
             <WithdrawForm balance={wallet.balance} min={wallet.minWithdrawal} />
 
-            {/* First task: advertise TheDiamond, earn 500₸ (creators only) */}
+            {/* First task: advertise TheDiamond — 1000₸ for Threads, 500₸ otherwise (creators only) */}
             {role === "CREATOR" && proofState && (
               <div className="rounded-card border border-border bg-surface p-5">
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <p className="text-15 font-semibold">Задание: расскажите о нас</p>
                   <span className="rounded-full bg-prism px-2.5 py-1 text-13 font-semibold text-bg">
-                    +500 ₸
+                    до +1000 ₸
                   </span>
                 </div>
                 <p className="mb-4 text-13 text-text-dim">
-                  Опубликуйте пост, TikTok или тред о TheDiamond с вашим кодом — награда
-                  зачислится автоматически после проверки.
+                  Напишите пост в Threads о TheDiamond и получите 1000&nbsp;₸ (или
+                  500&nbsp;₸ за Instagram/TikTok) — награда зачислится после проверки.
                 </p>
                 <SocialProofForm state={proofState} />
               </div>

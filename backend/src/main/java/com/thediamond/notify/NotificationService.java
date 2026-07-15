@@ -53,6 +53,13 @@ public class NotificationService {
                 p("Ваш профиль на TheDiamond одобрен. Загляните в кампании и откликнитесь на подходящую.")));
     }
 
+    public void creatorProfileRejected(String to, String reason) {
+        safeSend(to, "Профиль отклонён", EmailTemplates.render("Профиль отклонён",
+                p("К сожалению, ваш профиль пока не прошёл модерацию."
+                        + (reason != null && !reason.isBlank() ? " Причина: " + reason : ""))
+                        + p("Обновите данные профиля и отправьте на проверку снова.")));
+    }
+
     public void applicationAccepted(String to, String campaignTitle) {
         safeSend(to, "Ваш отклик приняли", EmailTemplates.render("Ваш отклик приняли",
                 p("Бренд принял ваш отклик на кампанию «" + campaignTitle + "».")
@@ -74,6 +81,13 @@ public class NotificationService {
     public void brandProfileApproved(String to) {
         safeSend(to, "Профиль компании одобрен", EmailTemplates.render("Профиль компании одобрен",
                 p("Профиль вашей компании одобрен. Создайте первую кампанию — и креаторы откликнутся.")));
+    }
+
+    public void brandProfileRejected(String to, String reason) {
+        safeSend(to, "Профиль компании отклонён", EmailTemplates.render("Профиль компании отклонён",
+                p("Профиль вашей компании пока не прошёл модерацию."
+                        + (reason != null && !reason.isBlank() ? " Причина: " + reason : ""))
+                        + p("Обновите данные и отправьте на проверку снова.")));
     }
 
     public void campaignApproved(String to, String campaignTitle) {

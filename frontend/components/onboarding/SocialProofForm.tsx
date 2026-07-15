@@ -13,11 +13,17 @@ import {
 import type { Platform } from "@/lib/categories";
 import type { SocialProofResponse, SocialProofState } from "@/lib/api-types";
 
+// Threads is first + default: it pays the higher reward, so we nudge toward it.
 const PROOF_PLATFORMS: Exclude<Platform, "YOUTUBE">[] = [
+  "THREADS",
   "INSTAGRAM",
   "TIKTOK",
-  "THREADS",
 ];
+
+/** Reward in tenge for an approved post on the given platform (mirrors WalletService). */
+function rewardFor(platform: Exclude<Platform, "YOUTUBE">): number {
+  return platform === "THREADS" ? 1000 : 500;
+}
 
 const statusLabel: Record<SocialProofResponse["status"], string> = {
   PENDING: "На проверке",
@@ -34,7 +40,7 @@ function proofTone(status: SocialProofResponse["status"]) {
 
 export function SocialProofForm({ state }: { state: SocialProofState }) {
   const router = useRouter();
-  const [platform, setPlatform] = useState<Exclude<Platform, "YOUTUBE">>("INSTAGRAM");
+  const [platform, setPlatform] = useState<Exclude<Platform, "YOUTUBE">>("THREADS");
   const [postUrl, setPostUrl] = useState("");
   const [screenshotUrl, setScreenshotUrl] = useState<string | undefined>();
   const [uploading, setUploading] = useState(false);
@@ -80,8 +86,23 @@ export function SocialProofForm({ state }: { state: SocialProofState }) {
     });
   }
 
+  const reward = rewardFor(platform);
+
   return (
     <div className="w-full max-w-[520px] text-left">
+      <div className="mb-6 rounded-card border border-accent/40 bg-accent/10 p-4">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-15 font-semibold">Напишите пост в Threads о TheDiamond</p>
+          <span className="shrink-0 rounded-full bg-accent px-2.5 py-1 text-13 font-semibold text-bg">
+            +1000 ₸
+          </span>
+        </div>
+        <p className="mt-2 text-13 text-text-dim">
+          За пост в&nbsp;Threads — 1000&nbsp;₸, за Instagram или TikTok — 500&nbsp;₸.
+          Награда начисляется один раз после проверки.
+        </p>
+      </div>
+
       <div className="mb-6 rounded-card border border-border bg-surface p-4">
         <p className="text-13 text-text-dim">Ваш код для публикации</p>
         <p className="mt-1 font-display text-28 font-semibold tabular">{state.verificationCode}</p>
@@ -109,13 +130,17 @@ export function SocialProofForm({ state }: { state: SocialProofState }) {
 
       <div className="flex flex-col gap-4">
         <Select
-          label="Площадка"
+          label={`Площадка · награда +${reward} ₸`}
           value={platform}
           onChange={(e) => setPlatform(e.target.value as Exclude<Platform, "YOUTUBE">)}
         >
           {PROOF_PLATFORMS.map((p) => (
             <option key={p} value={p}>
-              {p === "INSTAGRAM" ? "Instagram" : p === "TIKTOK" ? "TikTok" : "Threads"}
+              {p === "INSTAGRAM"
+                ? "Instagram (+500 ₸)"
+                : p === "TIKTOK"
+                  ? "TikTok (+500 ₸)"
+                  : "Threads (+1000 ₸)"}
             </option>
           ))}
         </Select>

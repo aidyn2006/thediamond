@@ -60,7 +60,7 @@ public class AdminController {
     @PostMapping("/brands/{id}/reject")
     public BrandProfileResponse rejectBrand(@PathVariable Long id,
                                             @RequestBody(required = false) @Valid ModerationDecision body) {
-        return service.setBrandApproval(id, false);
+        return service.setBrandApproval(id, false, body == null ? null : body.reason());
     }
 
     @GetMapping("/stats")

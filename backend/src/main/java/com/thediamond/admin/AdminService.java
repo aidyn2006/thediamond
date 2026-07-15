@@ -130,12 +130,22 @@ public class AdminService {
             notifier.creatorProfileApproved(c.getUser().getEmail());
             inApp.send(c.getUser().getId(), "Вас приняли как UGC-креатора",
                     "Профиль одобрен — теперь вы можете откликаться на кампании.");
+        } else {
+            notifier.creatorProfileRejected(c.getUser().getEmail(), reason);
+            inApp.send(c.getUser().getId(), "Профиль отклонён",
+                    (reason != null && !reason.isBlank() ? "Причина: " + reason + ". " : "")
+                            + "Обновите профиль и отправьте на проверку снова.");
         }
         return Mappers.toCreatorResponse(c, true, socialProofs.latestForCreator(c.getId()));
     }
 
     @Transactional
     public BrandProfileResponse setBrandApproval(Long id, boolean approved) {
+        return setBrandApproval(id, approved, null);
+    }
+
+    @Transactional
+    public BrandProfileResponse setBrandApproval(Long id, boolean approved, String reason) {
         BrandProfile b = brands.findById(id)
                 .orElseThrow(() -> ApiException.notFound("Профиль бренда не найден"));
         b.setApproved(approved);
@@ -144,6 +154,11 @@ public class AdminService {
             notifier.brandProfileApproved(b.getUser().getEmail());
             inApp.send(b.getUser().getId(), "Профиль компании одобрен",
                     "Профиль одобрен — создайте первую кампанию.");
+        } else {
+            notifier.brandProfileRejected(b.getUser().getEmail(), reason);
+            inApp.send(b.getUser().getId(), "Профиль компании отклонён",
+                    (reason != null && !reason.isBlank() ? "Причина: " + reason + ". " : "")
+                            + "Обновите данные и отправьте на проверку снова.");
         }
         return Mappers.toBrandResponse(b);
     }

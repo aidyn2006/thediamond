@@ -29,8 +29,9 @@ export default async function PendingPage() {
 
       {role === "CREATOR" && (
         <p className="mt-6 max-w-[46ch] text-13 text-text-dim">
-          После входа выполните первое задание в разделе «Кошелёк» — расскажите о
-          TheDiamond и получите 500&nbsp;₸.
+          После входа выполните первое задание в разделе «Кошелёк» — напишите пост
+          в&nbsp;Threads о&nbsp;TheDiamond и получите 1000&nbsp;₸ (или 500&nbsp;₸ за
+          Instagram/TikTok).
         </p>
       )}
 

@@ -22,15 +22,18 @@ public class CampaignService {
     private final CreatorProfileRepository creators;
     private final ApplicationRepository applications;
     private final com.thediamond.notify.NotificationService notifier;
+    private final com.thediamond.notify.InAppNotificationService inApp;
 
     public CampaignService(CampaignRepository campaigns, BrandProfileRepository brands,
                            CreatorProfileRepository creators, ApplicationRepository applications,
-                           com.thediamond.notify.NotificationService notifier) {
+                           com.thediamond.notify.NotificationService notifier,
+                           com.thediamond.notify.InAppNotificationService inApp) {
         this.campaigns = campaigns;
         this.brands = brands;
         this.creators = creators;
         this.applications = applications;
         this.notifier = notifier;
+        this.inApp = inApp;
     }
 
     // ---------- Creator feed ----------
@@ -181,6 +184,8 @@ public class CampaignService {
         c.setRejectReason(null);
         campaigns.save(c);
         notifier.campaignApproved(c.getBrand().getUser().getEmail(), c.getTitle());
+        inApp.send(c.getBrand().getUser().getId(), "Кампания одобрена",
+                "Кампания «" + c.getTitle() + "» прошла модерацию и теперь видна креаторам.");
         return toFull(c);
     }
 
@@ -198,6 +203,9 @@ public class CampaignService {
         c.setRejectReason(reason.trim());
         campaigns.save(c);
         notifier.campaignRejected(c.getBrand().getUser().getEmail(), c.getTitle(), reason.trim());
+        inApp.send(c.getBrand().getUser().getId(), "Кампанию отклонили",
+                "Кампанию «" + c.getTitle() + "» отклонили. Причина: " + reason.trim()
+                        + ". Отредактируйте и отправьте на модерацию снова.");
         return toFull(c);
     }
 
