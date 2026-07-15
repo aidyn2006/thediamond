@@ -33,7 +33,9 @@ function buildPostText(code: string): string {
 
 💰 2 000–20 000 ₸ әр тапсырма.
 
-thediamond.kz
+Постқа + қойып лайк басып кет)
+
+Сайттың аты thediamond kz деп гуглға жаз
 
 ${code}`;
 }
