@@ -13,6 +13,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 
 /**
  * Sends transactional email. Transport is chosen at runtime:
@@ -70,12 +71,22 @@ public class EmailService {
         }
         try {
             MimeMessage message = sender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, false, StandardCharsets.UTF_8.name());
+            // MULTIPART_MODE_MIXED_RELATED lets us attach both a plain-text and an HTML
+            // body (multipart/alternative) — HTML-only mail scores higher as spam.
+            MimeMessageHelper helper = new MimeMessageHelper(
+                    message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
             // Mail.ru requires the From to match the authenticated mailbox.
             helper.setFrom(from);
             helper.setTo(to);
+            helper.setReplyTo(from);
             helper.setSubject(subject);
-            helper.setText(html, true);
+            // A Date header is expected by spam filters; JavaMail also sets one on send.
+            helper.setSentDate(new Date());
+            // Order matters: plain-text first, HTML second (preferred alternative).
+            helper.setText(htmlToText(html), html);
+            // One-click unsubscribe signals a legitimate (non-spam) sender.
+            message.addHeader("List-Unsubscribe", "<mailto:" + fromAddress() + "?subject=unsubscribe>");
+            message.addHeader("List-Unsubscribe-Post", "List-Unsubscribe=One-Click");
             sender.send(message);
             log.info("[EMAIL:sent:smtp] to={} | {}", to, subject);
         } catch (Exception e) {
@@ -88,13 +99,39 @@ public class EmailService {
             CreateEmailOptions params = CreateEmailOptions.builder()
                     .from(from)
                     .to(to)
+                    .replyTo(from)
                     .subject(subject)
                     .html(html)
+                    .text(htmlToText(html))
                     .build();
             CreateEmailResponse data = resend.emails().send(params);
             log.info("[EMAIL:sent:resend] to={} | {} | id={}", to, subject, data.getId());
         } catch (Exception e) {
             log.warn("[EMAIL:failed:resend] to={} | {} — {}", to, subject, e.getMessage());
         }
+    }
+
+    /** Bare email address inside a "Name <addr>" from string (or the string itself). */
+    private String fromAddress() {
+        int lt = from.indexOf('<');
+        int gt = from.indexOf('>');
+        return (lt >= 0 && gt > lt) ? from.substring(lt + 1, gt).trim() : from.trim();
+    }
+
+    /** Crude HTML→text for the plain-text alternative part (spam filters expect one). */
+    static String htmlToText(String html) {
+        if (html == null) return "";
+        String text = html
+                .replaceAll("(?is)<(script|style)[^>]*>.*?</\\1>", " ")
+                .replaceAll("(?i)<br\\s*/?>", "\n")
+                .replaceAll("(?i)</(p|div|h1|h2|h3|tr|li)>", "\n")
+                .replaceAll("(?i)<a[^>]*href=\"([^\"]*)\"[^>]*>(.*?)</a>", "$2 ($1)")
+                .replaceAll("<[^>]+>", " ");
+        text = text
+                .replace("&nbsp;", " ").replace("&amp;", "&")
+                .replace("&lt;", "<").replace("&gt;", ">").replace("&quot;", "\"")
+                .replaceAll("[ \\t]+", " ")
+                .replaceAll("\\n\\s*\\n\\s*\\n+", "\n\n");
+        return text.trim();
     }
 }
