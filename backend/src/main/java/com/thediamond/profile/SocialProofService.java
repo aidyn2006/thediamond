@@ -140,7 +140,7 @@ public class SocialProofService {
         Set<String> allowed = switch (platform) {
             case INSTAGRAM -> Set.of("instagram.com", "www.instagram.com");
             case TIKTOK -> Set.of("tiktok.com", "www.tiktok.com", "vm.tiktok.com");
-            case THREADS -> Set.of("threads.net", "www.threads.net");
+            case THREADS -> Set.of("threads.net", "www.threads.net", "threads.com", "www.threads.com");
             case YOUTUBE -> Set.of();
         };
         return allowed.contains(host);
