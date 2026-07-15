@@ -23,14 +23,17 @@ public class AuthService {
     private final UserRepository users;
     private final CreatorProfileRepository creators;
     private final BrandProfileRepository brands;
+    private final com.thediamond.repo.CreatorSocialProofRepository proofs;
     private final PasswordEncoder passwordEncoder;
     private final com.thediamond.security.JwtService jwtService;
 
     public AuthService(UserRepository users, CreatorProfileRepository creators, BrandProfileRepository brands,
+                       com.thediamond.repo.CreatorSocialProofRepository proofs,
                        PasswordEncoder passwordEncoder, com.thediamond.security.JwtService jwtService) {
         this.users = users;
         this.creators = creators;
         this.brands = brands;
+        this.proofs = proofs;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
     }
@@ -76,11 +79,20 @@ public class AuthService {
     private UserSummary buildSummary(User user) {
         boolean onboardingComplete;
         boolean approved;
+        // Non-creators have no advertise task, so it's "done" for gating purposes.
+        boolean rewardTaskDone = true;
         switch (user.getRole()) {
             case CREATOR -> {
                 CreatorProfile p = creators.findByUserId(user.getId()).orElse(null);
                 onboardingComplete = p != null;
                 approved = p != null && p.isApproved();
+                rewardTaskDone = user.isRewardTaskPaid();
+                if (!rewardTaskDone && p != null) {
+                    // Also "done" once a post has been submitted and not rejected.
+                    rewardTaskDone = proofs.findTopByCreatorIdOrderByCreatedAtDesc(p.getId())
+                            .map(pr -> pr.getStatus() != com.thediamond.domain.SocialProofStatus.REJECTED)
+                            .orElse(false);
+                }
             }
             case BRAND -> {
                 BrandProfile p = brands.findByUserId(user.getId()).orElse(null);
@@ -93,6 +105,6 @@ public class AuthService {
             }
         }
         return new UserSummary(user.getId(), user.getEmail(), user.getRole(), user.isBanned(),
-                user.isEmailVerified(), onboardingComplete, approved);
+                user.isEmailVerified(), onboardingComplete, approved, rewardTaskDone);
     }
 }

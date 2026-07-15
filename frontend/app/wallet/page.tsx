@@ -124,12 +124,12 @@ export default async function WalletPage() {
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <p className="text-15 font-semibold">Задание: расскажите о нас</p>
                   <span className="rounded-full bg-prism px-2.5 py-1 text-13 font-semibold text-bg">
-                    до +1000 ₸
+                    +1000 ₸
                   </span>
                 </div>
                 <p className="mb-4 text-13 text-text-dim">
-                  Напишите пост в Threads о TheDiamond и получите 1000&nbsp;₸ (или
-                  500&nbsp;₸ за Instagram/TikTok) — награда зачислится после проверки.
+                  Скопируйте готовый текст, опубликуйте в Threads и отправьте ссылку —
+                  1000&nbsp;₸ придёт на кошелёк после проверки.
                 </p>
                 <SocialProofForm state={proofState} />
               </div>

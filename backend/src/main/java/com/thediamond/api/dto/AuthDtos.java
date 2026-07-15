@@ -43,7 +43,8 @@ public final class AuthDtos {
             boolean banned,
             boolean emailVerified,
             boolean onboardingComplete,
-            boolean approved
+            boolean approved,
+            boolean rewardTaskDone
     ) {}
 
     public record AuthResponse(String token, UserSummary user) {}

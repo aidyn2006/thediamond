@@ -28,5 +28,8 @@ export async function requireApprovedRole(role: Role): Promise<UserSummary> {
   if (!me) redirect("/login");
   if (!me.onboardingComplete) redirect("/onboarding");
   if (!me.approved) redirect("/pending");
+  // Creators must complete the advertise task before using the app — shown every
+  // login until done. The /reward screen itself must NOT call this guard (would loop).
+  if (me.role === "CREATOR" && !me.rewardTaskDone) redirect("/reward");
   return me;
 }

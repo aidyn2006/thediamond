@@ -8,6 +8,8 @@ export interface UserSummary {
   emailVerified: boolean;
   onboardingComplete: boolean;
   approved: boolean;
+  /** Creators only: false until they submit the advertise post. Gates the app until done. */
+  rewardTaskDone: boolean;
 }
 
 /** Where each role lands after login / from the app root. */

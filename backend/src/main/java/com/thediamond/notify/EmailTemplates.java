@@ -1,5 +1,9 @@
 package com.thediamond.notify;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+
 /**
  * Branded HTML wrappers for transactional email. Uses inline styles only
  * (email clients strip &lt;style&gt;/external CSS) and the TheDiamond palette.
@@ -7,6 +11,15 @@ package com.thediamond.notify;
 final class EmailTemplates {
 
     private EmailTemplates() {}
+
+    private static final ZoneId ZONE = ZoneId.of("Asia/Almaty");
+    private static final DateTimeFormatter STAMP =
+            DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss.SSS");
+
+    /** Full timestamp shown in the header — also makes each email body unique. */
+    private static String stamp() {
+        return ZonedDateTime.now(ZONE).format(STAMP);
+    }
 
     private static final String BG = "#101114";
     private static final String SURFACE = "#17181d";
@@ -47,8 +60,11 @@ final class EmailTemplates {
                 + "<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"max-width:480px;background:"
                 + SURFACE + ";border:1px solid " + BORDER + ";border-radius:12px;overflow:hidden;\">"
                 + "<tr><td style=\"padding:28px 28px 0;\">"
-                + "<div style=\"font-size:17px;font-weight:700;color:" + TEXT + ";letter-spacing:0.5px;\">"
-                + "The<span style=\"color:" + ACCENT + ";\">Diamond</span></div></td></tr>"
+                + "<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\"><tr>"
+                + "<td style=\"font-size:17px;font-weight:700;color:" + TEXT + ";letter-spacing:0.5px;\">"
+                + "The<span style=\"color:" + ACCENT + ";\">Diamond</span></td>"
+                + "<td align=\"right\" style=\"font-size:11px;color:" + TEXT_DIM + ";white-space:nowrap;\">"
+                + stamp() + "</td></tr></table></td></tr>"
                 + "<tr><td style=\"padding:20px 28px 28px;\">" + inner + "</td></tr>"
                 + "<tr><td style=\"padding:16px 28px;border-top:1px solid " + BORDER + ";\">"
                 + "<p style=\"margin:0;font-size:12px;color:" + TEXT_DIM
