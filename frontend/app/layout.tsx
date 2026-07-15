@@ -1,22 +1,12 @@
-import type { Metadata } from "next";
-import { Unbounded, Manrope } from "next/font/google";
+import type { CSSProperties, Metadata } from "next";
 import "./globals.css";
 
 const siteUrl = "https://thediamond.kz";
 
-const display = Unbounded({
-  subsets: ["latin", "cyrillic"],
-  weight: ["500", "600"],
-  variable: "--font-unbounded",
-  display: "swap",
-});
-
-const sans = Manrope({
-  subsets: ["latin", "cyrillic"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-manrope",
-  display: "swap",
-});
+const fontVars = {
+  "--font-unbounded": "ui-sans-serif, system-ui, sans-serif",
+  "--font-manrope": "ui-sans-serif, system-ui, sans-serif",
+} satisfies CSSProperties;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -29,7 +19,11 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ru" className={`${display.variable} ${sans.variable} h-full`}>
+    <html
+      lang="ru"
+      className="h-full"
+      style={fontVars as CSSProperties}
+    >
       <body className="min-h-full">{children}</body>
     </html>
   );

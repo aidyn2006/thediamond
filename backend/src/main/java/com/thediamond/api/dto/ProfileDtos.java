@@ -62,6 +62,19 @@ public final class ProfileDtos {
             SocialProofResponse socialProof
     ) {}
 
+    /** Public, unauthenticated creator card — no email, no telegram, no birth date. */
+    public record PublicCreatorProfile(
+            Long id,
+            String name,
+            String username,
+            String avatarUrl,
+            String bio,
+            String city,
+            List<Category> categories,
+            List<SocialLink> socials,
+            long totalFollowers
+    ) {}
+
     public record BrandProfileResponse(
             Long id,
             String email,

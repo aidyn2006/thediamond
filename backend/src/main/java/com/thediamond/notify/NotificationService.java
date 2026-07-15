@@ -26,6 +26,13 @@ public class NotificationService {
         }
     }
 
+    // --- Auth ---
+    public void emailVerificationCode(String to, String code) {
+        safeSend(to, "Код подтверждения TheDiamond",
+                "Ваш код подтверждения: " + code + "\n"
+                        + "Введите его на сайте, чтобы подтвердить почту. Код действует 15 минут.");
+    }
+
     // --- Creator ---
     public void creatorProfileApproved(String to) {
         safeSend(to, "Профиль одобрен",

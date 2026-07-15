@@ -25,6 +25,18 @@ public class User {
     @Column(name = "is_banned", nullable = false)
     private boolean banned = false;
 
+    @Column(name = "email_verified", nullable = false)
+    private boolean emailVerified = false;
+
+    @Column(name = "verification_code", length = 10)
+    private String verificationCode;
+
+    @Column(name = "verification_code_expires")
+    private Instant verificationCodeExpires;
+
+    @Column(name = "reward_task_paid", nullable = false)
+    private boolean rewardTaskPaid = false;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
@@ -42,6 +54,18 @@ public class User {
 
     public boolean isBanned() { return banned; }
     public void setBanned(boolean banned) { this.banned = banned; }
+
+    public boolean isEmailVerified() { return emailVerified; }
+    public void setEmailVerified(boolean emailVerified) { this.emailVerified = emailVerified; }
+
+    public String getVerificationCode() { return verificationCode; }
+    public void setVerificationCode(String verificationCode) { this.verificationCode = verificationCode; }
+
+    public Instant getVerificationCodeExpires() { return verificationCodeExpires; }
+    public void setVerificationCodeExpires(Instant v) { this.verificationCodeExpires = v; }
+
+    public boolean isRewardTaskPaid() { return rewardTaskPaid; }
+    public void setRewardTaskPaid(boolean rewardTaskPaid) { this.rewardTaskPaid = rewardTaskPaid; }
 
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }

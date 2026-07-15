@@ -1,12 +1,15 @@
 package com.thediamond.admin;
 
 import com.thediamond.api.dto.AdminDtos.AdminUser;
+import com.thediamond.api.dto.AdminDtos.AdminUserDetail;
 import com.thediamond.api.dto.AdminDtos.ModerationDecision;
 import com.thediamond.api.dto.AdminDtos.StatsResponse;
 import com.thediamond.api.dto.CampaignDtos.CampaignFull;
 import com.thediamond.api.dto.ProfileDtos.BrandProfileResponse;
 import com.thediamond.api.dto.ProfileDtos.CreatorProfileResponse;
+import com.thediamond.api.dto.WalletDtos.WithdrawalItem;
 import com.thediamond.campaign.CampaignService;
+import com.thediamond.wallet.WalletService;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -20,10 +23,12 @@ public class AdminController {
 
     private final AdminService service;
     private final CampaignService campaignService;
+    private final WalletService walletService;
 
-    public AdminController(AdminService service, CampaignService campaignService) {
+    public AdminController(AdminService service, CampaignService campaignService, WalletService walletService) {
         this.service = service;
         this.campaignService = campaignService;
+        this.walletService = walletService;
     }
 
     @GetMapping("/creators")
@@ -78,6 +83,29 @@ public class AdminController {
     @PostMapping("/users/{id}/unban")
     public AdminUser unban(@PathVariable Long id) {
         return service.setBan(id, false);
+    }
+
+    @GetMapping("/users/{id}/detail")
+    public AdminUserDetail userDetail(@PathVariable Long id) {
+        return service.userDetail(id);
+    }
+
+    // ---- Withdrawals ----
+
+    @GetMapping("/withdrawals")
+    public List<WithdrawalItem> withdrawals(@RequestParam(required = false) String status) {
+        return walletService.listWithdrawals(status);
+    }
+
+    @PostMapping("/withdrawals/{id}/pay")
+    public WithdrawalItem payWithdrawal(@PathVariable Long id) {
+        return walletService.markPaid(id);
+    }
+
+    @PostMapping("/withdrawals/{id}/reject")
+    public WithdrawalItem rejectWithdrawal(@PathVariable Long id,
+                                           @RequestBody(required = false) @Valid ModerationDecision body) {
+        return walletService.reject(id, body == null ? null : body.reason());
     }
 
     // ---- Campaign moderation ----

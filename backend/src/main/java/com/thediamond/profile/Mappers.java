@@ -2,6 +2,7 @@ package com.thediamond.profile;
 
 import com.thediamond.api.dto.ProfileDtos.BrandProfileResponse;
 import com.thediamond.api.dto.ProfileDtos.CreatorProfileResponse;
+import com.thediamond.api.dto.ProfileDtos.PublicCreatorProfile;
 import com.thediamond.api.dto.ProfileDtos.SocialLink;
 import com.thediamond.api.dto.SocialProofDtos.SocialProofResponse;
 import com.thediamond.domain.BrandProfile;
@@ -44,6 +45,25 @@ public final class Mappers {
                 includeTelegram ? p.getTelegramUrl() : null,
                 p.isApproved(),
                 socialProof
+        );
+    }
+
+    public static PublicCreatorProfile toPublicCreator(CreatorProfile p) {
+        List<SocialLink> socials = new ArrayList<>();
+        if (p.getInstagramUrl() != null) socials.add(new SocialLink("INSTAGRAM", p.getInstagramUrl(), p.getInstagramFollowers()));
+        if (p.getTiktokUrl() != null) socials.add(new SocialLink("TIKTOK", p.getTiktokUrl(), p.getTiktokFollowers()));
+        if (p.getThreadsUrl() != null) socials.add(new SocialLink("THREADS", p.getThreadsUrl(), p.getThreadsFollowers()));
+        if (p.getYoutubeUrl() != null) socials.add(new SocialLink("YOUTUBE", p.getYoutubeUrl(), p.getYoutubeFollowers()));
+        return new PublicCreatorProfile(
+                p.getId(),
+                p.getName(),
+                p.getUsername(),
+                p.getAvatarUrl(),
+                p.getBio(),
+                p.getCity(),
+                p.getCategories().stream().sorted().toList(),
+                socials,
+                p.getTotalFollowers()
         );
     }
 

@@ -10,6 +10,7 @@ import com.thediamond.domain.SocialProofStatus;
 import com.thediamond.error.ApiException;
 import com.thediamond.repo.CreatorProfileRepository;
 import com.thediamond.repo.CreatorSocialProofRepository;
+import com.thediamond.wallet.WalletService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,10 +24,13 @@ public class SocialProofService {
 
     private final CreatorProfileRepository creators;
     private final CreatorSocialProofRepository proofs;
+    private final WalletService wallet;
 
-    public SocialProofService(CreatorProfileRepository creators, CreatorSocialProofRepository proofs) {
+    public SocialProofService(CreatorProfileRepository creators, CreatorSocialProofRepository proofs,
+                              WalletService wallet) {
         this.creators = creators;
         this.proofs = proofs;
+        this.wallet = wallet;
     }
 
     @Transactional(readOnly = true)
@@ -66,6 +70,10 @@ public class SocialProofService {
         }
 
         proofs.save(proof);
+        // Reward the one-time "advertise TheDiamond" task once the post is approved.
+        if (proof.getStatus() == SocialProofStatus.AUTO_APPROVED) {
+            wallet.creditAdvertiseReward(creator.getUser().getId());
+        }
         return toResponse(proof);
     }
 
@@ -76,6 +84,9 @@ public class SocialProofService {
             proof.setRejectReason(approved ? null : blankToNull(reason));
             proof.setReviewedAt(Instant.now());
             proofs.save(proof);
+            if (approved) {
+                wallet.creditAdvertiseReward(creator.getUser().getId());
+            }
         });
     }
 

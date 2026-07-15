@@ -4,6 +4,7 @@ import com.thediamond.api.dto.AuthDtos.AuthResponse;
 import com.thediamond.api.dto.AuthDtos.LoginRequest;
 import com.thediamond.api.dto.AuthDtos.RegisterRequest;
 import com.thediamond.api.dto.AuthDtos.UserSummary;
+import com.thediamond.api.dto.AuthDtos.VerifyEmailRequest;
 import com.thediamond.error.ApiException;
 import com.thediamond.security.AuthPrincipal;
 import jakarta.validation.Valid;
@@ -17,9 +18,11 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final EmailVerificationService emailVerification;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, EmailVerificationService emailVerification) {
         this.authService = authService;
+        this.emailVerification = emailVerification;
     }
 
     @PostMapping("/register")
@@ -38,5 +41,17 @@ public class AuthController {
             throw new ApiException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "Требуется вход");
         }
         return authService.currentUser(principal.userId());
+    }
+
+    @PostMapping("/email/send-code")
+    public void sendEmailCode(@AuthenticationPrincipal AuthPrincipal me) {
+        emailVerification.sendCode(me.userId());
+    }
+
+    @PostMapping("/email/verify")
+    public UserSummary verifyEmail(@AuthenticationPrincipal AuthPrincipal me,
+                                   @Valid @RequestBody VerifyEmailRequest req) {
+        emailVerification.verify(me.userId(), req.code());
+        return authService.currentUser(me.userId());
     }
 }

@@ -1,6 +1,7 @@
 package com.thediamond.profile;
 
 import com.thediamond.api.dto.ProfileDtos.*;
+import com.thediamond.auth.EmailVerificationService;
 import com.thediamond.domain.BrandProfile;
 import com.thediamond.domain.CreatorProfile;
 import com.thediamond.domain.User;
@@ -21,11 +22,14 @@ public class ProfileService {
     private final UserRepository users;
     private final CreatorProfileRepository creators;
     private final BrandProfileRepository brands;
+    private final EmailVerificationService emailVerification;
 
-    public ProfileService(UserRepository users, CreatorProfileRepository creators, BrandProfileRepository brands) {
+    public ProfileService(UserRepository users, CreatorProfileRepository creators, BrandProfileRepository brands,
+                          EmailVerificationService emailVerification) {
         this.users = users;
         this.creators = creators;
         this.brands = brands;
+        this.emailVerification = emailVerification;
     }
 
     // ---------- Creator ----------
@@ -69,8 +73,9 @@ public class ProfileService {
         p.setTiktokFollowers(req.tiktokFollowers());
         p.setThreadsFollowers(req.threadsFollowers());
         p.setYoutubeFollowers(req.youtubeFollowers());
-        // approval is never granted by the user; new profiles start unapproved
+        // approval is never granted by the user directly; a confirmed email auto-approves it
         creators.save(p);
+        emailVerification.autoApproveProfiles(user);
         return Mappers.toCreatorResponse(p, true);
     }
 
@@ -94,6 +99,7 @@ public class ProfileService {
         b.setPhone(req.phone().trim());
         b.setContactName(req.contactName().trim());
         brands.save(b);
+        emailVerification.autoApproveProfiles(user);
         return Mappers.toBrandResponse(b);
     }
 

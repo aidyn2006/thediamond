@@ -1,16 +1,21 @@
 package com.thediamond.admin;
 
 import com.thediamond.api.dto.AdminDtos.AdminUser;
+import com.thediamond.api.dto.AdminDtos.AdminUserDetail;
 import com.thediamond.api.dto.AdminDtos.StatsResponse;
 import com.thediamond.api.dto.ProfileDtos.BrandProfileResponse;
 import com.thediamond.api.dto.ProfileDtos.CreatorProfileResponse;
 import com.thediamond.domain.BrandProfile;
 import com.thediamond.domain.CampaignStatus;
 import com.thediamond.domain.CreatorProfile;
+import com.thediamond.domain.Role;
+import com.thediamond.domain.User;
 import com.thediamond.error.ApiException;
+import com.thediamond.notify.InAppNotificationService;
 import com.thediamond.profile.Mappers;
 import com.thediamond.profile.SocialProofService;
 import com.thediamond.repo.*;
+import com.thediamond.wallet.WalletService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,19 +30,24 @@ public class AdminService {
     private final ApplicationRepository applications;
     private final UserRepository users;
     private final com.thediamond.notify.NotificationService notifier;
+    private final InAppNotificationService inApp;
     private final SocialProofService socialProofs;
+    private final WalletService wallet;
 
     public AdminService(CreatorProfileRepository creators, BrandProfileRepository brands,
                         CampaignRepository campaigns, ApplicationRepository applications,
                         UserRepository users, com.thediamond.notify.NotificationService notifier,
-                        SocialProofService socialProofs) {
+                        InAppNotificationService inApp, SocialProofService socialProofs,
+                        WalletService wallet) {
         this.creators = creators;
         this.brands = brands;
         this.campaigns = campaigns;
         this.applications = applications;
         this.users = users;
         this.notifier = notifier;
+        this.inApp = inApp;
         this.socialProofs = socialProofs;
+        this.wallet = wallet;
     }
 
     // ---------- Users ----------
@@ -62,6 +72,24 @@ public class AdminService {
         u.setBanned(banned);
         users.save(u);
         return new AdminUser(u.getId(), u.getEmail(), u.getRole().name(), u.isBanned(), u.getCreatedAt());
+    }
+
+    @Transactional
+    public AdminUserDetail userDetail(Long id) {
+        User u = users.findById(id).orElseThrow(() -> ApiException.notFound("Пользователь не найден"));
+        CreatorProfileResponse creator = u.getRole() == Role.CREATOR
+                ? creators.findByUserId(id)
+                    .map(c -> Mappers.toCreatorResponse(c, true, socialProofs.latestForCreator(c.getId())))
+                    .orElse(null)
+                : null;
+        BrandProfileResponse brand = u.getRole() == Role.BRAND
+                ? brands.findByUserId(id).map(Mappers::toBrandResponse).orElse(null)
+                : null;
+        long balance = u.getRole() == Role.ADMIN ? 0 : wallet.view(id).balance();
+        var withdrawals = u.getRole() == Role.ADMIN ? List.<com.thediamond.api.dto.WalletDtos.WithdrawalItem>of()
+                : wallet.view(id).withdrawals();
+        return new AdminUserDetail(u.getId(), u.getEmail(), u.getRole().name(), u.isBanned(),
+                u.isEmailVerified(), u.getCreatedAt(), balance, creator, brand, withdrawals);
     }
 
     @Transactional(readOnly = true)
@@ -98,7 +126,11 @@ public class AdminService {
         c.setApproved(approved);
         creators.save(c);
         socialProofs.markLatest(c, approved, reason);
-        if (approved) notifier.creatorProfileApproved(c.getUser().getEmail());
+        if (approved) {
+            notifier.creatorProfileApproved(c.getUser().getEmail());
+            inApp.send(c.getUser().getId(), "Вас приняли как UGC-креатора",
+                    "Профиль одобрен — теперь вы можете откликаться на кампании.");
+        }
         return Mappers.toCreatorResponse(c, true, socialProofs.latestForCreator(c.getId()));
     }
 
@@ -108,7 +140,11 @@ public class AdminService {
                 .orElseThrow(() -> ApiException.notFound("Профиль бренда не найден"));
         b.setApproved(approved);
         brands.save(b);
-        if (approved) notifier.brandProfileApproved(b.getUser().getEmail());
+        if (approved) {
+            notifier.brandProfileApproved(b.getUser().getEmail());
+            inApp.send(b.getUser().getId(), "Профиль компании одобрен",
+                    "Профиль одобрен — создайте первую кампанию.");
+        }
         return Mappers.toBrandResponse(b);
     }
 

@@ -93,6 +93,6 @@ public class AuthService {
             }
         }
         return new UserSummary(user.getId(), user.getEmail(), user.getRole(), user.isBanned(),
-                onboardingComplete, approved);
+                user.isEmailVerified(), onboardingComplete, approved);
     }
 }

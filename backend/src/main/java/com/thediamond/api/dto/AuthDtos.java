@@ -22,11 +22,16 @@ public final class AuthDtos {
             @NotBlank(message = "Введите пароль") String password
     ) {}
 
+    public record VerifyEmailRequest(
+            @NotBlank(message = "Введите код") @Size(min = 6, max = 6, message = "Код из 6 цифр") String code
+    ) {}
+
     public record UserSummary(
             Long id,
             String email,
             Role role,
             boolean banned,
+            boolean emailVerified,
             boolean onboardingComplete,
             boolean approved
     ) {}
