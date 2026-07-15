@@ -85,6 +85,15 @@ function LoginForm() {
 
           {formError && <p className="text-13 text-error">{formError}</p>}
 
+          <div className="-mt-1 text-right">
+            <Link
+              href="/forgot-password"
+              className="text-13 text-text-dim hover:text-accent"
+            >
+              Забыли пароль?
+            </Link>
+          </div>
+
           <Button type="submit" variant="primary" fullWidth loading={loading}>
             Войти
           </Button>

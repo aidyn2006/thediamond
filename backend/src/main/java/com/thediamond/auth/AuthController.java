@@ -1,8 +1,10 @@
 package com.thediamond.auth;
 
 import com.thediamond.api.dto.AuthDtos.AuthResponse;
+import com.thediamond.api.dto.AuthDtos.ForgotPasswordRequest;
 import com.thediamond.api.dto.AuthDtos.LoginRequest;
 import com.thediamond.api.dto.AuthDtos.RegisterRequest;
+import com.thediamond.api.dto.AuthDtos.ResetPasswordRequest;
 import com.thediamond.api.dto.AuthDtos.UserSummary;
 import com.thediamond.api.dto.AuthDtos.VerifyEmailRequest;
 import com.thediamond.error.ApiException;
@@ -19,10 +21,13 @@ public class AuthController {
 
     private final AuthService authService;
     private final EmailVerificationService emailVerification;
+    private final PasswordResetService passwordReset;
 
-    public AuthController(AuthService authService, EmailVerificationService emailVerification) {
+    public AuthController(AuthService authService, EmailVerificationService emailVerification,
+                          PasswordResetService passwordReset) {
         this.authService = authService;
         this.emailVerification = emailVerification;
+        this.passwordReset = passwordReset;
     }
 
     @PostMapping("/register")
@@ -41,6 +46,17 @@ public class AuthController {
             throw new ApiException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "Требуется вход");
         }
         return authService.currentUser(principal.userId());
+    }
+
+    @PostMapping("/forgot-password")
+    public void forgotPassword(@Valid @RequestBody ForgotPasswordRequest req) {
+        // Always 200 — never reveal whether the email exists.
+        passwordReset.requestReset(req.email());
+    }
+
+    @PostMapping("/reset-password")
+    public void resetPassword(@Valid @RequestBody ResetPasswordRequest req) {
+        passwordReset.resetPassword(req.token(), req.password());
     }
 
     @PostMapping("/email/send-code")

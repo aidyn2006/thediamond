@@ -72,7 +72,7 @@ public class SocialProofService {
         proofs.save(proof);
         // Reward the one-time "advertise TheDiamond" task once the post is approved.
         if (proof.getStatus() == SocialProofStatus.AUTO_APPROVED) {
-            wallet.creditAdvertiseReward(creator.getUser().getId());
+            wallet.creditAdvertiseReward(creator.getUser().getId(), proof.getPlatform());
         }
         return toResponse(proof);
     }
@@ -85,7 +85,7 @@ public class SocialProofService {
             proof.setReviewedAt(Instant.now());
             proofs.save(proof);
             if (approved) {
-                wallet.creditAdvertiseReward(creator.getUser().getId());
+                wallet.creditAdvertiseReward(creator.getUser().getId(), proof.getPlatform());
             }
         });
     }

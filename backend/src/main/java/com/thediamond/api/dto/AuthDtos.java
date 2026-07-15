@@ -26,6 +26,16 @@ public final class AuthDtos {
             @NotBlank(message = "Введите код") @Size(min = 6, max = 6, message = "Код из 6 цифр") String code
     ) {}
 
+    public record ForgotPasswordRequest(
+            @NotBlank(message = "Укажите email") @Email(message = "Неверный формат email") String email
+    ) {}
+
+    public record ResetPasswordRequest(
+            @NotBlank(message = "Ссылка недействительна") String token,
+            @NotBlank(message = "Придумайте пароль")
+            @Size(min = 8, max = 100, message = "Пароль от 8 символов") String password
+    ) {}
+
     public record UserSummary(
             Long id,
             String email,

@@ -16,6 +16,8 @@ public class WalletService {
 
     /** One-time reward for advertising TheDiamond (spec: "первое задание"). */
     public static final long ADVERTISE_REWARD = 500;
+    /** Higher one-time reward when the advertising post is published on Threads. */
+    public static final long THREADS_REWARD = 1000;
     /** Minimum amount a user may withdraw. */
     public static final long MIN_WITHDRAWAL = 2000;
 
@@ -67,18 +69,20 @@ public class WalletService {
     }
 
     /**
-     * Credits the one-time 500₸ "advertise us" reward, if not already paid.
+     * Credits the one-time "advertise us" reward, if not already paid. The amount depends on
+     * the platform: {@link #THREADS_REWARD}₸ for a Threads post, {@link #ADVERTISE_REWARD}₸ otherwise.
      * Called when the creator's social-proof post is approved (auto or by admin).
      */
     @Transactional
-    public void creditAdvertiseReward(Long userId) {
+    public void creditAdvertiseReward(Long userId, Platform platform) {
         User user = users.findById(userId).orElse(null);
         if (user == null || user.isRewardTaskPaid()) return;
+        long amount = platform == Platform.THREADS ? THREADS_REWARD : ADVERTISE_REWARD;
         user.setRewardTaskPaid(true);
         users.save(user);
-        post(userId, ADVERTISE_REWARD, WalletTransactionType.REWARD,
-                "Награда за рекламу TheDiamond");
-        inApp.send(userId, "Начислено " + ADVERTISE_REWARD + " ₸",
+        post(userId, amount, WalletTransactionType.REWARD,
+                "Награда за рекламу TheDiamond" + (platform == Platform.THREADS ? " в Threads" : ""));
+        inApp.send(userId, "Начислено " + amount + " ₸",
                 "Спасибо за пост о TheDiamond! Награда зачислена на ваш кошелёк.");
     }
 

@@ -37,6 +37,18 @@ public class User {
     @Column(name = "reward_task_paid", nullable = false)
     private boolean rewardTaskPaid = false;
 
+    @Column(name = "password_reset_token", length = 64)
+    private String passwordResetToken;
+
+    @Column(name = "password_reset_expires")
+    private Instant passwordResetExpires;
+
+    @Column(name = "verification_code_sent_at")
+    private Instant verificationCodeSentAt;
+
+    @Column(name = "verification_attempts", nullable = false)
+    private int verificationAttempts = 0;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
@@ -66,6 +78,18 @@ public class User {
 
     public boolean isRewardTaskPaid() { return rewardTaskPaid; }
     public void setRewardTaskPaid(boolean rewardTaskPaid) { this.rewardTaskPaid = rewardTaskPaid; }
+
+    public String getPasswordResetToken() { return passwordResetToken; }
+    public void setPasswordResetToken(String passwordResetToken) { this.passwordResetToken = passwordResetToken; }
+
+    public Instant getPasswordResetExpires() { return passwordResetExpires; }
+    public void setPasswordResetExpires(Instant passwordResetExpires) { this.passwordResetExpires = passwordResetExpires; }
+
+    public Instant getVerificationCodeSentAt() { return verificationCodeSentAt; }
+    public void setVerificationCodeSentAt(Instant verificationCodeSentAt) { this.verificationCodeSentAt = verificationCodeSentAt; }
+
+    public int getVerificationAttempts() { return verificationAttempts; }
+    public void setVerificationAttempts(int verificationAttempts) { this.verificationAttempts = verificationAttempts; }
 
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }

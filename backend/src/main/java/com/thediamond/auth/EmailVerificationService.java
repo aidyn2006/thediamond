@@ -24,6 +24,10 @@ import java.time.Instant;
 public class EmailVerificationService {
 
     private static final Duration CODE_TTL = Duration.ofMinutes(15);
+    /** Minimum gap between two code emails (anti-spam / anti-quota-burn). */
+    private static final Duration RESEND_COOLDOWN = Duration.ofSeconds(60);
+    /** Wrong-code attempts before the code is invalidated (anti-brute-force). */
+    private static final int MAX_ATTEMPTS = 5;
     private static final SecureRandom RANDOM = new SecureRandom();
 
     private final UserRepository users;
@@ -48,9 +52,18 @@ public class EmailVerificationService {
         if (user.isEmailVerified()) {
             throw ApiException.badRequest("ALREADY_VERIFIED", "Почта уже подтверждена");
         }
+        Instant now = Instant.now();
+        Instant lastSent = user.getVerificationCodeSentAt();
+        if (lastSent != null && lastSent.plus(RESEND_COOLDOWN).isAfter(now)) {
+            long wait = RESEND_COOLDOWN.getSeconds() - Duration.between(lastSent, now).getSeconds();
+            throw ApiException.badRequest("RESEND_COOLDOWN",
+                    "Подождите " + Math.max(1, wait) + " сек перед повторной отправкой");
+        }
         String code = String.format("%06d", RANDOM.nextInt(1_000_000));
         user.setVerificationCode(code);
-        user.setVerificationCodeExpires(Instant.now().plus(CODE_TTL));
+        user.setVerificationCodeExpires(now.plus(CODE_TTL));
+        user.setVerificationCodeSentAt(now);
+        user.setVerificationAttempts(0);
         users.save(user);
         email.emailVerificationCode(user.getEmail(), code);
     }
@@ -63,14 +76,34 @@ public class EmailVerificationService {
                 || user.getVerificationCodeExpires().isBefore(Instant.now())) {
             throw ApiException.badRequest("CODE_EXPIRED", "Код истёк — запросите новый");
         }
+        if (user.getVerificationAttempts() >= MAX_ATTEMPTS) {
+            invalidateCode(user);
+            throw ApiException.badRequest("TOO_MANY_ATTEMPTS",
+                    "Слишком много попыток — запросите новый код");
+        }
         if (!user.getVerificationCode().equals(code == null ? null : code.trim())) {
+            user.setVerificationAttempts(user.getVerificationAttempts() + 1);
+            if (user.getVerificationAttempts() >= MAX_ATTEMPTS) {
+                invalidateCode(user);
+                throw ApiException.badRequest("TOO_MANY_ATTEMPTS",
+                        "Слишком много попыток — запросите новый код");
+            }
+            users.save(user);
             throw ApiException.badRequest("CODE_INVALID", "Неверный код подтверждения");
         }
         user.setEmailVerified(true);
         user.setVerificationCode(null);
         user.setVerificationCodeExpires(null);
+        user.setVerificationAttempts(0);
         users.save(user);
         autoApproveProfiles(user);
+    }
+
+    private void invalidateCode(User user) {
+        user.setVerificationCode(null);
+        user.setVerificationCodeExpires(null);
+        user.setVerificationAttempts(0);
+        users.save(user);
     }
 
     /** Approve the user's existing profile (if any) now that their email is confirmed. */
