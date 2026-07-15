@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireAuth } from "@/lib/guards";
 import { apiFetch, getCurrentUser } from "@/lib/api";
@@ -46,12 +45,6 @@ export default async function RewardPage() {
 
         <div className="flex justify-center">
           <SocialProofForm state={proofState} />
-        </div>
-
-        <div className="mt-8 text-center">
-          <Link href="/campaigns" className="text-15 text-text-dim hover:text-accent">
-            Позже — перейти к кампаниям
-          </Link>
         </div>
       </div>
     </main>
