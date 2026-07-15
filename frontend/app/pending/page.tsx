@@ -25,7 +25,11 @@ export default async function PendingPage() {
         автоматически — модерация не потребуется.
       </p>
 
-      <EmailVerifyForm email={me.email} home={roleHome(role)} />
+      {/* Creators land on the first-task (reward) screen right after verifying. */}
+      <EmailVerifyForm
+        email={me.email}
+        home={role === "CREATOR" ? "/reward" : roleHome(role)}
+      />
 
       {role === "CREATOR" && (
         <p className="mt-6 max-w-[46ch] text-13 text-text-dim">
