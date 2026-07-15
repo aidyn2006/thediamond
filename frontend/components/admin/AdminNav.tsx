@@ -8,6 +8,7 @@ const items = [
   { href: "/admin/profiles", label: "Профили" },
   { href: "/admin/campaigns", label: "Кампании" },
   { href: "/admin/users", label: "Пользователи" },
+  { href: "/admin/withdrawals", label: "Выводы" },
   { href: "/admin/stats", label: "Статистика" },
 ];
 

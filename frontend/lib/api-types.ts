@@ -69,6 +69,79 @@ export interface AdminUser {
   createdAt: string;
 }
 
+export type WalletTransactionType =
+  | "REWARD"
+  | "CAMPAIGN_PAYOUT"
+  | "WITHDRAWAL"
+  | "REFUND"
+  | "ADJUSTMENT";
+
+export interface WalletTransaction {
+  id: number;
+  amount: number;
+  type: WalletTransactionType;
+  description: string | null;
+  createdAt: string;
+}
+
+export type WithdrawalStatus = "PENDING" | "PAID" | "REJECTED";
+
+export interface WithdrawalItem {
+  id: number;
+  amount: number;
+  status: WithdrawalStatus;
+  requisites: string;
+  rejectReason: string | null;
+  createdAt: string;
+  reviewedAt: string | null;
+}
+
+export interface WalletResponse {
+  balance: number;
+  minWithdrawal: number;
+  canWithdraw: boolean;
+  transactions: WalletTransaction[];
+  withdrawals: WithdrawalItem[];
+}
+
+export interface NotificationItem {
+  id: number;
+  title: string;
+  body: string;
+  read: boolean;
+  createdAt: string;
+}
+
+export interface NotificationList {
+  unread: number;
+  items: NotificationItem[];
+}
+
+export interface AdminUserDetail {
+  userId: number;
+  email: string;
+  role: "CREATOR" | "BRAND" | "ADMIN";
+  banned: boolean;
+  emailVerified: boolean;
+  createdAt: string;
+  walletBalance: number;
+  creator: CreatorProfileResponse | null;
+  brand: BrandProfileResponse | null;
+  withdrawals: WithdrawalItem[];
+}
+
+export interface PublicCreatorProfile {
+  id: number;
+  name: string;
+  username: string;
+  avatarUrl: string | null;
+  bio: string | null;
+  city: string;
+  categories: Category[];
+  socials: SocialLink[];
+  totalFollowers: number;
+}
+
 export interface CampaignSummary {
   id: number;
   title: string;

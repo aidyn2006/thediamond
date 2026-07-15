@@ -5,6 +5,7 @@ export interface UserSummary {
   email: string;
   role: Role;
   banned: boolean;
+  emailVerified: boolean;
   onboardingComplete: boolean;
   approved: boolean;
 }

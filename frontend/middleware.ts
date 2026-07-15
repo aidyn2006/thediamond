@@ -2,10 +2,14 @@ import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 
 const PUBLIC_PATHS = ["/", "/login", "/register"];
+// path prefixes that anyone (incl. logged-out visitors) may open
+const PUBLIC_PREFIXES = ["/u/"];
 
 export default auth((req) => {
   const { pathname } = req.nextUrl;
-  const isPublic = PUBLIC_PATHS.includes(pathname);
+  const isPublic =
+    PUBLIC_PATHS.includes(pathname) ||
+    PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 
   if (isPublic) return NextResponse.next();
   if (!req.auth) {

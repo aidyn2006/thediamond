@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -55,7 +56,11 @@ export function UsersTable({ rows }: { rows: AdminUser[] }) {
         <tbody>
           {rows.map((u) => (
             <tr key={u.id} className="border-b border-border">
-              <td className="h-[52px] py-2 text-15">{u.email}</td>
+              <td className="h-[52px] py-2 text-15">
+                <Link href={`/admin/users/${u.id}`} className="text-accent hover:brightness-110">
+                  {u.email}
+                </Link>
+              </td>
               <td className="py-2 text-15 text-text-dim">{roleLabel[u.role]}</td>
               <td className="py-2">
                 <StatusPill tone={u.banned ? "error" : "success"} label={u.banned ? "Заблокирован" : "Активен"} />

@@ -2,20 +2,23 @@ import Link from "next/link";
 import { signOut } from "@/auth";
 import { Logo } from "@/components/ui/Logo";
 import { MobileTabBar } from "./MobileTabBar";
+import { NotificationBell } from "./NotificationBell";
+import { fetchNotifications } from "@/app/notifications/actions";
 
 export interface NavItem {
   href: string;
   label: string;
 }
 
-/** Shared internal app header (design 2.5): logo + role nav + user + sign out. */
-export function AppHeader({
+/** Shared internal app header (design 2.5): logo + role nav + notifications + user + sign out. */
+export async function AppHeader({
   email,
   items = [],
 }: {
   email?: string | null;
   items?: NavItem[];
 }) {
+  const notifications = await fetchNotifications();
   return (
     <header className="border-b border-border">
       <div className="mx-auto flex h-14 max-w-[1200px] items-center justify-between px-6 md:px-10">
@@ -34,6 +37,7 @@ export function AppHeader({
           </nav>
         </div>
         <div className="flex items-center gap-4">
+          <NotificationBell initial={notifications} />
           {email && (
             <span className="hidden text-13 text-text-dim sm:inline">{email}</span>
           )}

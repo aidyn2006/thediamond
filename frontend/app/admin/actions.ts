@@ -43,3 +43,20 @@ export async function setUserBan(id: number, banned: boolean) {
   const data = res.ok ? null : await res.json().catch(() => null);
   return { ok: res.ok, message: data?.message };
 }
+
+export async function payWithdrawal(id: number) {
+  const res = await apiFetch(`/api/admin/withdrawals/${id}/pay`, { method: "POST" });
+  revalidatePath("/admin/withdrawals");
+  const data = res.ok ? null : await res.json().catch(() => null);
+  return { ok: res.ok, message: data?.message };
+}
+
+export async function rejectWithdrawal(id: number, reason: string) {
+  const res = await apiFetch(`/api/admin/withdrawals/${id}/reject`, {
+    method: "POST",
+    body: JSON.stringify({ reason }),
+  });
+  revalidatePath("/admin/withdrawals");
+  const data = res.ok ? null : await res.json().catch(() => null);
+  return { ok: res.ok, message: data?.message };
+}

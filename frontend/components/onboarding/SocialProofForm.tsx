@@ -76,10 +76,7 @@ export function SocialProofForm({ state }: { state: SocialProofState }) {
         return;
       }
       setProof(result.proof ?? null);
-      if (result.proof?.status === "AUTO_APPROVED" || result.proof?.status === "APPROVED") {
-        router.push("/campaigns");
-        router.refresh();
-      }
+      router.refresh();
     });
   }
 
