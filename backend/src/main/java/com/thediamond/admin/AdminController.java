@@ -44,7 +44,7 @@ public class AdminController {
     @PostMapping("/creators/{id}/reject")
     public CreatorProfileResponse rejectCreator(@PathVariable Long id,
                                                 @RequestBody(required = false) @Valid ModerationDecision body) {
-        return service.setCreatorApproval(id, false);
+        return service.setCreatorApproval(id, false, body == null ? null : body.reason());
     }
 
     @PostMapping("/brands/{id}/approve")

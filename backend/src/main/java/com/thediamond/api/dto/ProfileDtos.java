@@ -2,6 +2,7 @@ package com.thediamond.api.dto;
 
 import com.thediamond.domain.Category;
 import jakarta.validation.constraints.*;
+import com.thediamond.api.dto.SocialProofDtos.SocialProofResponse;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -57,7 +58,8 @@ public final class ProfileDtos {
             List<SocialLink> socials,
             long totalFollowers,
             String telegramUrl,
-            boolean approved
+            boolean approved,
+            SocialProofResponse socialProof
     ) {}
 
     public record BrandProfileResponse(

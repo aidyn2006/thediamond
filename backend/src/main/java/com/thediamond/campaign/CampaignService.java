@@ -50,7 +50,7 @@ public class CampaignService {
     @Transactional
     public List<CampaignFeedItem> feed(Long userId, String search, Category category, Platform platform) {
         closeExpiredActive();
-        CreatorProfile creator = creators.findByUserId(userId).orElse(null);
+        CreatorProfile creator = requireApprovedCreator(userId);
         String q = search == null ? null : search.trim().toLowerCase();
 
         return campaigns.findByStatusOrderByCreatedAtDesc(CampaignStatus.ACTIVE).stream()
@@ -58,11 +58,8 @@ public class CampaignService {
                 .filter(c -> category == null || c.getCategory() == category)
                 .filter(c -> platform == null || c.getPlatforms().contains(platform))
                 .map(c -> {
-                    String myStatus = null;
-                    if (creator != null) {
-                        myStatus = applications.findByCampaignIdAndCreatorId(c.getId(), creator.getId())
-                                .map(a -> a.getStatus().name()).orElse(null);
-                    }
+                    String myStatus = applications.findByCampaignIdAndCreatorId(c.getId(), creator.getId())
+                            .map(a -> a.getStatus().name()).orElse(null);
                     return new CampaignFeedItem(toSummary(c), myStatus);
                 })
                 .toList();
@@ -78,12 +75,9 @@ public class CampaignService {
                 || c.getStatus() == CampaignStatus.REJECTED) {
             throw ApiException.notFound("Кампания не найдена");
         }
-        CreatorProfile creator = creators.findByUserId(userId).orElse(null);
-        String myStatus = null;
-        if (creator != null) {
-            myStatus = applications.findByCampaignIdAndCreatorId(c.getId(), creator.getId())
-                    .map(a -> a.getStatus().name()).orElse(null);
-        }
+        CreatorProfile creator = requireApprovedCreator(userId);
+        String myStatus = applications.findByCampaignIdAndCreatorId(c.getId(), creator.getId())
+                .map(a -> a.getStatus().name()).orElse(null);
 
         int slots = slotsLeft(c);
         String block = null;
@@ -223,6 +217,15 @@ public class CampaignService {
     private BrandProfile requireBrand(Long userId) {
         return brands.findByUserId(userId)
                 .orElseThrow(() -> ApiException.forbidden("Сначала заполните профиль компании"));
+    }
+
+    private CreatorProfile requireApprovedCreator(Long userId) {
+        CreatorProfile creator = creators.findByUserId(userId)
+                .orElseThrow(() -> ApiException.forbidden("Сначала заполните профиль"));
+        if (!creator.isApproved()) {
+            throw ApiException.forbidden("Профиль еще не одобрен");
+        }
+        return creator;
     }
 
     private Campaign requireOwned(Long userId, Long campaignId) {

@@ -43,6 +43,32 @@ function ApprovalActions({
   );
 }
 
+function ProofCell({ creator }: { creator: CreatorProfileResponse }) {
+  const proof = creator.socialProof;
+  if (!proof) return <span className="text-text-dim">Нет</span>;
+
+  return (
+    <div className="flex max-w-[240px] flex-col gap-1 text-13 text-text-dim">
+      <div className="flex items-center gap-2">
+        <span className="font-medium text-text">{proof.platform}</span>
+        <StatusPill
+          tone={proof.status === "REJECTED" ? "error" : proof.status === "PENDING" ? "warning" : "success"}
+          label={proof.status === "PENDING" ? "На проверке" : proof.status === "REJECTED" ? "Отклонено" : "Одобрено"}
+        />
+      </div>
+      <a href={proof.postUrl} target="_blank" rel="noreferrer" className="text-accent">
+        Пост
+      </a>
+      {proof.screenshotUrl && (
+        <a href={proof.screenshotUrl} target="_blank" rel="noreferrer" className="text-accent">
+          Скриншот
+        </a>
+      )}
+      <span className="tabular">{proof.verificationCode}</span>
+    </div>
+  );
+}
+
 export function CreatorModerationTable({ rows }: { rows: CreatorProfileResponse[] }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -58,7 +84,7 @@ export function CreatorModerationTable({ rows }: { rows: CreatorProfileResponse[
   }
 
   if (rows.length === 0) {
-    return <p className="py-8 text-15 text-text-dim">Пусто — новых профилей нет.</p>;
+    return <p className="py-8 text-15 text-text-dim">Пусто - новых профилей нет.</p>;
   }
 
   return (
@@ -68,6 +94,7 @@ export function CreatorModerationTable({ rows }: { rows: CreatorProfileResponse[
           <th className="py-2 font-medium">Креатор</th>
           <th className="py-2 font-medium">Город</th>
           <th className="py-2 font-medium">Подписчики</th>
+          <th className="py-2 font-medium">Подтверждение</th>
           <th className="py-2 font-medium">Статус</th>
           <th className="py-2" />
         </tr>
@@ -81,6 +108,9 @@ export function CreatorModerationTable({ rows }: { rows: CreatorProfileResponse[
             </td>
             <td className="py-2 text-15 text-text-dim">{c.city}</td>
             <td className="py-2 tabular text-15 text-text-dim">{formatNumber(c.totalFollowers)}</td>
+            <td className="py-2">
+              <ProofCell creator={c} />
+            </td>
             <td className="py-2">
               <StatusPill tone={c.approved ? "success" : "warning"} label={c.approved ? "Одобрен" : "На модерации"} />
             </td>
@@ -114,7 +144,7 @@ export function BrandModerationTable({ rows }: { rows: BrandProfileResponse[] })
   }
 
   if (rows.length === 0) {
-    return <p className="py-8 text-15 text-text-dim">Пусто — новых профилей нет.</p>;
+    return <p className="py-8 text-15 text-text-dim">Пусто - новых профилей нет.</p>;
   }
 
   return (

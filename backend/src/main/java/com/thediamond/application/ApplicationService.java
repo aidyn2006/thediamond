@@ -169,8 +169,12 @@ public class ApplicationService {
     // ---------- helpers ----------
 
     private CreatorProfile requireCreator(Long userId) {
-        return creators.findByUserId(userId)
+        CreatorProfile creator = creators.findByUserId(userId)
                 .orElseThrow(() -> ApiException.forbidden("Сначала заполните профиль"));
+        if (!creator.isApproved()) {
+            throw ApiException.forbidden("Профиль еще не одобрен");
+        }
+        return creator;
     }
 
     private Campaign requireOwnedCampaign(Long userId, Long campaignId) {

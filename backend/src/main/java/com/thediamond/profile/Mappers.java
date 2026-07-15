@@ -3,6 +3,7 @@ package com.thediamond.profile;
 import com.thediamond.api.dto.ProfileDtos.BrandProfileResponse;
 import com.thediamond.api.dto.ProfileDtos.CreatorProfileResponse;
 import com.thediamond.api.dto.ProfileDtos.SocialLink;
+import com.thediamond.api.dto.SocialProofDtos.SocialProofResponse;
 import com.thediamond.domain.BrandProfile;
 import com.thediamond.domain.Category;
 import com.thediamond.domain.CreatorProfile;
@@ -15,6 +16,11 @@ public final class Mappers {
     private Mappers() {}
 
     public static CreatorProfileResponse toCreatorResponse(CreatorProfile p, boolean includeTelegram) {
+        return toCreatorResponse(p, includeTelegram, null);
+    }
+
+    public static CreatorProfileResponse toCreatorResponse(CreatorProfile p, boolean includeTelegram,
+                                                           SocialProofResponse socialProof) {
         List<SocialLink> socials = new ArrayList<>();
         if (p.getInstagramUrl() != null) socials.add(new SocialLink("INSTAGRAM", p.getInstagramUrl(), p.getInstagramFollowers()));
         if (p.getTiktokUrl() != null) socials.add(new SocialLink("TIKTOK", p.getTiktokUrl(), p.getTiktokFollowers()));
@@ -36,7 +42,8 @@ public final class Mappers {
                 socials,
                 p.getTotalFollowers(),
                 includeTelegram ? p.getTelegramUrl() : null,
-                p.isApproved()
+                p.isApproved(),
+                socialProof
         );
     }
 

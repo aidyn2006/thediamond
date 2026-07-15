@@ -9,6 +9,7 @@ import com.thediamond.domain.CampaignStatus;
 import com.thediamond.domain.CreatorProfile;
 import com.thediamond.error.ApiException;
 import com.thediamond.profile.Mappers;
+import com.thediamond.profile.SocialProofService;
 import com.thediamond.repo.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,16 +25,19 @@ public class AdminService {
     private final ApplicationRepository applications;
     private final UserRepository users;
     private final com.thediamond.notify.NotificationService notifier;
+    private final SocialProofService socialProofs;
 
     public AdminService(CreatorProfileRepository creators, BrandProfileRepository brands,
                         CampaignRepository campaigns, ApplicationRepository applications,
-                        UserRepository users, com.thediamond.notify.NotificationService notifier) {
+                        UserRepository users, com.thediamond.notify.NotificationService notifier,
+                        SocialProofService socialProofs) {
         this.creators = creators;
         this.brands = brands;
         this.campaigns = campaigns;
         this.applications = applications;
         this.users = users;
         this.notifier = notifier;
+        this.socialProofs = socialProofs;
     }
 
     // ---------- Users ----------
@@ -67,7 +71,9 @@ public class AdminService {
             case "approved" -> creators.findByApprovedOrderByCreatedAtDesc(true);
             default -> creators.findAllByOrderByCreatedAtDesc();
         };
-        return list.stream().map(c -> Mappers.toCreatorResponse(c, true)).toList();
+        return list.stream()
+                .map(c -> Mappers.toCreatorResponse(c, true, socialProofs.latestForCreator(c.getId())))
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -82,12 +88,18 @@ public class AdminService {
 
     @Transactional
     public CreatorProfileResponse setCreatorApproval(Long id, boolean approved) {
+        return setCreatorApproval(id, approved, null);
+    }
+
+    @Transactional
+    public CreatorProfileResponse setCreatorApproval(Long id, boolean approved, String reason) {
         CreatorProfile c = creators.findById(id)
                 .orElseThrow(() -> ApiException.notFound("Профиль креатора не найден"));
         c.setApproved(approved);
         creators.save(c);
+        socialProofs.markLatest(c, approved, reason);
         if (approved) notifier.creatorProfileApproved(c.getUser().getEmail());
-        return Mappers.toCreatorResponse(c, true);
+        return Mappers.toCreatorResponse(c, true, socialProofs.latestForCreator(c.getId()));
     }
 
     @Transactional

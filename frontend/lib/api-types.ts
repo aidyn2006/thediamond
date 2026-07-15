@@ -7,6 +7,25 @@ export interface SocialLink {
   followers: number | null;
 }
 
+export type SocialProofStatus = "PENDING" | "AUTO_APPROVED" | "APPROVED" | "REJECTED";
+
+export interface SocialProofResponse {
+  id: number;
+  platform: Platform;
+  postUrl: string;
+  screenshotUrl: string | null;
+  verificationCode: string;
+  status: SocialProofStatus;
+  rejectReason: string | null;
+  createdAt: string;
+  reviewedAt: string | null;
+}
+
+export interface SocialProofState {
+  verificationCode: string;
+  proof: SocialProofResponse | null;
+}
+
 export interface CreatorProfileResponse {
   id: number;
   email: string;
@@ -21,6 +40,7 @@ export interface CreatorProfileResponse {
   totalFollowers: number;
   telegramUrl: string | null;
   approved: boolean;
+  socialProof: SocialProofResponse | null;
 }
 
 export interface BrandProfileResponse {

@@ -48,8 +48,7 @@ export function BrandOnboarding() {
       else setFormError(result.message ?? null);
       return;
     }
-    router.push("/pending");
-    router.refresh();
+    router.replace("/pending");
   }
 
   return (

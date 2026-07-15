@@ -142,8 +142,7 @@ export function CreatorOnboarding() {
       }
       return;
     }
-    router.push("/pending");
-    router.refresh();
+    router.replace("/pending");
   }
 
   return (
