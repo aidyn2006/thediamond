@@ -4,10 +4,10 @@ import "./globals.css";
 
 const siteUrl = "https://thediamond.kz";
 
-const fontVars = {
+const fontVars: CSSProperties = {
   "--font-unbounded": "ui-sans-serif, system-ui, sans-serif",
   "--font-manrope": "ui-sans-serif, system-ui, sans-serif",
-} satisfies CSSProperties;
+} as CSSProperties;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
