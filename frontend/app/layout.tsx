@@ -1,4 +1,5 @@
-import type { CSSProperties, Metadata } from "next";
+import type { Metadata } from "next";
+import type { CSSProperties } from "react";
 import "./globals.css";
 
 const siteUrl = "https://thediamond.kz";
