@@ -10,7 +10,7 @@ export default async function AdminLayout({
   const session = await requireRole("ADMIN");
   return (
     <>
-      <AppHeader email={session.user.email} />
+      <AppHeader email={session.user.email} home="/admin" />
       <div className="mx-auto flex max-w-[1200px] gap-8 px-6 py-8 md:px-10">
         <aside className="w-44 shrink-0">
           <AdminNav />
