@@ -1,7 +1,8 @@
 package com.thediamond.publicapi;
 
-import com.thediamond.api.dto.ProfileDtos.PublicCreatorListItem;
 import com.thediamond.api.dto.ProfileDtos.PublicCreatorProfile;
+import com.thediamond.catalog.CatalogService;
+import com.thediamond.domain.Category;
 import com.thediamond.domain.CreatorProfile;
 import com.thediamond.error.ApiException;
 import com.thediamond.profile.Mappers;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -20,9 +22,11 @@ import java.util.List;
 public class PublicController {
 
     private final CreatorProfileRepository creators;
+    private final CatalogService catalog;
 
-    public PublicController(CreatorProfileRepository creators) {
+    public PublicController(CreatorProfileRepository creators, CatalogService catalog) {
         this.creators = creators;
+        this.catalog = catalog;
     }
 
     @GetMapping("/creators/{id}")
@@ -34,12 +38,11 @@ public class PublicController {
         return Mappers.toPublicCreator(p);
     }
 
-    /** Approved creators for the sitemap (id + last-modified). */
+    /** Approved creators for the public catalog + sitemap, optionally filtered. */
     @GetMapping("/creators")
-    @Transactional(readOnly = true)
-    public List<PublicCreatorListItem> creatorList() {
-        return creators.findByApprovedOrderByCreatedAtDesc(true).stream()
-                .map(Mappers::toPublicCreatorListItem)
-                .toList();
+    public List<PublicCreatorProfile> creatorList(
+            @RequestParam(required = false) Category category,
+            @RequestParam(required = false) String city) {
+        return catalog.publicList(category, city);
     }
 }

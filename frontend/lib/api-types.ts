@@ -140,11 +140,6 @@ export interface PublicCreatorProfile {
   categories: Category[];
   socials: SocialLink[];
   totalFollowers: number;
-}
-
-export interface PublicCreatorListItem {
-  id: number;
-  username: string;
   createdAt: string;
 }
 

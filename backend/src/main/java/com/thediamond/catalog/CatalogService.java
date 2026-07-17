@@ -1,6 +1,7 @@
 package com.thediamond.catalog;
 
 import com.thediamond.api.dto.ProfileDtos.CreatorProfileResponse;
+import com.thediamond.api.dto.ProfileDtos.PublicCreatorProfile;
 import com.thediamond.domain.ApplicationStatus;
 import com.thediamond.domain.BrandProfile;
 import com.thediamond.domain.Category;
@@ -42,6 +43,18 @@ public class CatalogService {
                 .filter(p -> category == null || p.getCategories().contains(category))
                 .filter(p -> c == null || c.isEmpty() || p.getCity().equalsIgnoreCase(c))
                 .map(p -> Mappers.toCreatorResponse(p, false))
+                .toList();
+    }
+
+    /** Same filtering as {@link #list}, but mapped to the unauthenticated public card
+     *  (no email/telegram) — used by the public catalog and the sitemap. */
+    @Transactional(readOnly = true)
+    public List<PublicCreatorProfile> publicList(Category category, String city) {
+        String c = city == null ? null : city.trim();
+        return creators.findByApprovedOrderByCreatedAtDesc(true).stream()
+                .filter(p -> category == null || p.getCategories().contains(category))
+                .filter(p -> c == null || c.isEmpty() || p.getCity().equalsIgnoreCase(c))
+                .map(Mappers::toPublicCreator)
                 .toList();
     }
 

@@ -1,10 +1,9 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getPublicCreator } from "@/lib/api";
 import { JsonLd } from "@/components/JsonLd";
-import { pageMetadata, profilePageJsonLd } from "@/lib/seo";
-import { Logo } from "@/components/ui/Logo";
+import { pageMetadata, profilePageJsonLd, breadcrumbJsonLd } from "@/lib/seo";
+import { PublicHeader } from "@/components/public/PublicHeader";
 import { categoryLabels, platformLabels, formatNumber } from "@/lib/categories";
 
 export async function generateMetadata({
@@ -45,18 +44,18 @@ export default async function PublicCreatorPage({
 
   return (
     <div className="min-h-dvh">
-      <JsonLd data={profilePageJsonLd(p)} />
+      <JsonLd
+        data={[
+          profilePageJsonLd(p),
+          breadcrumbJsonLd([
+            { name: "Главная", path: "/" },
+            { name: "Каталог", path: "/catalog" },
+            { name: p.name, path: `/u/${p.id}` },
+          ]),
+        ]}
+      />
 
-      <header className="border-b border-border">
-        <div className="mx-auto flex h-14 max-w-[900px] items-center justify-between px-6">
-          <Link href="/">
-            <Logo />
-          </Link>
-          <Link href="/login" className="text-13 text-accent hover:brightness-110">
-            Войти
-          </Link>
-        </div>
-      </header>
+      <PublicHeader maxWidth="900px" />
 
       <main id="main-content" tabIndex={-1} className="mx-auto max-w-[900px] px-6 py-10">
         <div className="flex flex-col items-center text-center sm:flex-row sm:items-start sm:text-left sm:gap-6">

@@ -96,13 +96,12 @@ export default async function OpengraphImage({
             </div>
             {p && (
               <div style={{ marginTop: 14, fontSize: 30, color: "#9a9da7" }}>
-                @{p.username}
-                {p.city ? ` · ${p.city}` : ""}
+                {`@${p.username}${p.city ? ` · ${p.city}` : ""}`}
               </div>
             )}
             {p && (
-              <div style={{ marginTop: 22, fontSize: 32 }}>
-                Аудитория:{" "}
+              <div style={{ display: "flex", alignItems: "baseline", marginTop: 22, fontSize: 32 }}>
+                <span>Аудитория:</span>
                 <span style={{ fontWeight: 600, marginLeft: 8 }}>
                   {formatNumber(p.totalFollowers)}
                 </span>

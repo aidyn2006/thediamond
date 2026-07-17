@@ -1,10 +1,7 @@
 import { cache } from "react";
 import { auth } from "@/auth";
 import type { UserSummary } from "@/lib/types";
-import type {
-  PublicCreatorProfile,
-  PublicCreatorListItem,
-} from "@/lib/api-types";
+import type { PublicCreatorProfile } from "@/lib/api-types";
 
 export const BACKEND_URL =
   process.env.BACKEND_INTERNAL_URL ?? "http://localhost:8080";
@@ -58,14 +55,24 @@ export const getPublicCreator = cache(
   },
 );
 
-/** All approved creators for the sitemap. Never throws — empty list on failure. */
-export async function getPublicCreatorList(): Promise<PublicCreatorListItem[]> {
+/**
+ * Approved public creators for the catalog + sitemap, optionally filtered by
+ * category / city. Never throws — empty list on failure (backend down at build,
+ * etc.) so SSR and `next build` stay green.
+ */
+export async function getPublicCreators(
+  params?: { category?: string; city?: string },
+): Promise<PublicCreatorProfile[]> {
+  const qs = new URLSearchParams();
+  if (params?.category) qs.set("category", params.category);
+  if (params?.city) qs.set("city", params.city);
+  const suffix = qs.toString() ? `?${qs}` : "";
   try {
-    const res = await fetch(`${BACKEND_URL}/api/public/creators`, {
+    const res = await fetch(`${BACKEND_URL}/api/public/creators${suffix}`, {
       next: { revalidate: 3600 },
     });
     if (!res.ok) return [];
-    return (await res.json()) as PublicCreatorListItem[];
+    return (await res.json()) as PublicCreatorProfile[];
   } catch {
     return [];
   }

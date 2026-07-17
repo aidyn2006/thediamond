@@ -3,13 +3,37 @@ import type { Metadata } from "next";
 import { Logo } from "@/components/ui/Logo";
 import { Stone } from "@/components/ui/Stone";
 import { buttonClasses } from "@/components/ui/Button";
-import { pageMetadata } from "@/lib/seo";
+import { JsonLd } from "@/components/JsonLd";
+import { pageMetadata, faqPageJsonLd } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
   path: "/",
   description:
     "Бренды Казахстана находят UGC-креаторов и микроинфлюенсеров, а креаторы — оплачиваемые задания. Откликайтесь на кампании, сдавайте контент, получайте выплаты в тенге.",
 });
+
+const faqs = [
+  {
+    q: "Что такое TheDiamond?",
+    a: "Платформа, где бренды Казахстана находят UGC-креаторов и микроинфлюенсеров, а креаторы получают оплачиваемые задания.",
+  },
+  {
+    q: "Сколько это стоит для креатора?",
+    a: "Регистрация и отклики бесплатны. Вы получаете вознаграждение за выполненные задания — выплаты в тенге через кошелёк платформы.",
+  },
+  {
+    q: "Как бренду начать работу?",
+    a: "Зарегистрируйтесь, опубликуйте кампанию с задачей и бюджетом, выбирайте креаторов из откликов и принимайте работы.",
+  },
+  {
+    q: "На каких площадках работают креаторы?",
+    a: "TikTok, Instagram, Threads и YouTube.",
+  },
+  {
+    q: "Кто может стать креатором?",
+    a: "Любой автор из Казахстана с активной аудиторией — после заполнения профиля и модерации.",
+  },
+];
 
 const creatorSteps = [
   { title: "Заполните профиль", text: "Расскажите о себе, площадках и аудитории." },
@@ -47,6 +71,12 @@ export default function LandingPage() {
         <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-6 md:px-10">
           <Logo />
           <nav className="flex items-center gap-3">
+            <Link
+              href="/catalog"
+              className="hidden text-15 text-text-dim transition-colors duration-150 hover:text-text sm:inline"
+            >
+              Креаторы
+            </Link>
             <Link href="/login" className={buttonClasses("ghost")}>Войти</Link>
             <Link href="/register" className={buttonClasses("primary")}>Начать</Link>
           </nav>
@@ -90,6 +120,21 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* FAQ */}
+      <section className="border-t border-border">
+        <div className="mx-auto max-w-[1200px] px-6 py-16 md:px-10">
+          <h2 className="mb-10 text-28 font-semibold">Частые вопросы</h2>
+          <div className="grid gap-8 md:grid-cols-2">
+            {faqs.map((f) => (
+              <div key={f.q}>
+                <h3 className="font-semibold">{f.q}</h3>
+                <p className="mt-1.5 text-15 text-text-dim">{f.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="border-t border-border">
         <div className="mx-auto flex max-w-[1200px] flex-col items-center gap-6 px-6 py-20 text-center md:px-10">
@@ -97,6 +142,8 @@ export default function LandingPage() {
           <Link href="/register" className={buttonClasses("primary")}>Начать</Link>
         </div>
       </section>
+
+      <JsonLd data={faqPageJsonLd(faqs)} />
 
       {/* footer */}
       <footer className="border-t border-border">

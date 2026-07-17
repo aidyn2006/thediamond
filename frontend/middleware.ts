@@ -13,9 +13,11 @@ const PUBLIC_PATHS = [
   // (Dotted metadata routes like /robots.txt, /sitemap.xml, /manifest.webmanifest,
   // /icon.png are already excluded by the matcher below; this one has no dot.)
   "/opengraph-image",
+  // Public creator catalog (SEO hub).
+  "/catalog",
 ];
 // path prefixes that anyone (incl. logged-out visitors) may open
-const PUBLIC_PREFIXES = ["/u/"];
+const PUBLIC_PREFIXES = ["/u/", "/catalog/"];
 
 export default auth((req) => {
   const { pathname } = req.nextUrl;

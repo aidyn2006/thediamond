@@ -73,13 +73,7 @@ public final class ProfileDtos {
             String city,
             List<Category> categories,
             List<SocialLink> socials,
-            long totalFollowers
-    ) {}
-
-    /** Minimal public listing item for the sitemap — id + last-modified. */
-    public record PublicCreatorListItem(
-            Long id,
-            String username,
+            long totalFollowers,
             Instant createdAt
     ) {}
 

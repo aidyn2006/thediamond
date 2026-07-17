@@ -26,6 +26,25 @@ export const categoryLabels: Record<Category, string> = {
   OTHER: "Другое",
 };
 
+/** URL slug per category for the public catalog hubs (/catalog/[slug]). */
+export const categorySlugs: Record<Category, string> = {
+  FOOD: "food",
+  BEAUTY: "beauty",
+  TECH: "tech",
+  CARS: "cars",
+  LIFESTYLE: "lifestyle",
+  GAMING: "gaming",
+  FASHION: "fashion",
+  TRAVEL: "travel",
+  EDUCATION: "education",
+  OTHER: "other",
+};
+
+/** Reverse lookup: slug → Category (undefined for unknown slugs). */
+export const categoryBySlug: Record<string, Category> = Object.fromEntries(
+  (Object.entries(categorySlugs) as [Category, string][]).map(([cat, slug]) => [slug, cat]),
+);
+
 export const PLATFORMS = ["TIKTOK", "INSTAGRAM", "THREADS", "YOUTUBE"] as const;
 export type Platform = (typeof PLATFORMS)[number];
 

@@ -138,3 +138,62 @@ export function profilePageJsonLd(p: PublicCreatorProfile) {
     mainEntity: personEntity(p),
   };
 }
+
+/** BreadcrumbList from an ordered list of {name, path} crumbs. */
+export function breadcrumbJsonLd(items: { name: string; path: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((it, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: it.name,
+      item: absoluteUrl(it.path),
+    })),
+  };
+}
+
+/** CollectionPage wrapping an ItemList of creator profiles (catalog + hubs). */
+export function catalogJsonLd({
+  name,
+  description,
+  path,
+  creators,
+}: {
+  name: string;
+  description: string;
+  path: string;
+  creators: PublicCreatorProfile[];
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name,
+    description,
+    url: absoluteUrl(path),
+    inLanguage: "ru-KZ",
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: creators.length,
+      itemListElement: creators.slice(0, 50).map((c, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        url: absoluteUrl(`/u/${c.id}`),
+        name: c.name,
+      })),
+    },
+  };
+}
+
+/** FAQPage from a list of {q, a} pairs. */
+export function faqPageJsonLd(qa: { q: string; a: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: qa.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+  };
+}
