@@ -1,5 +1,10 @@
+import { cache } from "react";
 import { auth } from "@/auth";
 import type { UserSummary } from "@/lib/types";
+import type {
+  PublicCreatorProfile,
+  PublicCreatorListItem,
+} from "@/lib/api-types";
 
 export const BACKEND_URL =
   process.env.BACKEND_INTERNAL_URL ?? "http://localhost:8080";
@@ -32,4 +37,36 @@ export async function getCurrentUser(): Promise<UserSummary | null> {
   const res = await apiFetch("/api/auth/me");
   if (!res.ok) return null;
   return (await res.json()) as UserSummary;
+}
+
+/**
+ * Public creator profile — no auth. Wrapped in React `cache()` so a single
+ * request (generateMetadata + the page component) hits the backend only once.
+ * Returns null on any failure so callers can `notFound()` cleanly.
+ */
+export const getPublicCreator = cache(
+  async (id: string): Promise<PublicCreatorProfile | null> => {
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/public/creators/${id}`, {
+        next: { revalidate: 3600 },
+      });
+      if (!res.ok) return null;
+      return (await res.json()) as PublicCreatorProfile;
+    } catch {
+      return null;
+    }
+  },
+);
+
+/** All approved creators for the sitemap. Never throws — empty list on failure. */
+export async function getPublicCreatorList(): Promise<PublicCreatorListItem[]> {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/public/creators`, {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return [];
+    return (await res.json()) as PublicCreatorListItem[];
+  } catch {
+    return [];
+  }
 }

@@ -1,5 +1,6 @@
 package com.thediamond.publicapi;
 
+import com.thediamond.api.dto.ProfileDtos.PublicCreatorListItem;
 import com.thediamond.api.dto.ProfileDtos.PublicCreatorProfile;
 import com.thediamond.domain.CreatorProfile;
 import com.thediamond.error.ApiException;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /** Unauthenticated, public-facing endpoints (see SecurityConfig permitAll on /api/public/**). */
 @RestController
@@ -29,5 +32,14 @@ public class PublicController {
                 .filter(CreatorProfile::isApproved)
                 .orElseThrow(() -> ApiException.notFound("Профиль не найден"));
         return Mappers.toPublicCreator(p);
+    }
+
+    /** Approved creators for the sitemap (id + last-modified). */
+    @GetMapping("/creators")
+    @Transactional(readOnly = true)
+    public List<PublicCreatorListItem> creatorList() {
+        return creators.findByApprovedOrderByCreatedAtDesc(true).stream()
+                .map(Mappers::toPublicCreatorListItem)
+                .toList();
     }
 }

@@ -1,9 +1,38 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { apiFetch } from "@/lib/api";
+import { getPublicCreator } from "@/lib/api";
+import { JsonLd } from "@/components/JsonLd";
+import { pageMetadata, profilePageJsonLd } from "@/lib/seo";
 import { Logo } from "@/components/ui/Logo";
 import { categoryLabels, platformLabels, formatNumber } from "@/lib/categories";
-import type { PublicCreatorProfile } from "@/lib/api-types";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const p = await getPublicCreator(id);
+  if (!p) {
+    return { title: "Профиль не найден", robots: { index: false, follow: false } };
+  }
+
+  const cats = p.categories.map((c) => categoryLabels[c]);
+  const title = `${p.name} — креатор${p.city ? ` в ${p.city}` : ""}`;
+  const description = p.bio?.trim()
+    ? p.bio.trim()
+    : `${p.name} — креатор${p.city ? ` из ${p.city}` : ""}. ${
+        cats.length ? `${cats.join(", ")}. ` : ""
+      }Аудитория ${formatNumber(p.totalFollowers)}. Профиль на TheDiamond.`;
+
+  return pageMetadata({
+    title,
+    description,
+    path: `/u/${p.id}`,
+    ogType: "profile",
+  });
+}
 
 export default async function PublicCreatorPage({
   params,
@@ -11,12 +40,13 @@ export default async function PublicCreatorPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const res = await apiFetch(`/api/public/creators/${id}`);
-  if (!res.ok) notFound();
-  const p = (await res.json()) as PublicCreatorProfile;
+  const p = await getPublicCreator(id);
+  if (!p) notFound();
 
   return (
     <div className="min-h-dvh">
+      <JsonLd data={profilePageJsonLd(p)} />
+
       <header className="border-b border-border">
         <div className="mx-auto flex h-14 max-w-[900px] items-center justify-between px-6">
           <Link href="/">
@@ -32,8 +62,17 @@ export default async function PublicCreatorPage({
         <div className="flex flex-col items-center text-center sm:flex-row sm:items-start sm:text-left sm:gap-6">
           <div className="mb-4 h-24 w-24 shrink-0 overflow-hidden rounded-full border border-border bg-surface-2 sm:mb-0">
             {p.avatarUrl ? (
+              // Above-the-fold LCP image — eager + high priority, explicit size to avoid CLS.
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={p.avatarUrl} alt={p.name} className="h-full w-full object-cover" />
+              <img
+                src={p.avatarUrl}
+                alt={p.name}
+                width={96}
+                height={96}
+                loading="eager"
+                fetchPriority="high"
+                className="h-full w-full object-cover"
+              />
             ) : (
               <div className="flex h-full w-full items-center justify-center font-display text-28 text-text-dim">
                 {p.name.charAt(0)}

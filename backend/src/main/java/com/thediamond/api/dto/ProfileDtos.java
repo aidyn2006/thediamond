@@ -4,6 +4,7 @@ import com.thediamond.domain.Category;
 import jakarta.validation.constraints.*;
 import com.thediamond.api.dto.SocialProofDtos.SocialProofResponse;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -73,6 +74,13 @@ public final class ProfileDtos {
             List<Category> categories,
             List<SocialLink> socials,
             long totalFollowers
+    ) {}
+
+    /** Minimal public listing item for the sitemap — id + last-modified. */
+    public record PublicCreatorListItem(
+            Long id,
+            String username,
+            Instant createdAt
     ) {}
 
     public record BrandProfileResponse(

@@ -1,7 +1,15 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { Logo } from "@/components/ui/Logo";
 import { Stone } from "@/components/ui/Stone";
 import { buttonClasses } from "@/components/ui/Button";
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = pageMetadata({
+  path: "/",
+  description:
+    "Бренды Казахстана находят UGC-креаторов и микроинфлюенсеров, а креаторы — оплачиваемые задания. Откликайтесь на кампании, сдавайте контент, получайте выплаты в тенге.",
+});
 
 const creatorSteps = [
   { title: "Заполните профиль", text: "Расскажите о себе, площадках и аудитории." },

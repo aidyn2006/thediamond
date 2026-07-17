@@ -142,6 +142,12 @@ export interface PublicCreatorProfile {
   totalFollowers: number;
 }
 
+export interface PublicCreatorListItem {
+  id: number;
+  username: string;
+  createdAt: string;
+}
+
 export interface CampaignSummary {
   id: number;
   title: string;

@@ -1,7 +1,15 @@
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 
-const PUBLIC_PATHS = ["/", "/login", "/register"];
+const PUBLIC_PATHS = [
+  "/",
+  "/login",
+  "/register",
+  // Default OG image — must be reachable by unauthenticated social/crawler bots.
+  // (Dotted metadata routes like /robots.txt, /sitemap.xml, /manifest.webmanifest,
+  // /icon.png are already excluded by the matcher below; this one has no dot.)
+  "/opengraph-image",
+];
 // path prefixes that anyone (incl. logged-out visitors) may open
 const PUBLIC_PREFIXES = ["/u/"];
 

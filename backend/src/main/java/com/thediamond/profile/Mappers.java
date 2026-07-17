@@ -2,6 +2,7 @@ package com.thediamond.profile;
 
 import com.thediamond.api.dto.ProfileDtos.BrandProfileResponse;
 import com.thediamond.api.dto.ProfileDtos.CreatorProfileResponse;
+import com.thediamond.api.dto.ProfileDtos.PublicCreatorListItem;
 import com.thediamond.api.dto.ProfileDtos.PublicCreatorProfile;
 import com.thediamond.api.dto.ProfileDtos.SocialLink;
 import com.thediamond.api.dto.SocialProofDtos.SocialProofResponse;
@@ -65,6 +66,10 @@ public final class Mappers {
                 socials,
                 p.getTotalFollowers()
         );
+    }
+
+    public static PublicCreatorListItem toPublicCreatorListItem(CreatorProfile p) {
+        return new PublicCreatorListItem(p.getId(), p.getUsername(), p.getCreatedAt());
     }
 
     public static BrandProfileResponse toBrandResponse(BrandProfile b) {
