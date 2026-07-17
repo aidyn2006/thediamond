@@ -24,7 +24,7 @@ export async function AppHeader({
       <div className="mx-auto flex h-14 max-w-[1200px] items-center justify-between px-6 md:px-10">
         <div className="flex items-center gap-8">
           <Logo />
-          <nav className="hidden items-center gap-6 md:flex">
+          <nav aria-label="Основная навигация" className="hidden items-center gap-6 md:flex">
             {items.map((item) => (
               <Link
                 key={item.href}

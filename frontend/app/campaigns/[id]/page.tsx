@@ -23,7 +23,7 @@ export default async function CampaignDetailPage({
   return (
     <>
       <AppHeader email={me.email} items={creatorNav} />
-      <main className="mx-auto max-w-[1200px] px-6 py-8 pb-28 md:px-10 md:pb-8">
+      <main id="main-content" tabIndex={-1} className="mx-auto max-w-[1200px] px-6 py-8 pb-28 md:px-10 md:pb-8">
         <div className="grid gap-8 md:grid-cols-[1fr_320px]">
           {/* left: description */}
           <div>

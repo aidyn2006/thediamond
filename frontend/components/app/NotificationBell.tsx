@@ -48,7 +48,13 @@ export function NotificationBell({ initial }: { initial: NotificationList }) {
       <button
         type="button"
         onClick={toggle}
-        aria-label="Уведомления"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label={
+          data.unread > 0
+            ? `Уведомления, непрочитанных: ${data.unread}`
+            : "Уведомления"
+        }
         className="relative flex h-9 w-9 items-center justify-center rounded-btn text-text-dim transition-colors duration-150 hover:bg-surface-2 hover:text-text"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -56,7 +62,10 @@ export function NotificationBell({ initial }: { initial: NotificationList }) {
           <path d="M13.73 21a2 2 0 0 1-3.46 0" />
         </svg>
         {data.unread > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-semibold text-bg">
+          <span
+            aria-hidden
+            className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-semibold text-bg"
+          >
             {data.unread > 9 ? "9+" : data.unread}
           </span>
         )}

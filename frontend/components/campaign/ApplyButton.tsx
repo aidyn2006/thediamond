@@ -43,7 +43,7 @@ export function ApplyButton({
       <Button variant="primary" fullWidth loading={pending} onClick={apply}>
         Откликнуться
       </Button>
-      {error && <p className="mt-2 text-center text-13 text-error">{error}</p>}
+      {error && <p role="alert" className="mt-2 text-center text-13 text-error">{error}</p>}
     </div>
   );
 }

@@ -17,7 +17,7 @@ export default async function MyApplicationsPage() {
   return (
     <>
       <AppHeader email={me.email} items={creatorNav} />
-      <main className="mx-auto max-w-[800px] px-6 py-8 pb-24 md:px-10 md:pb-8">
+      <main id="main-content" tabIndex={-1} className="mx-auto max-w-[800px] px-6 py-8 pb-24 md:px-10 md:pb-8">
         <h1 className="mb-6 text-28 font-semibold">Мои отклики</h1>
         <MyApplicationsList apps={apps} />
       </main>

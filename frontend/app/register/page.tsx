@@ -85,7 +85,7 @@ function RegisterForm() {
   }
 
   return (
-    <main className="flex min-h-dvh flex-col items-center px-6 py-12">
+    <main id="main-content" tabIndex={-1} className="flex min-h-dvh flex-col items-center px-6 py-12">
       <Logo className="mb-10" />
       <div className="w-full max-w-[400px]">
         <h1 className="mb-1 text-22 font-semibold">Создать аккаунт</h1>
@@ -135,7 +135,7 @@ function RegisterForm() {
             error={errors.password}
           />
 
-          {formError && <p className="text-13 text-error">{formError}</p>}
+          {formError && <p role="alert" className="text-13 text-error">{formError}</p>}
 
           <Button type="submit" variant="primary" fullWidth loading={loading}>
             Начать
@@ -144,7 +144,7 @@ function RegisterForm() {
 
         <p className="mt-6 text-center text-15 text-text-dim">
           Уже есть аккаунт?{" "}
-          <Link href="/login" className="text-accent">
+          <Link href="/login" className="text-accent underline underline-offset-2">
             Войти
           </Link>
         </p>

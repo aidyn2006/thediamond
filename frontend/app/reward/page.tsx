@@ -27,7 +27,7 @@ export default async function RewardPage() {
   const proofState = (await pr.json()) as SocialProofState;
 
   return (
-    <main className="flex min-h-dvh flex-col items-center px-6 py-12">
+    <main id="main-content" tabIndex={-1} className="flex min-h-dvh flex-col items-center px-6 py-12">
       <Logo className="mb-8" />
 
       <div className="w-full max-w-[560px]">

@@ -58,7 +58,7 @@ export default async function PublicCreatorPage({
         </div>
       </header>
 
-      <main className="mx-auto max-w-[900px] px-6 py-10">
+      <main id="main-content" tabIndex={-1} className="mx-auto max-w-[900px] px-6 py-10">
         <div className="flex flex-col items-center text-center sm:flex-row sm:items-start sm:text-left sm:gap-6">
           <div className="mb-4 h-24 w-24 shrink-0 overflow-hidden rounded-full border border-border bg-surface-2 sm:mb-0">
             {p.avatarUrl ? (

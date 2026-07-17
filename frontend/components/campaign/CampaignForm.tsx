@@ -142,7 +142,7 @@ export function CampaignForm({ initial }: { initial?: CampaignFull }) {
         <Input label="Дедлайн" name="deadline" type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} error={errors.deadline} />
         <Textarea label="Требования" name="requirements" value={requirements} onChange={(e) => setRequirements(e.target.value)} error={errors.requirements} maxLength={3000} placeholder="Длина ролика, упоминания, площадки публикации" />
 
-        {formError && <p className="text-13 text-error">{formError}</p>}
+        {formError && <p role="alert" className="text-13 text-error">{formError}</p>}
 
         <div className="mt-2 flex flex-col gap-3 sm:flex-row">
           <Button variant="secondary" type="button" onClick={() => save("draft")} loading={loading === "draft"}>

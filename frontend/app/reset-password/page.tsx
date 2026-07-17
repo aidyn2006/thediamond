@@ -109,7 +109,7 @@ function ResetForm() {
           onChange={(e) => setConfirm(e.target.value)}
           error={errors.confirm}
         />
-        {formError && <p className="text-13 text-error">{formError}</p>}
+        {formError && <p role="alert" className="text-13 text-error">{formError}</p>}
         <Button type="submit" variant="primary" fullWidth loading={loading}>
           Сохранить пароль
         </Button>
@@ -120,7 +120,7 @@ function ResetForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <main className="flex min-h-dvh flex-col items-center px-6 py-12">
+    <main id="main-content" tabIndex={-1} className="flex min-h-dvh flex-col items-center px-6 py-12">
       <Logo className="mb-10" />
       <Suspense>
         <ResetForm />

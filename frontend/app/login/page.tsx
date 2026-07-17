@@ -54,7 +54,7 @@ function LoginForm() {
   }
 
   return (
-    <main className="flex min-h-dvh flex-col items-center px-6 py-12">
+    <main id="main-content" tabIndex={-1} className="flex min-h-dvh flex-col items-center px-6 py-12">
       <Logo className="mb-10" />
       <div className="w-full max-w-[400px]">
         <h1 className="mb-1 text-22 font-semibold">С возвращением</h1>
@@ -83,7 +83,7 @@ function LoginForm() {
             error={errors.password}
           />
 
-          {formError && <p className="text-13 text-error">{formError}</p>}
+          {formError && <p role="alert" className="text-13 text-error">{formError}</p>}
 
           <div className="-mt-1 text-right">
             <Link
@@ -101,7 +101,7 @@ function LoginForm() {
 
         <p className="mt-6 text-center text-15 text-text-dim">
           Ещё нет аккаунта?{" "}
-          <Link href="/register" className="text-accent">
+          <Link href="/register" className="text-accent underline underline-offset-2">
             Создать
           </Link>
         </p>

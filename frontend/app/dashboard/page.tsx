@@ -31,7 +31,7 @@ export default async function DashboardPage() {
   return (
     <>
       <AppHeader email={me.email} items={brandNav} />
-      <main className="mx-auto max-w-[1200px] px-6 py-8 md:px-10">
+      <main id="main-content" tabIndex={-1} className="mx-auto max-w-[1200px] px-6 py-8 md:px-10">
         <div className="mb-8 flex items-center justify-between">
           <h1 className="text-28 font-semibold">Кабинет</h1>
           <Link href="/campaigns/new" className="inline-flex h-11 items-center gap-2 rounded-btn bg-prism px-5 text-15 font-semibold text-bg hover:brightness-110">

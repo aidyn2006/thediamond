@@ -111,7 +111,7 @@ export function MyApplicationsList({ apps }: { apps: MyApplication[] }) {
           Загляните в кампании и откликнитесь на подходящую — отклики появятся здесь.
         </p>
         <div className="mt-6 flex justify-center">
-          <Link href="/campaigns" className="text-accent">К кампаниям</Link>
+          <Link href="/campaigns" className="text-accent underline underline-offset-2">К кампаниям</Link>
         </div>
       </div>
     );

@@ -33,7 +33,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <main className="flex min-h-dvh flex-col items-center px-6 py-12">
+    <main id="main-content" tabIndex={-1} className="flex min-h-dvh flex-col items-center px-6 py-12">
       <Logo className="mb-10" />
       <div className="w-full max-w-[400px]">
         {sent ? (
@@ -71,7 +71,7 @@ export default function ForgotPasswordPage() {
             </form>
             <p className="mt-6 text-center text-15 text-text-dim">
               Вспомнили пароль?{" "}
-              <Link href="/login" className="text-accent">
+              <Link href="/login" className="text-accent underline underline-offset-2">
                 Войти
               </Link>
             </p>

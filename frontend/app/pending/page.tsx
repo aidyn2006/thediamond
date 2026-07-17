@@ -23,7 +23,7 @@ export default async function PendingPage() {
   const needsEmail = !me.emailVerified;
 
   return (
-    <main className="flex min-h-dvh flex-col items-center justify-center px-6 py-10 text-center">
+    <main id="main-content" tabIndex={-1} className="flex min-h-dvh flex-col items-center justify-center px-6 py-10 text-center">
       <Stone size={140} className="mb-8 opacity-80" />
 
       {needsEmail ? (

@@ -10,6 +10,7 @@ export interface SelectProps
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
   function Select({ label, error, className, id, children, ...props }, ref) {
     const selectId = id ?? props.name;
+    const msgId = selectId ? `${selectId}-msg` : undefined;
     return (
       <div className="flex flex-col gap-1.5">
         {label && (
@@ -26,11 +27,13 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             error ? "border-error" : "border-border",
             className,
           )}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error && msgId ? msgId : undefined}
           {...props}
         >
           {children}
         </select>
-        {error && <p className="text-13 text-error">{error}</p>}
+        {error && <p id={msgId} className="text-13 text-error">{error}</p>}
       </div>
     );
   },

@@ -41,7 +41,7 @@ function Steps({ title, steps }: { title: string; steps: { title: string; text: 
 
 export default function LandingPage() {
   return (
-    <main className="min-h-dvh">
+    <main id="main-content" tabIndex={-1} className="min-h-dvh">
       {/* header */}
       <header className="border-b border-border">
         <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-6 md:px-10">

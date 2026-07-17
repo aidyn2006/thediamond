@@ -95,7 +95,7 @@ export function EmailVerifyForm({ email, home }: { email: string; home: string }
         )}
 
         {info && <p className="mt-3 text-13 text-success">{info}</p>}
-        {error && <p className="mt-3 text-13 text-error">{error}</p>}
+        {error && <p role="alert" className="mt-3 text-13 text-error">{error}</p>}
       </div>
     </div>
   );

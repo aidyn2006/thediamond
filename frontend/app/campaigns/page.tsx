@@ -29,7 +29,7 @@ export default async function CampaignsFeedPage({
   return (
     <>
       <AppHeader email={me.email} items={creatorNav} />
-      <main className="mx-auto max-w-[1200px] px-6 py-8 pb-24 md:px-10 md:pb-8">
+      <main id="main-content" tabIndex={-1} className="mx-auto max-w-[1200px] px-6 py-8 pb-24 md:px-10 md:pb-8">
         <h1 className="mb-6 text-28 font-semibold">Кампании</h1>
 
         <div className="mb-8">

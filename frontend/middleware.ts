@@ -5,6 +5,10 @@ const PUBLIC_PATHS = [
   "/",
   "/login",
   "/register",
+  // Password-reset flow — reached by logged-OUT users (link on /login, link from
+  // the reset email). Must stay public or the whole flow bounces back to /login.
+  "/forgot-password",
+  "/reset-password",
   // Default OG image — must be reachable by unauthenticated social/crawler bots.
   // (Dotted metadata routes like /robots.txt, /sitemap.xml, /manifest.webmanifest,
   // /icon.png are already excluded by the matcher below; this one has no dot.)

@@ -88,6 +88,12 @@ export default function RootLayout({
       className={`h-full ${unbounded.variable} ${manrope.variable}`}
     >
       <body className="min-h-full">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-btn focus:border focus:border-accent focus:bg-surface focus:px-4 focus:py-2 focus:text-15 focus:text-text"
+        >
+          Перейти к содержимому
+        </a>
         {children}
         <JsonLd data={[organizationJsonLd(), websiteJsonLd()]} />
       </body>

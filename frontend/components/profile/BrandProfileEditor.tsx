@@ -63,7 +63,7 @@ export function BrandProfileEditor({ initial }: { initial: BrandProfileResponse 
         <Input label="Сайт" name="website" value={website} onChange={(e) => setWebsite(e.target.value)} error={errors.website} />
         <Input label="Телефон" name="phone" value={phone} onChange={(e) => setPhone(e.target.value)} error={errors.phone} />
         <Input label="Контактное лицо" name="contactName" value={contactName} onChange={(e) => setContactName(e.target.value)} error={errors.contactName} />
-        {error && <p className="text-13 text-error">{error}</p>}
+        {error && <p role="alert" className="text-13 text-error">{error}</p>}
         {message && <p className="text-13 text-success">{message}</p>}
         <div>
           <Button variant="primary" onClick={save} loading={loading} type="button">

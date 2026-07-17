@@ -65,7 +65,7 @@ export function BrandOnboarding() {
           <Input label="Сайт (необязательно)" name="website" value={website} onChange={(e) => setWebsite(e.target.value)} error={errors.website} placeholder="https://example.kz" />
           <Input label="Телефон" name="phone" value={phone} onChange={(e) => setPhone(e.target.value)} error={errors.phone} placeholder="+7 701 234 56 78" />
           <Input label="Контактное лицо" name="contactName" value={contactName} onChange={(e) => setContactName(e.target.value)} error={errors.contactName} placeholder="Ержан Мукашев" />
-          {formError && <p className="text-13 text-error">{formError}</p>}
+          {formError && <p role="alert" className="text-13 text-error">{formError}</p>}
           <Button variant="primary" onClick={submit} type="button" loading={loading} fullWidth>
             Отправить на проверку
           </Button>

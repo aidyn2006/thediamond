@@ -42,6 +42,7 @@ export function Button({
     <button
       className={cn(base, variantClasses[variant], fullWidth && "w-full", className)}
       disabled={disabled || loading}
+      aria-busy={loading || undefined}
       {...props}
     >
       {loading && <Spinner />}

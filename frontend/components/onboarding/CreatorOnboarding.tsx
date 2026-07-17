@@ -231,7 +231,7 @@ export function CreatorOnboarding() {
           </div>
         )}
 
-        {formError && <p className="mt-4 text-13 text-error">{formError}</p>}
+        {formError && <p role="alert" className="mt-4 text-13 text-error">{formError}</p>}
 
         <div className="mt-8 flex gap-3">
           {step > 1 && (

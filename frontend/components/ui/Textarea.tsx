@@ -11,6 +11,7 @@ export interface TextareaProps
 export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   function Textarea({ label, error, hint, className, id, ...props }, ref) {
     const textareaId = id ?? props.name;
+    const msgId = textareaId ? `${textareaId}-msg` : undefined;
     return (
       <div className="flex flex-col gap-1.5">
         {label && (
@@ -28,12 +29,13 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             className,
           )}
           aria-invalid={error ? true : undefined}
+          aria-describedby={(error || hint) && msgId ? msgId : undefined}
           {...props}
         />
         {error ? (
-          <p className="text-13 text-error">{error}</p>
+          <p id={msgId} className="text-13 text-error">{error}</p>
         ) : hint ? (
-          <p className="text-13 text-text-dim">{hint}</p>
+          <p id={msgId} className="text-13 text-text-dim">{hint}</p>
         ) : null}
       </div>
     );

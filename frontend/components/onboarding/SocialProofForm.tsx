@@ -149,7 +149,7 @@ export function SocialProofForm({ state }: { state: SocialProofState }) {
           value={postUrl}
           onChange={(e) => setPostUrl(e.target.value)}
         />
-        {error && <p className="text-13 text-error">{error}</p>}
+        {error && <p role="alert" className="text-13 text-error">{error}</p>}
         <Button type="button" variant="primary" fullWidth loading={pending} onClick={submit}>
           Отправить и получить 1000 ₸
         </Button>

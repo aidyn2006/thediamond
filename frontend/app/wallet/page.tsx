@@ -52,7 +52,7 @@ export default async function WalletPage() {
   return (
     <>
       <AppHeader email={session.user.email} items={nav} />
-      <main className="mx-auto max-w-[1200px] px-6 py-8 md:px-10">
+      <main id="main-content" tabIndex={-1} className="mx-auto max-w-[1200px] px-6 py-8 md:px-10">
         <h1 className="mb-6 text-28 font-semibold">Кошелёк</h1>
 
         <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">

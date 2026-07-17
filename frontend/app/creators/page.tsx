@@ -28,7 +28,7 @@ export default async function CreatorsPage({
   return (
     <>
       <AppHeader email={me.email} items={brandNav} />
-      <main className="mx-auto max-w-[1200px] px-6 py-8 md:px-10">
+      <main id="main-content" tabIndex={-1} className="mx-auto max-w-[1200px] px-6 py-8 md:px-10">
         <h1 className="mb-6 text-28 font-semibold">Креаторы</h1>
         <div className="mb-8">
           <Suspense>
