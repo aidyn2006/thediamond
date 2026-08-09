@@ -1,16 +1,18 @@
 # Деплой TheDiamond на VPS через Docker
 
-Поднимает весь стек одной командой: PostgreSQL + Java-бэкенд + Next.js-фронт + Caddy
-(авто-HTTPS от Let's Encrypt). Наружу открыт только Caddy (80/443).
+В контейнерах поднимается стек: PostgreSQL + Java-бэкенд + Next.js-фронт. TLS и 80/443
+терминирует **хостовый nginx** (сертификат — certbot), контейнеры публикуются только
+на `127.0.0.1`.
 
 ```
-браузер ──443──> Caddy ──/uploads/*──> backend:8080
-                      └──всё остальное─> frontend:3000 ──внутр.──> backend:8080
+браузер ──443──> nginx ──/uploads/*──> 127.0.0.1:8082 (backend)
+                      └──всё остальное─> 127.0.0.1:3002 (frontend) ──внутр.──> backend:8080
 ```
 
 ## 1. Предпосылки на VPS
 
 - Установлены Docker и Docker Compose (`docker --version`, `docker compose version`).
+- Установлен nginx и certbot (`nginx -v`, `certbot --version`).
 - Домен (например `thediamond.kz`) с A-записью на IP вашего VPS.
 - Открыты порты **80** и **443** (firewall/security group).
 
@@ -36,42 +38,57 @@ nano .env
 | `POSTGRES_PASSWORD` | надёжный пароль БД |
 | `JWT_SECRET` | `openssl rand -base64 48` |
 | `AUTH_SECRET` | `openssl rand -base64 32` |
-| `RESEND_API_KEY` | ключ Resend (или оставить пустым — письма пойдут в лог) |
+| `MAIL_SMTP_*` | доступы SMTP (или оставить пустыми — письма пойдут в лог) |
 
-## 4. Запуск
+`FRONTEND_HOST_PORT` (3002) и `BACKEND_HOST_PORT` (8082) менять нужно только если
+эти порты на хосте уже заняты — тогда поправьте их и в vhost'е nginx.
+
+## 4. Запуск контейнеров
 
 ```bash
-docker compose -f docker-compose.prod.yml up -d --build
+docker compose -f docker-compose.nginx.yml up -d --build
 ```
 
-Первый билд — несколько минут (Maven + Next). Caddy сам выпустит TLS-сертификат,
-как только домен резолвится на сервер.
+Первый билд — несколько минут (Maven + Next).
 
 Проверка:
 
 ```bash
-docker compose -f docker-compose.prod.yml ps
-docker compose -f docker-compose.prod.yml logs -f backend   # Flyway + сиды при первом старте
+docker compose -f docker-compose.nginx.yml ps
+docker compose -f docker-compose.nginx.yml logs -f backend   # Flyway + сиды при первом старте
+curl -I http://127.0.0.1:3002
 ```
+
+## 5. Настроить nginx и TLS
+
+```bash
+sudo cp deploy/nginx-thediamond.conf /etc/nginx/sites-available/thediamond.conf
+sudo ln -s /etc/nginx/sites-available/thediamond.conf /etc/nginx/sites-enabled/
+# поправьте server_name под свой домен, если он не thediamond.kz
+sudo nginx -t && sudo systemctl reload nginx
+sudo certbot --nginx -d thediamond.kz -d www.thediamond.kz
+```
+
+Certbot сам добавит 443-сервер и редирект с 80.
 
 Открывайте `https://<DOMAIN>`. Тестовые аккаунты (пароль `password123`):
 `admin@thediamond.kz`, `brand1@company.kz`, `aida@creator.kz`.
 
-## 5. Обновление версии
+## 6. Обновление версии
 
 ```bash
 git pull
-docker compose -f docker-compose.prod.yml up -d --build
+docker compose -f docker-compose.nginx.yml up -d --build
 ```
 
 Схема БД мигрируется Flyway автоматически при старте бэкенда.
 
 ## Данные и бэкапы
 
-- БД — в томе `pgdata`, загруженные аватары — в томе `uploads`, сертификаты — в `caddy_data`.
+- БД — в томе `pgdata`, загруженные аватары — в томе `uploads`.
 - Бэкап БД:
   ```bash
-  docker compose -f docker-compose.prod.yml exec postgres \
+  docker compose -f docker-compose.nginx.yml exec postgres \
     pg_dump -U thediamond thediamond > backup_$(date +%F).sql
   ```
 - Сиды заливаются только в пустую БД (идемпотентно). Для «боевого» запуска после проверки
@@ -80,16 +97,20 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 ## Частые проблемы
 
-- **Caddy не выдаёт сертификат** — домен ещё не указывает на сервер, или закрыты порты 80/443.
-  Смотрите `docker compose -f docker-compose.prod.yml logs caddy`.
+- **502 от nginx** — контейнеры не поднялись или слушают другие порты.
+  Проверьте `docker compose -f docker-compose.nginx.yml ps` и совпадение
+  `FRONTEND_HOST_PORT`/`BACKEND_HOST_PORT` с `proxy_pass` в vhost'е.
 - **Логин не проходит (CSRF/redirect)** — проверьте, что `DOMAIN` в `.env` совпадает с доменом
-  в адресной строке (от него зависят `AUTH_URL` и `CORS_ALLOWED_ORIGINS`).
-- **Порт 80 занят** (уже есть nginx/apache на VPS) — остановите его или уберите проброс `80/443`
-  у Caddy и повесьте свой прокси на `frontend:3000` + `backend:8080` (`/uploads`).
+  в адресной строке (от него зависят `AUTH_URL` и `CORS_ALLOWED_ORIGINS`); после правки
+  `.env` нужен `up -d` (перезапуск контейнеров).
+- **Аватар не загружается (413)** — увеличьте `client_max_body_size` в vhost'е.
+- **Порт 3002/8082 занят** — задайте другие в `.env` и синхронно в `deploy/nginx-thediamond.conf`.
 
-## Без своего домена (быстрый тест по IP)
+## Локальная разработка
 
-Auto-HTTPS требует домен. Для проверки по IP без TLS замените в `Caddyfile` первую строку
-`{$DOMAIN} {` на `:80 {`, а в `.env` при этом задайте
-`AUTH_URL=http://<IP>` и `UPLOAD_PUBLIC_BASE_URL=http://<IP>/uploads`
-(поправьте в `docker-compose.prod.yml`). Для продакшена используйте домен + HTTPS.
+Корневой `docker-compose.yml` поднимает только PostgreSQL на порту 5433 для локального
+запуска бэкенда и фронта вне Docker:
+
+```bash
+docker compose up -d
+```
