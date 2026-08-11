@@ -1,5 +1,13 @@
 import type { Metadata } from "next";
 import type { ListingSummary } from "@/lib/api-types";
+import { listingPath } from "@/lib/listing-url";
+import {
+  brandLabels,
+  conditionLabels,
+  storageLabel,
+  type PhoneBrand,
+  type PhoneCondition,
+} from "@/lib/phones";
 
 /**
  * Single source of truth for site-wide SEO. Pages compose their metadata with
@@ -146,9 +154,113 @@ export function catalogJsonLd({
       itemListElement: listings.slice(0, 50).map((l, i) => ({
         "@type": "ListItem",
         position: i + 1,
-        url: absoluteUrl(`/listings/${l.id}`),
+        url: absoluteUrl(listingPath(l)),
         name: l.title,
       })),
+    },
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/* One listing = one indexable product page                            */
+/* ------------------------------------------------------------------ */
+
+/** schema.org condition per our five states — "на запчасти" is damaged, not just used. */
+const CONDITION_SCHEMA: Record<PhoneCondition, string> = {
+  NEW: "https://schema.org/NewCondition",
+  LIKE_NEW: "https://schema.org/UsedCondition",
+  GOOD: "https://schema.org/UsedCondition",
+  FAIR: "https://schema.org/UsedCondition",
+  FOR_PARTS: "https://schema.org/DamagedCondition",
+};
+
+export interface ListingSeoInput {
+  id: number;
+  title: string;
+  brand: PhoneBrand;
+  model: string;
+  storageGb?: number | null;
+  ramGb?: number | null;
+  color?: string | null;
+  condition: PhoneCondition;
+  batteryHealth?: number | null;
+  price: number;
+  city: string;
+  description: string;
+  images: string[];
+  sellerName: string;
+  /** ACTIVE / SOLD / … — decides Offer availability. */
+  status?: string | null;
+}
+
+/**
+ * Meta description for one listing: the facts a searcher scans for (price, city,
+ * memory, condition) first, then the seller's own words. Google truncates ~160
+ * characters but indexes the whole tag, so we allow a bit more.
+ */
+export function listingDescription(l: ListingSeoInput): string {
+  const facts = [
+    l.storageGb ? storageLabel(l.storageGb) : null,
+    conditionLabels[l.condition],
+    l.batteryHealth ? `АКБ ${l.batteryHealth}%` : null,
+    l.city,
+  ]
+    .filter(Boolean)
+    .join(", ");
+  const text = `${l.title} за ${l.price.toLocaleString("ru-RU")} ₸. ${facts}. ${l.description}`
+    .replace(/\s+/g, " ")
+    .trim();
+  return text.length > 300 ? `${text.slice(0, 297).trimEnd()}…` : text;
+}
+
+/**
+ * Product + Offer for a single listing — this is what earns the price/condition
+ * snippet in search results. `additionalProperty` carries the specs Google shows in
+ * the merchant-style snippet for used goods.
+ */
+export function listingJsonLd(l: ListingSeoInput) {
+  const url = absoluteUrl(listingPath(l));
+  const specs = [
+    l.storageGb ? { name: "Память", value: storageLabel(l.storageGb) } : null,
+    l.ramGb ? { name: "ОЗУ", value: `${l.ramGb} ГБ` } : null,
+    l.color ? { name: "Цвет", value: l.color } : null,
+    l.batteryHealth ? { name: "Аккумулятор", value: `${l.batteryHealth} %` } : null,
+  ].filter((x): x is { name: string; value: string } => x != null);
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: l.title,
+    description: l.description,
+    sku: `listing-${l.id}`,
+    url,
+    brand: { "@type": "Brand", name: brandLabels[l.brand] },
+    model: l.model,
+    image: l.images.map((src) => absoluteImage(src)).filter(Boolean),
+    additionalProperty: specs.map((s) => ({
+      "@type": "PropertyValue",
+      name: s.name,
+      value: s.value,
+    })),
+    offers: {
+      "@type": "Offer",
+      price: l.price,
+      priceCurrency: "KZT",
+      itemCondition: CONDITION_SCHEMA[l.condition],
+      availability:
+        l.status === "SOLD"
+          ? "https://schema.org/SoldOut"
+          : "https://schema.org/InStock",
+      url,
+      availableAtOrFrom: {
+        "@type": "Place",
+        address: {
+          "@type": "PostalAddress",
+          addressLocality: l.city,
+          addressCountry: "KZ",
+        },
+      },
+      seller: { "@type": "Person", name: l.sellerName },
     },
   };
 }

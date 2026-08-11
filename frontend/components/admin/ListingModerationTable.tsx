@@ -10,6 +10,7 @@ import { approveListing, rejectListing } from "@/app/admin/actions";
 import { listingStatusPill } from "@/lib/status";
 import { brandLabels, conditionLabels, formatTenge, relativeDate } from "@/lib/phones";
 import type { ListingSummary } from "@/lib/api-types";
+import { listingPath } from "@/lib/listing-url";
 
 /** Moderation queue. Rejecting requires a reason — the seller sees it verbatim. */
 export function ListingModerationTable({ rows }: { rows: ListingSummary[] }) {
@@ -69,7 +70,7 @@ export function ListingModerationTable({ rows }: { rows: ListingSummary[] }) {
 
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-3">
-                <Link href={`/listings/${l.id}`} className="text-15 text-text hover:text-accent">
+                <Link href={listingPath(l)} className="text-15 text-text hover:text-accent">
                   {l.title}
                 </Link>
                 <StatusPill tone={status.tone} label={status.label} />

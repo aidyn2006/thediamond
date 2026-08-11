@@ -5,6 +5,7 @@ import { requireMember } from "@/lib/guards";
 import { apiFetch } from "@/lib/api";
 import { memberNav } from "@/lib/nav";
 import { pageMetadata } from "@/lib/seo";
+import { parseListingId } from "@/lib/listing-url";
 import type { ListingDetail } from "@/lib/api-types";
 
 export const metadata = pageMetadata({
@@ -18,7 +19,10 @@ export default async function EditListingPage({
   params: Promise<{ id: string }>;
 }) {
   const me = await requireMember();
-  const { id } = await params;
+  const { id: param } = await params;
+  // The public URL carries a slug ("12-apple-iphone-13"), so strip it back to the id.
+  const id = parseListingId(param);
+  if (!id) notFound();
 
   const res = await apiFetch(`/api/listings/${id}`);
   if (!res.ok) notFound();

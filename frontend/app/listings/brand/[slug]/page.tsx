@@ -4,12 +4,15 @@ import type { Metadata } from "next";
 import { auth } from "@/auth";
 import { AppHeader } from "@/components/app/AppHeader";
 import { PublicHeader } from "@/components/public/PublicHeader";
+import { CategoryBar } from "@/components/public/CategoryBar";
+import { SiteFooter } from "@/components/public/SiteFooter";
 import { ListingCard } from "@/components/listing/ListingCard";
+import { BrandChips } from "@/components/listing/BrandChips";
 import { JsonLd } from "@/components/JsonLd";
 import { getPublicListings } from "@/lib/api";
 import { memberNav } from "@/lib/nav";
 import { breadcrumbJsonLd, catalogJsonLd, pageMetadata } from "@/lib/seo";
-import { PHONE_BRANDS, brandBySlug, brandLabels, brandSlugs, formatTenge } from "@/lib/phones";
+import { brandBySlug, brandLabels, formatTenge } from "@/lib/phones";
 
 // Rendered per request (the header depends on the session), but the catalog fetch
 // underneath is cached, so a hub costs one backend call per revalidate window.
@@ -61,6 +64,7 @@ export default async function BrandHubPage({
       ) : (
         <PublicHeader />
       )}
+      <CategoryBar signedIn={!!session?.user} />
 
       <main id="main-content" className="mx-auto max-w-[1200px] px-6 py-8 md:px-10">
         <nav aria-label="Хлебные крошки" className="mb-4 text-13 text-text-dim">
@@ -80,16 +84,8 @@ export default async function BrandHubPage({
             : `Сейчас нет активных объявлений ${label}. Загляните позже или посмотрите другие бренды.`}
         </p>
 
-        <div className="mt-6 flex flex-wrap gap-2">
-          {PHONE_BRANDS.filter((b) => b !== brand).map((b) => (
-            <Link
-              key={b}
-              href={`/listings/brand/${brandSlugs[b]}`}
-              className="rounded-btn border border-border px-4 py-2 text-13 text-text-dim transition-colors duration-150 hover:border-accent hover:text-text"
-            >
-              {brandLabels[b]}
-            </Link>
-          ))}
+        <div className="mt-6">
+          <BrandChips active={brand} />
         </div>
 
         {listings.length === 0 ? (
@@ -103,13 +99,15 @@ export default async function BrandHubPage({
             </Link>
           </div>
         ) : (
-          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
             {listings.map((l) => (
-              <ListingCard key={l.id} listing={l} />
+              <ListingCard key={l.id} listing={l} heart={!!session?.user} />
             ))}
           </div>
         )}
       </main>
+
+      <SiteFooter />
 
       <JsonLd
         data={[

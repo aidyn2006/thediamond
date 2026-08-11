@@ -101,6 +101,8 @@ public final class ListingDtos {
             int price,
             String city,
             String description,
+            /** ACTIVE or SOLD — the public page needs it for schema.org availability. */
+            String status,
             List<String> images,
             String sellerName,
             Long sellerId,

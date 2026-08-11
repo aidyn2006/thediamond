@@ -63,6 +63,7 @@ public final class Mappers {
                 l.getPrice(),
                 l.getCity(),
                 l.getDescription(),
+                l.getStatus().name(),
                 imageUrls(l),
                 sellerName,
                 l.getSeller().getId(),

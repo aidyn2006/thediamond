@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getPublicListings, getPublicSellers } from "@/lib/api";
 import { SITE_URL } from "@/lib/seo";
+import { listingPath } from "@/lib/listing-url";
 import { PHONE_BRANDS, brandSlugs } from "@/lib/phones";
 
 // Re-generate at most hourly; new approved listings appear without a redeploy.
@@ -32,9 +33,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily" as const,
       priority: 0.8,
     })),
-    // Listings are the money pages: one URL each, freshest first.
+    // Listings are the money pages: one canonical slug URL each, freshest first.
     ...listings.map((l) => ({
-      url: `${SITE_URL}/listings/${l.id}`,
+      url: `${SITE_URL}${listingPath(l)}`,
       lastModified: l.createdAt ? new Date(l.createdAt) : now,
       changeFrequency: "weekly" as const,
       priority: 0.7,

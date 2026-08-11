@@ -36,9 +36,11 @@ export default async function FavoritesPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
             {listings.map((l) => (
-              <ListingCard key={l.id} listing={l} showStatus />
+              // Everything here is already a favourite, so the heart starts filled and
+              // doubles as the "remove" control.
+              <ListingCard key={l.id} listing={l} showStatus heart favorite />
             ))}
           </div>
         )}

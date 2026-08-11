@@ -4,6 +4,7 @@ import { OG } from "../../_og/theme";
 import { ogPrice } from "../../_og/format";
 import { getPublicListing } from "@/lib/api";
 import { absoluteImage, SITE_NAME } from "@/lib/seo";
+import { parseListingId } from "@/lib/listing-url";
 import { brandLabels, conditionLabels, storageLabel } from "@/lib/phones";
 
 export const alt = "Объявление · TheDiamond";
@@ -21,8 +22,12 @@ export default async function OpengraphImage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
-  const [font, listing] = await Promise.all([loadOgFont(), getPublicListing(id)]);
+  const { id: param } = await params;
+  const id = parseListingId(param);
+  const [font, listing] = await Promise.all([
+    loadOgFont(),
+    id ? getPublicListing(id) : null,
+  ]);
 
   if (!listing) {
     return new ImageResponse(

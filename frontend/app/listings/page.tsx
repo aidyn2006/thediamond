@@ -2,13 +2,17 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import { AppHeader } from "@/components/app/AppHeader";
 import { PublicHeader } from "@/components/public/PublicHeader";
+import { CategoryBar } from "@/components/public/CategoryBar";
+import { SiteFooter } from "@/components/public/SiteFooter";
 import { ListingCard } from "@/components/listing/ListingCard";
-import { CatalogFilters } from "@/components/listing/CatalogFilters";
+import { BrandChips } from "@/components/listing/BrandChips";
+import { FilterSheet } from "@/components/listing/FilterSheet";
 import { Button } from "@/components/ui/Button";
 import { JsonLd } from "@/components/JsonLd";
 import { apiFetch, getPublicListings } from "@/lib/api";
 import { memberNav } from "@/lib/nav";
 import { catalogJsonLd, pageMetadata } from "@/lib/seo";
+import { PHONE_BRANDS, brandLabels, type PhoneBrand } from "@/lib/phones";
 import type { CatalogFilters as Filters, ListingSummary } from "@/lib/api-types";
 
 export const metadata = pageMetadata({
@@ -47,6 +51,10 @@ export default async function CatalogPage({
     listings = await getPublicListings(filters);
   }
 
+  const activeBrand = PHONE_BRANDS.includes(filters.brand as PhoneBrand)
+    ? (filters.brand as PhoneBrand)
+    : null;
+
   return (
     <>
       {session?.user ? (
@@ -54,11 +62,17 @@ export default async function CatalogPage({
       ) : (
         <PublicHeader />
       )}
+      <CategoryBar signedIn={!!session?.user} />
 
-      <main id="main-content" className="mx-auto max-w-[1200px] px-6 py-8 md:px-10">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+      <main
+        id="main-content"
+        className="mx-auto max-w-[1200px] px-6 pb-12 pt-6 md:px-10"
+      >
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-28 font-semibold">Телефоны</h1>
+            <h1 className="text-28 font-bold">
+              {activeBrand ? brandLabels[activeBrand] : "Телефоны"}
+            </h1>
             <p className="mt-1 text-13 text-text-dim">
               {listings.length > 0
                 ? `${listings.length} объявлений`
@@ -70,7 +84,15 @@ export default async function CatalogPage({
           </Link>
         </div>
 
-        <CatalogFilters />
+        {/* Brands stay pinned while the grid scrolls — switching brand is the move
+            people make most, and it costs no modal. */}
+        <div className="sticky top-0 z-20 bg-bg pb-3 pt-2">
+          <BrandChips params={filters} active={activeBrand} />
+        </div>
+
+        <div className="mb-6">
+          <FilterSheet />
+        </div>
 
         {listings.length === 0 ? (
           <div className="rounded-card border border-border bg-surface p-8 text-center">
@@ -80,13 +102,15 @@ export default async function CatalogPage({
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
             {listings.map((l) => (
-              <ListingCard key={l.id} listing={l} />
+              <ListingCard key={l.id} listing={l} heart={!!session?.user} />
             ))}
           </div>
         )}
       </main>
+
+      <SiteFooter />
 
       <JsonLd
         data={catalogJsonLd({

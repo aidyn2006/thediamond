@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
 import { auth } from "@/auth";
 import { AppHeader } from "@/components/app/AppHeader";
@@ -7,16 +7,25 @@ import { PublicHeader } from "@/components/public/PublicHeader";
 import { PhotoGallery } from "@/components/listing/PhotoGallery";
 import { BuyButton } from "@/components/listing/BuyButton";
 import { FavoriteButton } from "@/components/listing/FavoriteButton";
+import { ListingCard } from "@/components/listing/ListingCard";
 import { JsonLd } from "@/components/JsonLd";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { StatusPill } from "@/components/ui/StatusPill";
-import { apiFetch, getPublicListing } from "@/lib/api";
+import { apiFetch, getPublicListing, getPublicListings } from "@/lib/api";
 import { memberNav } from "@/lib/nav";
-import { absoluteImage, absoluteUrl, pageMetadata } from "@/lib/seo";
+import {
+  breadcrumbJsonLd,
+  listingDescription,
+  listingJsonLd,
+  pageMetadata,
+  type ListingSeoInput,
+} from "@/lib/seo";
+import { listingPath, parseListingId } from "@/lib/listing-url";
 import { listingStatusPill } from "@/lib/status";
 import {
   brandLabels,
+  brandSlugs,
   conditionLabels,
   formatTenge,
   relativeDate,
@@ -24,42 +33,33 @@ import {
 } from "@/lib/phones";
 import type { ListingDetail, PublicListing } from "@/lib/api-types";
 
+/** How many same-brand phones to link at the bottom — enough for crawlers to walk the catalog. */
+const RELATED = 4;
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
-  const { id } = await params;
-  const listing = await getPublicListing(id);
+  const { id: param } = await params;
+  const id = parseListingId(param);
+  const listing = id ? await getPublicListing(id) : null;
   if (!listing) return pageMetadata({ title: "Объявление не найдено", index: false });
-  return pageMetadata({
+
+  const meta = pageMetadata({
     title: `${listing.title} — ${formatTenge(listing.price)}, ${listing.city}`,
-    description: listing.description.slice(0, 300),
-    path: `/listings/${id}`,
+    description: listingDescription(listing),
+    // Canonical is always the slug URL, so a numeric or stale-slug link never
+    // competes with it in the index.
+    path: listingPath(listing),
     ogType: "article",
   });
-}
-
-/** Google's Product/Offer schema — this is what earns the price snippet in search. */
-function productJsonLd(listing: PublicListing) {
   return {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: listing.title,
-    description: listing.description,
-    brand: { "@type": "Brand", name: brandLabels[listing.brand] },
-    image: listing.images.map((src) => absoluteImage(src)).filter(Boolean),
-    offers: {
-      "@type": "Offer",
-      price: listing.price,
-      priceCurrency: "KZT",
-      itemCondition:
-        listing.condition === "NEW"
-          ? "https://schema.org/NewCondition"
-          : "https://schema.org/UsedCondition",
-      availability: "https://schema.org/InStock",
-      url: absoluteUrl(`/listings/${listing.id}`),
-      seller: { "@type": "Person", name: listing.sellerName },
+    ...meta,
+    other: {
+      "product:price:amount": String(listing.price),
+      "product:price:currency": "KZT",
+      "product:availability": listing.status === "SOLD" ? "oos" : "instock",
     },
   };
 }
@@ -70,7 +70,9 @@ export default async function ListingPage({
   params: Promise<{ id: string }>;
 }) {
   const session = await auth();
-  const { id } = await params;
+  const { id: param } = await params;
+  const id = parseListingId(param);
+  if (!id) notFound();
 
   // Signed-in members get the full view (favourite state, deal state, seller phone
   // once accepted). Guests get the cached public projection, which never has a phone.
@@ -88,6 +90,40 @@ export default async function ListingPage({
 
   const view = listing ?? publicListing!;
   const status = listing ? listingStatusPill[listing.status] : null;
+  const sold = view.status === "SOLD";
+  const canonical = listingPath(view);
+
+  // Any other spelling of this id (bare number, slug from before an edit) is a
+  // duplicate: send it to the canonical URL with a 308 instead of relying on the
+  // canonical tag alone.
+  if (`/listings/${param}` !== canonical) permanentRedirect(canonical);
+
+  const sellerName = listing ? listing.seller.displayName : publicListing!.sellerName;
+  const sellerId = listing ? listing.seller.id : publicListing!.sellerId;
+
+  const seo: ListingSeoInput = {
+    id: view.id,
+    title: view.title,
+    brand: view.brand,
+    model: view.model,
+    storageGb: view.storageGb,
+    ramGb: view.ramGb,
+    color: view.color,
+    condition: view.condition,
+    batteryHealth: view.batteryHealth,
+    price: view.price,
+    city: view.city,
+    description: view.description,
+    images: view.images,
+    sellerName,
+    status: view.status,
+  };
+
+  // Same-brand phones: internal links so every listing is reachable in two clicks
+  // from any other one, which is what actually gets the long tail crawled.
+  const related = (await getPublicListings({ brand: view.brand }))
+    .filter((l) => l.id !== view.id)
+    .slice(0, RELATED);
 
   const specs: [string, string][] = [
     ["Бренд", brandLabels[view.brand]],
@@ -109,6 +145,22 @@ export default async function ListingPage({
       )}
 
       <main id="main-content" className="mx-auto max-w-[1200px] px-6 py-8 md:px-10">
+        <nav aria-label="Хлебные крошки" className="mb-4 text-13 text-text-dim">
+          <Link href="/listings" className="hover:text-text">
+            Каталог
+          </Link>
+          <span className="mx-2" aria-hidden="true">
+            /
+          </span>
+          <Link href={`/listings/brand/${brandSlugs[view.brand]}`} className="hover:text-text">
+            {brandLabels[view.brand]}
+          </Link>
+          <span className="mx-2" aria-hidden="true">
+            /
+          </span>
+          <span className="text-text">{view.title}</span>
+        </nav>
+
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
           <div className="flex flex-col gap-6">
             <PhotoGallery images={view.images} alt={view.title} />
@@ -156,6 +208,11 @@ export default async function ListingPage({
           <aside className="flex flex-col gap-4 lg:sticky lg:top-6 lg:self-start">
             <div className="rounded-card border border-border bg-surface p-5">
               <p className="text-28 font-semibold">{formatTenge(view.price)}</p>
+              {sold && (
+                <p className="mt-2 text-13 text-text-dim">
+                  Телефон продан — объявление осталось для истории.
+                </p>
+              )}
 
               <div className="mt-4 flex flex-col gap-3">
                 {listing ? (
@@ -177,7 +234,7 @@ export default async function ListingPage({
                   )
                 ) : (
                   <>
-                    <Link href={`/login?next=/listings/${id}`}>
+                    <Link href={`/login?next=${canonical}`}>
                       <Button variant="primary" fullWidth>
                         Войти и написать продавцу
                       </Button>
@@ -218,10 +275,10 @@ export default async function ListingPage({
                 </>
               ) : (
                 <Link
-                  href={`/u/${publicListing!.sellerId}`}
+                  href={`/u/${sellerId}`}
                   className="text-15 text-text hover:text-accent"
                 >
-                  {publicListing!.sellerName}
+                  {sellerName}
                 </Link>
               )}
             </div>
@@ -232,9 +289,42 @@ export default async function ListingPage({
             </p>
           </aside>
         </div>
+
+        {related.length > 0 && (
+          <section aria-labelledby="related" className="mt-12">
+            <div className="mb-4 flex items-center justify-between gap-4">
+              <h2 id="related" className="text-22 font-semibold">
+                Другие {brandLabels[view.brand]}
+              </h2>
+              <Link
+                href={`/listings/brand/${brandSlugs[view.brand]}`}
+                className="text-13 font-semibold text-accent underline underline-offset-2"
+              >
+                Все {brandLabels[view.brand]}
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+              {related.map((l) => (
+                <ListingCard key={l.id} listing={l} />
+              ))}
+            </div>
+          </section>
+        )}
       </main>
 
-      {publicListing && <JsonLd data={productJsonLd(publicListing)} />}
+      <JsonLd
+        data={[
+          listingJsonLd(seo),
+          breadcrumbJsonLd([
+            { name: "Каталог", path: "/listings" },
+            {
+              name: brandLabels[view.brand],
+              path: `/listings/brand/${brandSlugs[view.brand]}`,
+            },
+            { name: view.title, path: canonical },
+          ]),
+        ]}
+      />
     </>
   );
 }

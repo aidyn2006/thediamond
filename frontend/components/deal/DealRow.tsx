@@ -14,6 +14,7 @@ import {
   declineDeal,
 } from "@/app/deals/actions";
 import type { DealItem } from "@/lib/api-types";
+import { listingPath } from "@/lib/listing-url";
 
 /**
  * One deal, from either side. The seller drives the status; the buyer can only
@@ -65,7 +66,7 @@ export function DealRow({ deal }: { deal: DealItem }) {
   return (
     <div className="flex flex-col gap-3 rounded-card border border-border bg-surface p-4 sm:flex-row sm:items-start">
       {deal.listing.coverUrl && (
-        <Link href={`/listings/${deal.listing.id}`} className="shrink-0">
+        <Link href={listingPath(deal.listing)} className="shrink-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={deal.listing.coverUrl}
@@ -77,7 +78,7 @@ export function DealRow({ deal }: { deal: DealItem }) {
 
       <div className="flex-1">
         <div className="flex flex-wrap items-center gap-3">
-          <Link href={`/listings/${deal.listing.id}`} className="text-15 text-text hover:text-accent">
+          <Link href={listingPath(deal.listing)} className="text-15 text-text hover:text-accent">
             {deal.listing.title}
           </Link>
           <StatusPill tone={status.tone} label={status.label} />

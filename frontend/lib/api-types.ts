@@ -76,6 +76,8 @@ export interface PublicListing {
   price: number;
   city: string;
   description: string;
+  /** ACTIVE or SOLD — drives the schema.org availability on the public page. */
+  status: ListingStatus;
   images: string[];
   sellerName: string;
   sellerId: number;
