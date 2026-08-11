@@ -11,6 +11,7 @@ import { buttonClasses } from "@/components/ui/Button";
 import { getPublicListings } from "@/lib/api";
 import { roleHome } from "@/lib/types";
 import { formatTenge } from "@/lib/phones";
+import { GUIDES } from "@/lib/guides";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata = pageMetadata({
