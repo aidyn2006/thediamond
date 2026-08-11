@@ -22,6 +22,8 @@ import {
   type ListingSeoInput,
 } from "@/lib/seo";
 import { listingPath, parseListingId } from "@/lib/listing-url";
+import { cityByName, cityPath } from "@/lib/geo";
+import { modelSlugOf } from "@/lib/models";
 import { listingStatusPill } from "@/lib/status";
 import {
   brandLabels,
@@ -101,6 +103,9 @@ export default async function ListingPage({
   const sellerName = listing ? listing.seller.displayName : publicListing!.sellerName;
   const sellerId = listing ? listing.seller.id : publicListing!.sellerId;
 
+  // City hub the phone belongs to (null for a city we don't have a landing page for).
+  const cityHub = cityByName[view.city] ?? null;
+
   const seo: ListingSeoInput = {
     id: view.id,
     title: view.title,
@@ -155,6 +160,16 @@ export default async function ListingPage({
           <Link href={`/listings/brand/${brandSlugs[view.brand]}`} className="hover:text-text">
             {brandLabels[view.brand]}
           </Link>
+          {cityHub && (
+            <>
+              <span className="mx-2" aria-hidden="true">
+                /
+              </span>
+              <Link href={cityPath(cityHub)} className="hover:text-text">
+                {cityHub.name}
+              </Link>
+            </>
+          )}
           <span className="mx-2" aria-hidden="true">
             /
           </span>
@@ -305,11 +320,41 @@ export default async function ListingPage({
             </div>
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
               {related.map((l) => (
-                <ListingCard key={l.id} listing={l} />
+                <ListingCard key={l.id} listing={l} heart={!!session?.user} />
               ))}
             </div>
           </section>
         )}
+
+        {/* Hub links from the money page: the model hub, the city hub and the buying
+            checklist are exactly what a visitor (and a crawler) wants next. */}
+        <nav aria-label="Похожие подборки" className="mt-10 flex flex-wrap gap-x-5 gap-y-2 text-13">
+          <Link
+            href={`/listings/model/${modelSlugOf(view)}`}
+            className="text-accent underline underline-offset-2"
+          >
+            Все {brandLabels[view.brand]} {view.model} б/у
+          </Link>
+          {cityHub && (
+            <Link href={cityPath(cityHub)} className="text-accent underline underline-offset-2">
+              Телефоны {cityHub.in}
+            </Link>
+          )}
+          {cityHub && (
+            <Link
+              href={`/listings/brand/${brandSlugs[view.brand]}/${cityHub.slug}`}
+              className="text-accent underline underline-offset-2"
+            >
+              {brandLabels[view.brand]} {cityHub.in}
+            </Link>
+          )}
+          <Link
+            href="/guides/kak-proverit-telefon-pered-pokupkoy"
+            className="text-accent underline underline-offset-2"
+          >
+            Как проверить телефон перед покупкой
+          </Link>
+        </nav>
       </main>
 
       <JsonLd

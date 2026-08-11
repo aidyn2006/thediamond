@@ -56,6 +56,7 @@ export default async function CatalogPage({
   const activeBrand = PHONE_BRANDS.includes(filters.brand as PhoneBrand)
     ? (filters.brand as PhoneBrand)
     : null;
+  const activeCity = filters.city ? (cityByName[filters.city] ?? null) : null;
 
   return (
     <>

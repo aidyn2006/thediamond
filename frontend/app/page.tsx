@@ -5,6 +5,7 @@ import { PublicHeader } from "@/components/public/PublicHeader";
 import { CategoryBar } from "@/components/public/CategoryBar";
 import { SiteFooter } from "@/components/public/SiteFooter";
 import { BrandChips } from "@/components/listing/BrandChips";
+import { CityChips } from "@/components/listing/CityChips";
 import { ListingSection } from "@/components/listing/ListingSection";
 import { buttonClasses } from "@/components/ui/Button";
 import { getPublicListings } from "@/lib/api";
@@ -96,6 +97,35 @@ export default async function HomePage() {
                 listings={cheap}
               />
             )}
+
+            <section aria-labelledby="cities">
+              <h2 id="cities" className="mb-4 text-22 font-bold md:text-28">
+                Телефоны по городам
+              </h2>
+              <CityChips />
+            </section>
+
+            <section aria-labelledby="guides">
+              <h2 id="guides" className="mb-4 text-22 font-bold md:text-28">
+                Перед сделкой
+              </h2>
+              <ul className="grid gap-4 sm:grid-cols-3">
+                {GUIDES.map((g) => (
+                  <li key={g.slug}>
+                    <Link
+                      href={`/guides/${g.slug}`}
+                      className="flex h-full flex-col rounded-card border border-border bg-bg p-5 transition-colors duration-150 hover:border-accent"
+                    >
+                      <p className="text-15 font-semibold text-text">{g.h1}</p>
+                      <p className="mt-1 line-clamp-3 text-13 text-text-dim">{g.description}</p>
+                      <p className="mt-auto pt-3 text-13 text-accent">
+                        {g.readMinutes} мин чтения
+                      </p>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
 
             <section aria-labelledby="how" id="how" className="scroll-mt-8">
               <h2 id="how" className="mb-6 text-22 font-bold md:text-28">
