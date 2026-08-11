@@ -24,7 +24,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           className={cn(
             "h-11 w-full rounded-card border bg-surface-2 px-3.5 text-15 text-text",
             "transition-colors duration-150",
-            error ? "border-error" : "border-border",
+            error ? "border-error" : "border-border-strong",
             className,
           )}
           aria-invalid={error ? true : undefined}

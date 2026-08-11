@@ -25,7 +25,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           className={cn(
             "h-11 w-full rounded-card border bg-surface-2 px-3.5 text-15 text-text",
             "placeholder:text-text-dim/70 transition-colors duration-150",
-            error ? "border-error text-error" : "border-border",
+            error ? "border-error text-error" : "border-border-strong",
             className,
           )}
           aria-invalid={error ? true : undefined}

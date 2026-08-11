@@ -5,19 +5,24 @@
    source of color/geometry values — components must never hardcode hex.
 ------------------------------------------------------------------ */
 @theme {
-  /* palette */
-  --color-bg: #101114;
-  --color-surface: #17181d;
-  --color-surface-2: #1e2026;
-  --color-border: #2a2c34;
-  --color-text: #f2f3f5;
-  --color-text-dim: #9a9da7;
-  --color-accent: #7fd4ff;
+  /* palette — light mint. `mint` is the bright brand fill, `accent` its darkened
+     twin for anything that carries text or needs 4.5:1 contrast on white. */
+  --color-bg: #f4fbf8;
+  --color-surface: #ffffff;
+  --color-surface-2: #e9f7f1;
+  --color-border: #ceede2;
+  /* Form fields need a firmer edge than card borders to read as inputs on a
+     light background. */
+  --color-border-strong: #a8ddc9;
+  --color-text: #0d2b23;
+  --color-text-dim: #55736a;
+  --color-accent: #0a7d5c;
+  --color-mint: #74f2c4;
 
-  /* status colors (muted) */
-  --color-success: #6fdd9b;
-  --color-error: #ff7a85;
-  --color-warning: #ffc46b;
+  /* status colors — darkened for legibility on light surfaces */
+  --color-success: #0f7a4a;
+  --color-error: #c0392b;
+  --color-warning: #8a5a00;
 
   /* radii */
   --radius-card: 10px;
@@ -44,7 +49,7 @@
 
 /* base */
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
@@ -73,10 +78,12 @@ body {
    edges, single key button per screen). Never as generic decoration.
 ------------------------------------------------------------------ */
 .bg-prism {
-  background-image: linear-gradient(135deg, #7fd4ff 0%, #c3b5ff 50%, #ffd9a0 100%);
+  background-image: linear-gradient(135deg, var(--color-mint) 0%, #86efd2 55%, #a4ecdc 100%);
 }
+/* Gradient text needs the dark end of the mint scale — the bright fill above is
+   invisible on a light background. */
 .text-prism {
-  background-image: linear-gradient(135deg, #7fd4ff 0%, #c3b5ff 50%, #ffd9a0 100%);
+  background-image: linear-gradient(135deg, #0a7d5c 0%, #12a37a 50%, #1bbf8f 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -86,7 +93,7 @@ body {
 *:focus-visible {
   outline: none;
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 2px rgba(127, 212, 255, 0.25);
+  box-shadow: 0 0 0 2px rgba(10, 125, 92, 0.3);
 }
 
 /* respect reduced motion: kill all long/decorative animation */

@@ -1,14 +1,15 @@
 import { ImageResponse } from "next/og";
 import { loadOgFont, fetchImageDataUri } from "../../_og/font";
+import { OG } from "../../_og/theme";
+import { ogPrice } from "../../_og/format";
 import { getPublicListing } from "@/lib/api";
 import { absoluteImage, SITE_NAME } from "@/lib/seo";
-import { brandLabels, conditionLabels, formatTenge, storageLabel } from "@/lib/phones";
+import { brandLabels, conditionLabels, storageLabel } from "@/lib/phones";
 
 export const alt = "Объявление · TheDiamond";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const PRISM = "linear-gradient(135deg, #7fd4ff 0%, #c3b5ff 50%, #ffd9a0 100%)";
 
 /**
  * Share card for a listing: the phone's own photo on the left, price and specs on
@@ -33,8 +34,8 @@ export default async function OpengraphImage({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "#101114",
-            color: "#f2f3f5",
+            background: OG.bg,
+            color: OG.text,
             fontFamily: "OGSans",
             fontSize: 52,
           }}
@@ -64,8 +65,8 @@ export default async function OpengraphImage({
           width: "100%",
           height: "100%",
           display: "flex",
-          background: "#101114",
-          color: "#f2f3f5",
+          background: OG.bg,
+          color: OG.text,
           fontFamily: "OGSans",
         }}
       >
@@ -77,8 +78,8 @@ export default async function OpengraphImage({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "#17181d",
-            borderRight: "1px solid #2a2c34",
+            background: OG.surface2,
+            borderRight: `1px solid ${OG.border}`,
           }}
         >
           {photo ? (
@@ -90,7 +91,7 @@ export default async function OpengraphImage({
               style={{ width: 480, height: 630, objectFit: "cover" }}
             />
           ) : (
-            <div style={{ fontSize: 28, color: "#9a9da7" }}>без фото</div>
+            <div style={{ fontSize: 28, color: OG.dim }}>без фото</div>
           )}
         </div>
 
@@ -112,7 +113,7 @@ export default async function OpengraphImage({
                 marginRight: 12,
                 transform: "rotate(45deg)",
                 borderRadius: 4,
-                backgroundImage: PRISM,
+                backgroundImage: OG.prism,
               }}
             />
             <div style={{ fontSize: 24, fontWeight: 600, letterSpacing: "-0.01em" }}>
@@ -132,7 +133,7 @@ export default async function OpengraphImage({
                 letterSpacing: "-0.02em",
               }}
             >
-              {formatTenge(listing.price)}
+              {ogPrice(listing.price)}
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", marginTop: 28 }}>
               {specs.map((s) => (
@@ -144,10 +145,10 @@ export default async function OpengraphImage({
                     marginBottom: 12,
                     padding: "8px 18px",
                     borderRadius: 999,
-                    border: "1px solid #2a2c34",
-                    background: "#17181d",
+                    border: `1px solid ${OG.border}`,
+                    background: OG.surface2,
                     fontSize: 24,
-                    color: "#9a9da7",
+                    color: OG.dim,
                   }}
                 >
                   {s}
@@ -157,8 +158,8 @@ export default async function OpengraphImage({
           </div>
 
           <div style={{ display: "flex", alignItems: "center" }}>
-            <div style={{ width: 120, height: 6, borderRadius: 999, backgroundImage: PRISM }} />
-            <div style={{ marginLeft: 18, fontSize: 22, color: "#9a9da7" }}>
+            <div style={{ width: 120, height: 6, borderRadius: 999, backgroundImage: OG.prism }} />
+            <div style={{ marginLeft: 18, fontSize: 22, color: OG.dim }}>
               {`Продавец: ${listing.sellerName}`}
             </div>
           </div>

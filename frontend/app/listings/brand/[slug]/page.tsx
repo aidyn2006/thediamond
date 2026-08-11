@@ -11,13 +11,8 @@ import { memberNav } from "@/lib/nav";
 import { breadcrumbJsonLd, catalogJsonLd, pageMetadata } from "@/lib/seo";
 import { PHONE_BRANDS, brandBySlug, brandLabels, brandSlugs, formatTenge } from "@/lib/phones";
 
-// Hubs are pure SEO landing pages — hourly is fresh enough and keeps them cached.
-export const revalidate = 3600;
-
-/** One static page per brand, so the whole hub set is prerendered at build time. */
-export function generateStaticParams() {
-  return PHONE_BRANDS.map((b) => ({ slug: brandSlugs[b] }));
-}
+// Rendered per request (the header depends on the session), but the catalog fetch
+// underneath is cached, so a hub costs one backend call per revalidate window.
 
 function title(brand: string) {
   return `${brand} — купить телефон в Казахстане`;

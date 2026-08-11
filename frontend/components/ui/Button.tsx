@@ -10,8 +10,9 @@ const base =
   "disabled:cursor-not-allowed disabled:opacity-60 select-none";
 
 export const variantClasses: Record<ButtonVariant, string> = {
-  // signature prism button — exactly one per screen (design 2.3)
-  primary: "bg-prism text-bg hover:brightness-110",
+  // signature prism button — exactly one per screen (design 2.3). The mint fill is
+  // light, so the label is ink rather than the page background.
+  primary: "bg-prism text-text hover:brightness-105",
   secondary: "bg-surface-2 border border-border text-text hover:border-accent",
   ghost: "bg-transparent text-accent hover:bg-surface-2",
   destructive: "bg-transparent border border-error text-error hover:bg-error/10",

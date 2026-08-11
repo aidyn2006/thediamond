@@ -1,14 +1,14 @@
 import { ImageResponse } from "next/og";
 import { loadOgFont, fetchImageDataUri } from "../../_og/font";
+import { OG } from "../../_og/theme";
+import { ogPrice } from "../../_og/format";
 import { getPublicSeller } from "@/lib/api";
 import { absoluteImage, SITE_NAME } from "@/lib/seo";
-import { formatTenge } from "@/lib/phones";
 
 export const alt = "Профиль продавца · TheDiamond";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const PRISM = "linear-gradient(135deg, #7fd4ff 0%, #c3b5ff 50%, #ffd9a0 100%)";
 
 /** "5 объявлений" / "1 объявление" — RU plural for the seller's active count. */
 function listingsLabel(n: number): string {
@@ -46,8 +46,8 @@ export default async function OpengraphImage({
           flexDirection: "column",
           justifyContent: "space-between",
           padding: "72px",
-          background: "#101114",
-          color: "#f2f3f5",
+          background: OG.bg,
+          color: OG.text,
           fontFamily: "OGSans",
         }}
       >
@@ -60,7 +60,7 @@ export default async function OpengraphImage({
               marginRight: 14,
               transform: "rotate(45deg)",
               borderRadius: 4,
-              backgroundImage: PRISM,
+              backgroundImage: OG.prism,
             }}
           />
           <div style={{ fontSize: 28, fontWeight: 600, letterSpacing: "-0.01em" }}>
@@ -81,7 +81,7 @@ export default async function OpengraphImage({
                 height: 240,
                 borderRadius: 999,
                 objectFit: "cover",
-                border: "2px solid #2a2c34",
+                border: `2px solid ${OG.border}`,
               }}
             />
           ) : (
@@ -90,14 +90,14 @@ export default async function OpengraphImage({
                 width: 240,
                 height: 240,
                 borderRadius: 999,
-                background: "#1e2026",
-                border: "2px solid #2a2c34",
+                background: OG.surface2,
+                border: `2px solid ${OG.border}`,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 fontSize: 110,
                 fontWeight: 600,
-                color: "#9a9da7",
+                color: OG.dim,
               }}
             >
               {name.charAt(0)}
@@ -109,7 +109,7 @@ export default async function OpengraphImage({
               {name}
             </div>
             {seller && (
-              <div style={{ marginTop: 14, fontSize: 30, color: "#9a9da7" }}>
+              <div style={{ marginTop: 14, fontSize: 30, color: OG.dim }}>
                 {[seller.city, "продаёт телефоны"].filter(Boolean).join(" · ")}
               </div>
             )}
@@ -118,7 +118,7 @@ export default async function OpengraphImage({
                 <span>{listingsLabel(seller.listings.length)}</span>
                 {from != null && (
                   <span style={{ fontWeight: 600, marginLeft: 12 }}>
-                    {`от ${formatTenge(from)}`}
+                    {`от ${ogPrice(from)}`}
                   </span>
                 )}
               </div>
@@ -128,8 +128,8 @@ export default async function OpengraphImage({
 
         {/* footer */}
         <div style={{ display: "flex", alignItems: "center" }}>
-          <div style={{ width: 140, height: 6, borderRadius: 999, backgroundImage: PRISM }} />
-          <div style={{ marginLeft: 20, fontSize: 24, color: "#9a9da7" }}>thediamond.kz</div>
+          <div style={{ width: 140, height: 6, borderRadius: 999, backgroundImage: OG.prism }} />
+          <div style={{ marginLeft: 20, fontSize: 24, color: OG.dim }}>thediamond.kz</div>
         </div>
       </div>
     ),

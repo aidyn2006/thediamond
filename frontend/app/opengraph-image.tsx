@@ -1,12 +1,12 @@
 import { ImageResponse } from "next/og";
 import { loadOgFont } from "./_og/font";
+import { OG } from "./_og/theme";
 import { SITE_NAME } from "@/lib/seo";
 
 export const alt = "TheDiamond — маркетплейс телефонов в Казахстане";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const PRISM = "linear-gradient(135deg, #7fd4ff 0%, #c3b5ff 50%, #ffd9a0 100%)";
 
 export default async function OpengraphImage() {
   const font = await loadOgFont();
@@ -21,8 +21,8 @@ export default async function OpengraphImage() {
           flexDirection: "column",
           justifyContent: "space-between",
           padding: "72px",
-          background: "#101114",
-          color: "#f2f3f5",
+          background: OG.bg,
+          color: OG.text,
           fontFamily: "OGSans",
         }}
       >
@@ -34,7 +34,7 @@ export default async function OpengraphImage() {
               marginRight: 16,
               transform: "rotate(45deg)",
               borderRadius: 4,
-              backgroundImage: PRISM,
+              backgroundImage: OG.prism,
             }}
           />
           <div style={{ fontSize: 34, fontWeight: 600, letterSpacing: "-0.01em" }}>
@@ -54,14 +54,14 @@ export default async function OpengraphImage() {
           >
             Телефоны от людей, а не от перекупов
           </div>
-          <div style={{ marginTop: 28, fontSize: 32, color: "#9a9da7", maxWidth: 900 }}>
+          <div style={{ marginTop: 28, fontSize: 32, color: OG.dim, maxWidth: 900 }}>
             Маркетплейс телефонов в Казахстане. Без комиссии.
           </div>
         </div>
 
         <div style={{ display: "flex", alignItems: "center" }}>
-          <div style={{ width: 160, height: 6, borderRadius: 999, backgroundImage: PRISM }} />
-          <div style={{ marginLeft: 20, fontSize: 26, color: "#9a9da7" }}>thediamond.kz</div>
+          <div style={{ width: 160, height: 6, borderRadius: 999, backgroundImage: OG.prism }} />
+          <div style={{ marginLeft: 20, fontSize: 26, color: OG.dim }}>thediamond.kz</div>
         </div>
       </div>
     ),
