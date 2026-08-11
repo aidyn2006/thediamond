@@ -38,6 +38,38 @@ export const brandLabels: Record<PhoneBrand, string> = {
   OTHER: "Другой бренд",
 };
 
+/**
+ * How people actually search for the brand. Nobody types "Apple б/у Астана" — they type
+ * "iphone бу Астана", so hub titles use these instead of the display labels.
+ */
+export const brandQueryLabels: Record<PhoneBrand, string> = {
+  APPLE: "iPhone",
+  SAMSUNG: "Samsung",
+  XIAOMI: "Xiaomi",
+  HUAWEI: "Huawei",
+  HONOR: "Honor",
+  GOOGLE: "Google Pixel",
+  OPPO: "OPPO",
+  VIVO: "vivo",
+  REALME: "realme",
+  ONEPLUS: "OnePlus",
+  TECNO: "TECNO",
+  INFINIX: "Infinix",
+  NOKIA: "Nokia",
+  ZTE: "ZTE",
+  OTHER: "Телефоны других брендов",
+};
+
+/** Cyrillic spelling used in copy so pages contain the phrase people type. */
+export const brandRuLabels: Partial<Record<PhoneBrand, string>> = {
+  APPLE: "айфон",
+  SAMSUNG: "самсунг",
+  XIAOMI: "сяоми",
+  HUAWEI: "хуавей",
+  HONOR: "хонор",
+  REALME: "реалми",
+};
+
 /** URL slug per brand for the public catalog hubs (/listings/brand/[slug]). */
 export const brandSlugs: Record<PhoneBrand, string> = {
   APPLE: "apple",

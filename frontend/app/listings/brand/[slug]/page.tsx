@@ -8,21 +8,34 @@ import { CategoryBar } from "@/components/public/CategoryBar";
 import { SiteFooter } from "@/components/public/SiteFooter";
 import { ListingCard } from "@/components/listing/ListingCard";
 import { BrandChips } from "@/components/listing/BrandChips";
+import { CityChips } from "@/components/listing/CityChips";
 import { JsonLd } from "@/components/JsonLd";
 import { getPublicListings } from "@/lib/api";
 import { memberNav } from "@/lib/nav";
 import { breadcrumbJsonLd, catalogJsonLd, pageMetadata } from "@/lib/seo";
-import { brandBySlug, brandLabels, formatTenge } from "@/lib/phones";
+import {
+  brandBySlug,
+  brandLabels,
+  brandQueryLabels,
+  brandRuLabels,
+  formatTenge,
+  type PhoneBrand,
+} from "@/lib/phones";
 
 // Rendered per request (the header depends on the session), but the catalog fetch
 // underneath is cached, so a hub costs one backend call per revalidate window.
 
-function title(brand: string) {
-  return `${brand} — купить телефон в Казахстане`;
+// Titles use the query label ("iPhone"), not the display one ("Apple") — that's the
+// word people type. The Cyrillic spelling goes into the description for the same reason.
+function title(brand: PhoneBrand) {
+  return `${brandQueryLabels[brand]} б/у — купить в Казахстане, цены`;
 }
 
-function description(brand: string) {
-  return `Объявления о продаже телефонов ${brand} в Казахстане: цены, состояние, память и город. Покупайте напрямую у частных продавцов без комиссии.`;
+function description(brand: PhoneBrand) {
+  const ru = brandRuLabels[brand];
+  return `Объявления ${brandQueryLabels[brand]} б/у и новых в Казахстане${
+    ru ? ` (${ru} бу)` : ""
+  }: цены, память, состояние и ёмкость аккумулятора. Покупайте напрямую у владельца, без комиссии сайта.`;
 }
 
 export async function generateMetadata({
@@ -34,8 +47,8 @@ export async function generateMetadata({
   const brand = brandBySlug[slug];
   if (!brand) return pageMetadata({ title: "Бренд не найден", index: false });
   return pageMetadata({
-    title: title(brandLabels[brand]),
-    description: description(brandLabels[brand]),
+    title: title(brand),
+    description: description(brand),
     path: `/listings/brand/${slug}`,
   });
 }
@@ -77,15 +90,24 @@ export default async function BrandHubPage({
           <span className="text-text">{label}</span>
         </nav>
 
-        <h1 className="text-28 font-semibold md:text-40">{label}</h1>
-        <p className="mt-2 max-w-[640px] text-15 text-text-dim">
+        <h1 className="text-28 font-bold md:text-40">
+          {brandQueryLabels[brand]} б/у в Казахстане
+        </h1>
+        <p className="mt-3 max-w-[680px] text-15 leading-relaxed text-text-dim">
           {listings.length > 0
-            ? `${listings.length} объявлений${from != null ? `, от ${formatTenge(from)}` : ""}. Каждое проверено модератором — платите продавцу при встрече, без комиссии сайта.`
+            ? `${listings.length} объявлений${from != null ? `, от ${formatTenge(from)}` : ""}${
+                brandRuLabels[brand] ? ` (в поиске — «${brandRuLabels[brand]} бу купить»)` : ""
+              }. В каждой карточке память, состояние корпуса и ёмкость аккумулятора. Каждое объявление проверено модератором — платите продавцу при встрече, без комиссии сайта.`
             : `Сейчас нет активных объявлений ${label}. Загляните позже или посмотрите другие бренды.`}
         </p>
 
         <div className="mt-6">
           <BrandChips active={brand} />
+        </div>
+
+        {/* Brand × city links: the shape most local queries take. */}
+        <div className="mt-3">
+          <CityChips brandSlug={slug} allHref={`/listings/brand/${slug}`} />
         </div>
 
         {listings.length === 0 ? (
@@ -112,8 +134,8 @@ export default async function BrandHubPage({
       <JsonLd
         data={[
           catalogJsonLd({
-            name: title(label),
-            description: description(label),
+            name: title(brand),
+            description: description(brand),
             path: `/listings/brand/${slug}`,
             listings,
           }),

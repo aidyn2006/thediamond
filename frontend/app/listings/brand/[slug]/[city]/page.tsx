@@ -19,8 +19,14 @@ import {
   pageMetadata,
 } from "@/lib/seo";
 import { brandCityPath, cityBySlug, cityPath, type CityInfo } from "@/lib/geo";
-import { brandBySlug, brandLabels, formatTenge, type PhoneBrand } from "@/lib/phones";
-import { groupByModel, modelRuAlias } from "@/lib/models";
+import {
+  brandBySlug,
+  brandQueryLabels,
+  brandRuLabels,
+  formatTenge,
+  type PhoneBrand,
+} from "@/lib/phones";
+import { groupByModel } from "@/lib/models";
 
 /**
  * Brand × city — the shape most Kazakh queries actually take ("iphone бу цена Астана").
@@ -29,13 +35,14 @@ import { groupByModel, modelRuAlias } from "@/lib/models";
  */
 
 function title(brand: PhoneBrand, city: CityInfo) {
-  return `${brandLabels[brand]} б/у ${city.in} — купить, цены`;
+  return `${brandQueryLabels[brand]} б/у ${city.in} — купить, цены`;
 }
 
 function description(brand: PhoneBrand, city: CityInfo, count: number, from: number | null) {
-  const label = brandLabels[brand];
+  const label = brandQueryLabels[brand];
+  const ru = brandRuLabels[brand];
   return count > 0
-    ? `${count} объявлений ${label} б/у ${city.in}${from != null ? ` от ${formatTenge(from)}` : ""}: память, состояние, ёмкость аккумулятора. Покупка напрямую у владельца, без комиссии.`
+    ? `${count} объявлений ${label} б/у ${city.in}${from != null ? ` от ${formatTenge(from)}` : ""}${ru ? ` (${ru} бу ${city.name})` : ""}: память, состояние, ёмкость аккумулятора. Покупка напрямую у владельца, без комиссии.`
     : `Объявления ${label} б/у ${city.in}: цены, состояние и память. Покупка напрямую у владельца, без комиссии сайта.`;
 }
 
@@ -70,11 +77,13 @@ export default async function BrandCityPage({
   const city = cityBySlug[citySlug];
   if (!brand || !city) notFound();
 
-  const label = brandLabels[brand];
+  // Query label throughout: the page is here to answer "iphone бу Астана", so the
+  // visible copy should read the same way.
+  const label = brandQueryLabels[brand];
   const listings = await getPublicListings({ brand, city: city.name });
   const from = listings.length ? Math.min(...listings.map((l) => l.price)) : null;
   const models = groupByModel(listings).slice(0, 8);
-  const alias = modelRuAlias(brand, label);
+  const alias = brandRuLabels[brand] ?? null;
 
   const qa = [
     {
