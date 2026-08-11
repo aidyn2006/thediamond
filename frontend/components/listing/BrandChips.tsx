@@ -1,17 +1,7 @@
 import Link from "next/link";
-import { cn } from "@/lib/cn";
+import { chipClasses } from "@/lib/chips";
 import { PHONE_BRANDS, brandLabels, brandSlugs, type PhoneBrand } from "@/lib/phones";
 import type { CatalogFilters } from "@/lib/api-types";
-
-function chipClasses(active: boolean) {
-  return cn(
-    "inline-flex h-10 shrink-0 items-center whitespace-nowrap rounded-pill px-4",
-    "text-13 font-semibold transition-colors duration-150 md:text-15",
-    active
-      ? "bg-text text-surface"
-      : "bg-surface-2 text-text hover:bg-border",
-  );
-}
 
 /**
  * Horizontally scrollable brand row — the catalog's primary navigation now that the
