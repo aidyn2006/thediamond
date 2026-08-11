@@ -5,11 +5,11 @@ import type { CatalogFilters } from "@/lib/api-types";
 
 function chipClasses(active: boolean) {
   return cn(
-    "inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded-pill border px-4",
-    "text-13 font-medium transition-colors duration-150",
+    "inline-flex h-10 shrink-0 items-center whitespace-nowrap rounded-pill px-4",
+    "text-13 font-semibold transition-colors duration-150 md:text-15",
     active
-      ? "border-accent bg-accent text-surface"
-      : "border-border bg-surface text-text-dim hover:border-accent hover:text-text",
+      ? "bg-text text-surface"
+      : "bg-surface-2 text-text hover:bg-border",
   );
 }
 

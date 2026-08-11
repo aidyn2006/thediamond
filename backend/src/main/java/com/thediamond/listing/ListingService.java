@@ -9,6 +9,7 @@ import com.thediamond.domain.Deal;
 import com.thediamond.domain.DealStatus;
 import com.thediamond.domain.Listing;
 import com.thediamond.domain.ListingStatus;
+import com.thediamond.domain.Role;
 import com.thediamond.domain.User;
 import com.thediamond.domain.UserProfile;
 import com.thediamond.error.ApiException;
@@ -167,6 +168,9 @@ public class ListingService {
         // Straight to moderation — a draft nobody submits is just noise.
         l.setStatus(ListingStatus.PENDING_REVIEW);
         listings.save(l);
+        inApp.send(sellerId, "Объявление отправлено на проверку",
+                "«" + l.getTitle() + "» появится в каталоге после модерации.");
+        notifyModerators(l);
         return Mappers.toSummary(l);
     }
 
@@ -182,6 +186,7 @@ public class ListingService {
         l.setStatus(ListingStatus.PENDING_REVIEW);
         l.setRejectReason(null);
         listings.save(l);
+        notifyModerators(l);
         return Mappers.toSummary(l);
     }
 
@@ -191,6 +196,22 @@ public class ListingService {
         l.setStatus(ListingStatus.ARCHIVED);
         l.setUpdatedAt(Instant.now());
         listings.save(l);
+
+        // A withdrawn listing can't leave buyers waiting for an answer that will never
+        // come — close their requests and tell them why (same rule as markSold).
+        deals.findByListingIdOrderByCreatedAtDesc(listingId).stream()
+                .filter(d -> d.getStatus() == DealStatus.REQUESTED)
+                .forEach(d -> {
+                    d.setStatus(DealStatus.DECLINED);
+                    d.setUpdatedAt(Instant.now());
+                    deals.save(d);
+                    email.listingWithdrawn(d.getBuyer().getEmail(), l.getTitle());
+                    inApp.send(d.getBuyer().getId(), "Объявление снято с продажи",
+                            "«" + l.getTitle() + "» больше не продаётся — ваша заявка закрыта.");
+                });
+
+        inApp.send(sellerId, "Объявление удалено",
+                "«" + l.getTitle() + "» снято с публикации и больше не видно покупателям.");
     }
 
     @Transactional
@@ -243,6 +264,13 @@ public class ListingService {
     }
 
     // ---------- helpers ----------
+
+    /** Everything that enters the review queue pings the moderators' notification bell. */
+    private void notifyModerators(Listing l) {
+        users.findByRole(Role.ADMIN).forEach(admin ->
+                inApp.send(admin.getId(), "Новое объявление на проверке",
+                        "«" + l.getTitle() + "» ждёт модерации."));
+    }
 
     private Listing own(Long sellerId, Long listingId) {
         return listings.findByIdAndSellerId(listingId, sellerId)

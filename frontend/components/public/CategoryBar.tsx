@@ -12,10 +12,17 @@ const LINKS: { href: string; label: string; highlight?: boolean }[] = [
   { href: "/listings?maxPrice=100000", label: "До 100 000 ₸", highlight: true },
 ];
 
+function tabClasses(active: boolean) {
+  return cn(
+    "flex-1 rounded-pill py-2 text-center text-13 font-semibold transition-colors duration-150 md:flex-none md:px-6 md:text-15",
+    active ? "bg-prism text-text" : "text-surface/70 hover:text-surface",
+  );
+}
+
 /**
- * Dark category bar under the header: catalog entry points on the left, the
- * buy/sell switch on the right. Scrolls horizontally on narrow screens rather than
- * wrapping into two rows.
+ * Dark bar under the header: the buy/sell switch (full width on mobile, exactly like
+ * the reference) plus catalog entry points, which only fit from md up — on phones the
+ * brand chips right below the title do that job.
  */
 export function CategoryBar({
   signedIn = false,
@@ -26,14 +33,17 @@ export function CategoryBar({
 }) {
   return (
     <div className="bg-text">
-      <div className="mx-auto flex max-w-[1200px] items-center gap-6 overflow-x-auto px-6 py-2.5 md:px-10">
-        <nav aria-label="Категории каталога" className="flex items-center gap-5">
+      <div className="mx-auto flex max-w-[1200px] flex-col gap-2 px-4 py-2 md:flex-row md:items-center md:gap-6 md:px-10 md:py-2.5">
+        <nav
+          aria-label="Категории каталога"
+          className="hidden items-center gap-5 overflow-x-auto md:flex"
+        >
           {LINKS.map((l) => (
             <Link
               key={l.href}
               href={l.href}
               className={cn(
-                "whitespace-nowrap text-13 transition-colors duration-150 md:text-15",
+                "whitespace-nowrap text-15 transition-colors duration-150",
                 l.highlight
                   ? "font-semibold text-mint hover:brightness-110"
                   : "text-surface/80 hover:text-surface",
@@ -47,29 +57,19 @@ export function CategoryBar({
         <div
           role="group"
           aria-label="Купить или продать"
-          className="ml-auto flex shrink-0 gap-1 rounded-pill bg-surface/10 p-1"
+          className="flex gap-1 rounded-pill bg-surface/10 p-1 md:ml-auto"
         >
           <Link
             href="/listings"
             aria-current={active === "buy" ? "page" : undefined}
-            className={cn(
-              "rounded-pill px-5 py-1.5 text-13 font-semibold transition-colors duration-150 md:text-15",
-              active === "buy"
-                ? "bg-prism text-text"
-                : "text-surface/80 hover:text-surface",
-            )}
+            className={tabClasses(active === "buy")}
           >
             Купить
           </Link>
           <Link
             href={signedIn ? "/listings/new" : "/register"}
             aria-current={active === "sell" ? "page" : undefined}
-            className={cn(
-              "rounded-pill px-5 py-1.5 text-13 font-semibold transition-colors duration-150 md:text-15",
-              active === "sell"
-                ? "bg-prism text-text"
-                : "text-surface/80 hover:text-surface",
-            )}
+            className={tabClasses(active === "sell")}
           >
             Продать
           </Link>

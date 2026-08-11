@@ -4,6 +4,9 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { fetchNotifications, markNotificationsRead } from "@/app/notifications/actions";
 import type { NotificationItem, NotificationList } from "@/lib/api-types";
 
+/** Badge refresh interval. A minute is fast enough for a marketplace and cheap. */
+const POLL_MS = 60_000;
+
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
   const min = Math.floor(diff / 60000);
@@ -28,6 +31,29 @@ export function NotificationBell({ initial }: { initial: NotificationList }) {
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
+
+  // Without this the badge only updated on navigation, so a notification that arrived
+  // while the user sat on one page stayed invisible. Poll once a minute, skip hidden
+  // tabs, and never poll while the dropdown is open (that would undo "mark as read").
+  useEffect(() => {
+    if (open) return;
+    let cancelled = false;
+
+    async function refresh() {
+      if (document.hidden) return;
+      const fresh = await fetchNotifications();
+      if (!cancelled) setData(fresh);
+    }
+
+    const timer = setInterval(refresh, POLL_MS);
+    // Coming back to the tab is the moment a stale badge is most obvious.
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, [open]);
 
   function toggle() {
     const next = !open;

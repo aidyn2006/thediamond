@@ -37,11 +37,11 @@ export function ListingSection({
         </Link>
       </div>
 
-      <div className="-mx-6 flex snap-x gap-4 overflow-x-auto px-6 pb-1 md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0 lg:grid-cols-4 xl:grid-cols-6">
+      {/* Two-up on phones, one full row of six on wide screens — same rhythm as the
+          catalog grid, so a section never reads as a different component. */}
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
         {listings.map((l) => (
-          <div key={l.id} className="w-[168px] shrink-0 snap-start md:w-auto">
-            <ListingCard listing={l} heart={heart} />
-          </div>
+          <ListingCard key={l.id} listing={l} heart={heart} />
         ))}
       </div>
 

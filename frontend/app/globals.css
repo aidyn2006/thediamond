@@ -61,6 +61,13 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* room for the floating mobile tab bar so it never covers the last row of content */
+@media (max-width: 767px) {
+  body {
+    padding-bottom: 5.5rem;
+  }
+}
+
 /* tabular numerals for money / follower counts / counters */
 .tabular {
   font-variant-numeric: tabular-nums;

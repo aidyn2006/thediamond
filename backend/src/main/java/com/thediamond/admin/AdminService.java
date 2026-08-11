@@ -11,6 +11,8 @@ import com.thediamond.domain.Role;
 import com.thediamond.domain.User;
 import com.thediamond.error.ApiException;
 import com.thediamond.listing.ListingService;
+import com.thediamond.notify.InAppNotificationService;
+import com.thediamond.notify.NotificationService;
 import com.thediamond.profile.Mappers;
 import com.thediamond.repo.DealRepository;
 import com.thediamond.repo.ListingRepository;
@@ -29,14 +31,19 @@ public class AdminService {
     private final ListingRepository listings;
     private final DealRepository deals;
     private final ListingService listingService;
+    private final NotificationService email;
+    private final InAppNotificationService inApp;
 
     public AdminService(UserRepository users, UserProfileRepository profiles, ListingRepository listings,
-                        DealRepository deals, ListingService listingService) {
+                        DealRepository deals, ListingService listingService,
+                        NotificationService email, InAppNotificationService inApp) {
         this.users = users;
         this.profiles = profiles;
         this.listings = listings;
         this.deals = deals;
         this.listingService = listingService;
+        this.email = email;
+        this.inApp = inApp;
     }
 
     // ---------- Users ----------
@@ -55,8 +62,23 @@ public class AdminService {
         if (u.getRole() == Role.ADMIN) {
             throw ApiException.badRequest("CANNOT_BAN_ADMIN", "Администратора нельзя заблокировать");
         }
+        boolean changed = u.isBanned() != banned;
         u.setBanned(banned);
         users.save(u);
+
+        // Only announce an actual state change — re-banning an already banned user
+        // shouldn't send a second letter.
+        if (changed) {
+            if (banned) {
+                email.accountBanned(u.getEmail());
+                inApp.send(u.getId(), "Аккаунт заблокирован",
+                        "Вход и публикация объявлений недоступны. Напишите в поддержку, если это ошибка.");
+            } else {
+                email.accountUnbanned(u.getEmail());
+                inApp.send(u.getId(), "Аккаунт разблокирован",
+                        "Блокировка снята — можно снова продавать и покупать.");
+            }
+        }
         return toAdminUser(u);
     }
 

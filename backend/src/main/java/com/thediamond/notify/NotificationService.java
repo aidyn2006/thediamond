@@ -30,6 +30,31 @@ public class NotificationService {
         return "<p style=\"margin:0 0 12px;\">" + text + "</p>";
     }
 
+    // --- Account ---
+
+    /** Sent right after registration. */
+    public void welcome(String to, String siteUrl) {
+        String html = EmailTemplates.render("Добро пожаловать в TheDiamond",
+                p("Аккаунт создан. Теперь можно смотреть телефоны в каталоге и выставлять свои "
+                        + "на продажу — без комиссии сайта.")
+                        + p("Заполните профиль: покупателям нужен ваш город и телефон для связи."),
+                siteUrl == null || siteUrl.isBlank() ? null : "Открыть каталог",
+                siteUrl == null || siteUrl.isBlank() ? null : siteUrl + "/listings",
+                null);
+        safeSend(to, "Добро пожаловать в TheDiamond", html);
+    }
+
+    public void accountBanned(String to) {
+        safeSend(to, "Аккаунт заблокирован", EmailTemplates.render("Аккаунт заблокирован",
+                p("Администратор заблокировал ваш аккаунт: вход и публикация объявлений недоступны.")
+                        + p("Если считаете это ошибкой — ответьте на это письмо.")));
+    }
+
+    public void accountUnbanned(String to) {
+        safeSend(to, "Аккаунт разблокирован", EmailTemplates.render("Аккаунт разблокирован",
+                p("Блокировка снята — вы снова можете войти и продавать телефоны.")));
+    }
+
     // --- Auth ---
     public void emailVerificationCode(String to, String code) {
         String html = EmailTemplates.render("Подтвердите почту",
@@ -59,6 +84,13 @@ public class NotificationService {
                 p("Объявление «" + title + "» не прошло проверку."
                         + (reason != null && !reason.isBlank() ? " Причина: " + reason : ""))
                         + p("Отредактируйте его и отправьте на проверку снова.")));
+    }
+
+    /** The seller took the listing down — sent to buyers who were still waiting for an answer. */
+    public void listingWithdrawn(String to, String title) {
+        safeSend(to, "Объявление снято с продажи", EmailTemplates.render("Объявление снято с продажи",
+                p("Продавец снял «" + title + "» с продажи, поэтому ваша заявка закрыта.")
+                        + p("Посмотрите другие телефоны в каталоге — их добавляют каждый день.")));
     }
 
     // --- Deals ---

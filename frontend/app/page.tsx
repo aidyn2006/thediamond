@@ -22,6 +22,8 @@ export const metadata = pageMetadata({
 /** A row of four is the smallest set that reads as a section rather than leftovers. */
 const MIN_SECTION = 4;
 const CHEAP_UNDER = 100_000;
+/** One full row on a wide screen, three rows of two on a phone. */
+const SECTION_SIZE = 6;
 
 export default async function HomePage() {
   const session = await auth();
@@ -31,12 +33,12 @@ export default async function HomePage() {
   // One cached catalog call feeds every row — the backend already returns newest
   // first, so the sections are just different slices of it.
   const all = await getPublicListings();
-  const newest = all.slice(0, 12);
+  const newest = all.slice(0, SECTION_SIZE);
   const popular = [...all]
     .filter((l) => l.views > 0)
     .sort((a, b) => b.views - a.views)
-    .slice(0, 12);
-  const cheap = all.filter((l) => l.price <= CHEAP_UNDER).slice(0, 12);
+    .slice(0, SECTION_SIZE);
+  const cheap = all.filter((l) => l.price <= CHEAP_UNDER).slice(0, SECTION_SIZE);
 
   return (
     <>

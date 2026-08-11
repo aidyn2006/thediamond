@@ -12,6 +12,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByPasswordResetToken(String passwordResetToken);
     boolean existsByEmailIgnoreCase(String email);
     long countByRole(Role role);
+    /** Moderators to ping when something lands in the review queue. */
+    List<User> findByRole(Role role);
     List<User> findAllByOrderByCreatedAtDesc();
     List<User> findByEmailContainingIgnoreCaseOrderByCreatedAtDesc(String email);
 }
