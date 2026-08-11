@@ -265,6 +265,40 @@ export function listingJsonLd(l: ListingSeoInput) {
   };
 }
 
+/** Article for the guides. Author is the site itself — these aren't personal posts. */
+export function articleJsonLd({
+  headline,
+  description,
+  path,
+  published,
+  modified,
+}: {
+  headline: string;
+  description: string;
+  path: string;
+  published: string;
+  modified?: string;
+}) {
+  const url = absoluteUrl(path);
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline,
+    description,
+    inLanguage: "ru-KZ",
+    datePublished: published,
+    dateModified: modified ?? published,
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    author: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
+    publisher: {
+      "@type": "Organization",
+      name: SITE_NAME,
+      url: SITE_URL,
+      logo: { "@type": "ImageObject", url: absoluteUrl("/icon-512.png") },
+    },
+  };
+}
+
 /** FAQPage from a list of {q, a} pairs. */
 export function faqPageJsonLd(qa: { q: string; a: string }[]) {
   return {

@@ -9,6 +9,8 @@ const LINKS: { href: string; label: string; highlight?: boolean }[] = [
   { href: `/listings/brand/${brandSlugs.SAMSUNG}`, label: "Samsung" },
   { href: `/listings/brand/${brandSlugs.XIAOMI}`, label: "Xiaomi" },
   { href: `/listings/brand/${brandSlugs.HONOR}`, label: "Honor" },
+  { href: "/exchange", label: "Обмен" },
+  { href: "/guides", label: "Полезное" },
   { href: "/listings?maxPrice=100000", label: "До 100 000 ₸", highlight: true },
 ];
 
@@ -66,8 +68,10 @@ export function CategoryBar({
           >
             Купить
           </Link>
+          {/* Guests land on the /sell explainer (it's the page that ranks and converts);
+              members skip straight to the form. */}
           <Link
-            href={signedIn ? "/listings/new" : "/register"}
+            href={signedIn ? "/listings/new" : "/sell"}
             aria-current={active === "sell" ? "page" : undefined}
             className={tabClasses(active === "sell")}
           >

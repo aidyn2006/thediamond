@@ -6,6 +6,7 @@ import { CategoryBar } from "@/components/public/CategoryBar";
 import { SiteFooter } from "@/components/public/SiteFooter";
 import { ListingCard } from "@/components/listing/ListingCard";
 import { BrandChips } from "@/components/listing/BrandChips";
+import { CityChips } from "@/components/listing/CityChips";
 import { FilterSheet } from "@/components/listing/FilterSheet";
 import { Button } from "@/components/ui/Button";
 import { JsonLd } from "@/components/JsonLd";
@@ -13,6 +14,7 @@ import { apiFetch, getPublicListings } from "@/lib/api";
 import { memberNav } from "@/lib/nav";
 import { catalogJsonLd, pageMetadata } from "@/lib/seo";
 import { PHONE_BRANDS, brandLabels, type PhoneBrand } from "@/lib/phones";
+import { cityByName } from "@/lib/geo";
 import type { CatalogFilters as Filters, ListingSummary } from "@/lib/api-types";
 
 export const metadata = pageMetadata({
@@ -88,6 +90,12 @@ export default async function CatalogPage({
             people make most, and it costs no modal. */}
         <div className="sticky top-0 z-20 bg-bg pb-3 pt-2">
           <BrandChips params={filters} active={activeBrand} />
+        </div>
+
+        {/* City row links the geo hubs rather than filtering in place: those pages are
+            what rank for "телефоны бу Астана", and users end up in the same list. */}
+        <div className="mb-4">
+          <CityChips active={activeCity} />
         </div>
 
         <div className="mb-6">
