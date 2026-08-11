@@ -1,8 +1,7 @@
 package com.thediamond.api.dto;
 
-import com.thediamond.api.dto.ProfileDtos.BrandProfileResponse;
-import com.thediamond.api.dto.ProfileDtos.CreatorProfileResponse;
-import com.thediamond.api.dto.WalletDtos.WithdrawalItem;
+import com.thediamond.api.dto.ListingDtos.ListingSummary;
+import com.thediamond.api.dto.ProfileDtos.ProfileResponse;
 import jakarta.validation.constraints.Size;
 
 import java.time.Instant;
@@ -12,14 +11,14 @@ public final class AdminDtos {
 
     private AdminDtos() {}
 
-    /** Optional reason (used for the notification email; profiles have no persisted reject state). */
+    /** Reason shown to the seller when a listing is rejected. */
     public record ModerationDecision(@Size(max = 500) String reason) {}
 
     public record StatsResponse(
-            long creators,
-            long brands,
-            long activeCampaigns,
-            long applications
+            long users,
+            long activeListings,
+            long pendingListings,
+            long deals
     ) {}
 
     public record AdminUser(
@@ -30,7 +29,7 @@ public final class AdminDtos {
             Instant createdAt
     ) {}
 
-    /** Full picture of one user for the admin profile view. */
+    /** Full picture of one member for the admin user view. */
     public record AdminUserDetail(
             Long userId,
             String email,
@@ -38,9 +37,7 @@ public final class AdminDtos {
             boolean banned,
             boolean emailVerified,
             Instant createdAt,
-            long walletBalance,
-            CreatorProfileResponse creator,
-            BrandProfileResponse brand,
-            List<WithdrawalItem> withdrawals
+            ProfileResponse profile,
+            List<ListingSummary> listings
     ) {}
 }

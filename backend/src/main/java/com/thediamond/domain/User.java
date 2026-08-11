@@ -34,9 +34,6 @@ public class User {
     @Column(name = "verification_code_expires")
     private Instant verificationCodeExpires;
 
-    @Column(name = "reward_task_paid", nullable = false)
-    private boolean rewardTaskPaid = false;
-
     @Column(name = "password_reset_token", length = 64)
     private String passwordResetToken;
 
@@ -75,9 +72,6 @@ public class User {
 
     public Instant getVerificationCodeExpires() { return verificationCodeExpires; }
     public void setVerificationCodeExpires(Instant v) { this.verificationCodeExpires = v; }
-
-    public boolean isRewardTaskPaid() { return rewardTaskPaid; }
-    public void setRewardTaskPaid(boolean rewardTaskPaid) { this.rewardTaskPaid = rewardTaskPaid; }
 
     public String getPasswordResetToken() { return passwordResetToken; }
     public void setPasswordResetToken(String passwordResetToken) { this.passwordResetToken = passwordResetToken; }

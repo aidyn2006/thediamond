@@ -1,19 +1,30 @@
 import { redirect } from "next/navigation";
+import { AppHeader } from "@/components/app/AppHeader";
+import { ProfileEditor } from "@/components/profile/ProfileEditor";
 import { requireAuth } from "@/lib/guards";
 import { getCurrentUser } from "@/lib/api";
-import { roleHome } from "@/lib/types";
-import { CreatorOnboarding } from "@/components/onboarding/CreatorOnboarding";
-import { BrandOnboarding } from "@/components/onboarding/BrandOnboarding";
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata({
+  title: "Знакомство",
+  path: "/onboarding",
+  index: false,
+});
 
 export default async function OnboardingPage() {
   const session = await requireAuth();
-  const role = session.user.role;
-  if (role === "ADMIN") redirect("/admin");
+  if (session.user.role === "ADMIN") redirect("/admin");
 
   const me = await getCurrentUser();
-  if (me?.onboardingComplete) {
-    redirect(me.approved ? roleHome(role) : "/pending");
-  }
+  // Already filled in — nothing to onboard.
+  if (me?.onboardingComplete) redirect("/listings");
 
-  return role === "CREATOR" ? <CreatorOnboarding /> : <BrandOnboarding />;
+  return (
+    <>
+      <AppHeader email={session.user.email} home="/listings" />
+      <main id="main-content">
+        <ProfileEditor mode="onboarding" />
+      </main>
+    </>
+  );
 }

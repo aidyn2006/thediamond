@@ -3,34 +3,20 @@
 import { revalidatePath } from "next/cache";
 import { apiFetch } from "@/lib/api";
 
-export async function moderateCreator(id: number, approve: boolean) {
-  const res = await apiFetch(`/api/admin/creators/${id}/${approve ? "approve" : "reject"}`, {
-    method: "POST",
-  });
-  revalidatePath("/admin/profiles");
-  return { ok: res.ok };
+export async function approveListing(id: number) {
+  const res = await apiFetch(`/api/admin/listings/${id}/approve`, { method: "POST" });
+  revalidatePath("/admin");
+  revalidatePath("/listings");
+  const data = res.ok ? null : await res.json().catch(() => null);
+  return { ok: res.ok, message: data?.message };
 }
 
-export async function moderateBrand(id: number, approve: boolean) {
-  const res = await apiFetch(`/api/admin/brands/${id}/${approve ? "approve" : "reject"}`, {
-    method: "POST",
-  });
-  revalidatePath("/admin/profiles");
-  return { ok: res.ok };
-}
-
-export async function approveCampaign(id: number) {
-  const res = await apiFetch(`/api/admin/campaigns/${id}/approve`, { method: "POST" });
-  revalidatePath("/admin/campaigns");
-  return { ok: res.ok };
-}
-
-export async function rejectCampaign(id: number, reason: string) {
-  const res = await apiFetch(`/api/admin/campaigns/${id}/reject`, {
+export async function rejectListing(id: number, reason: string) {
+  const res = await apiFetch(`/api/admin/listings/${id}/reject`, {
     method: "POST",
     body: JSON.stringify({ reason }),
   });
-  revalidatePath("/admin/campaigns");
+  revalidatePath("/admin");
   const data = res.ok ? null : await res.json().catch(() => null);
   return { ok: res.ok, message: data?.message };
 }
@@ -40,23 +26,6 @@ export async function setUserBan(id: number, banned: boolean) {
     method: "POST",
   });
   revalidatePath("/admin/users");
-  const data = res.ok ? null : await res.json().catch(() => null);
-  return { ok: res.ok, message: data?.message };
-}
-
-export async function payWithdrawal(id: number) {
-  const res = await apiFetch(`/api/admin/withdrawals/${id}/pay`, { method: "POST" });
-  revalidatePath("/admin/withdrawals");
-  const data = res.ok ? null : await res.json().catch(() => null);
-  return { ok: res.ok, message: data?.message };
-}
-
-export async function rejectWithdrawal(id: number, reason: string) {
-  const res = await apiFetch(`/api/admin/withdrawals/${id}/reject`, {
-    method: "POST",
-    body: JSON.stringify({ reason }),
-  });
-  revalidatePath("/admin/withdrawals");
   const data = res.ok ? null : await res.json().catch(() => null);
   return { ok: res.ok, message: data?.message };
 }

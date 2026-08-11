@@ -13,11 +13,11 @@ const PUBLIC_PATHS = [
   // (Dotted metadata routes like /robots.txt, /sitemap.xml, /manifest.webmanifest,
   // /icon.png are already excluded by the matcher below; this one has no dot.)
   "/opengraph-image",
-  // Public creator catalog (SEO hub).
-  "/catalog",
+  // Public catalog — the marketplace's main SEO surface.
+  "/listings",
 ];
 // path prefixes that anyone (incl. logged-out visitors) may open
-const PUBLIC_PREFIXES = ["/u/", "/catalog/"];
+const PUBLIC_PREFIXES = ["/u/", "/listings/"];
 
 export default auth((req) => {
   const { pathname } = req.nextUrl;
@@ -25,7 +25,12 @@ export default auth((req) => {
     PUBLIC_PATHS.includes(pathname) ||
     PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 
-  if (isPublic) return NextResponse.next();
+  // /listings/* is public for reading, but posting and editing are not. Those pages
+  // also call requireMember() server-side; this keeps the redirect instant.
+  const isSellerPath =
+    pathname === "/listings/new" || /^\/listings\/[^/]+\/edit$/.test(pathname);
+
+  if (isPublic && !isSellerPath) return NextResponse.next();
   if (!req.auth) {
     const url = new URL("/login", req.nextUrl.origin);
     url.searchParams.set("next", pathname);

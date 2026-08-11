@@ -2,19 +2,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import { StatusPill } from "@/components/ui/StatusPill";
-import { categoryLabels, platformLabels, formatNumber, formatTenge } from "@/lib/categories";
-import type { AdminUserDetail, WithdrawalStatus } from "@/lib/api-types";
+import { ListingCard } from "@/components/listing/ListingCard";
+import { formatTenge } from "@/lib/phones";
+import type { AdminUserDetail } from "@/lib/api-types";
 
-const roleLabel: Record<AdminUserDetail["role"], string> = {
-  CREATOR: "Креатор",
-  BRAND: "Бренд",
+const roleLabel: Record<string, string> = {
+  USER: "Участник",
   ADMIN: "Админ",
-};
-
-const wdStatus: Record<WithdrawalStatus, { label: string; tone: "success" | "warning" | "error" }> = {
-  PENDING: { label: "В обработке", tone: "warning" },
-  PAID: { label: "Выплачено", tone: "success" },
-  REJECTED: { label: "Отклонено", tone: "error" },
 };
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
@@ -32,9 +26,12 @@ export default async function AdminUserDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const res = await apiFetch(`/api/admin/users/${id}/detail`);
+  const res = await apiFetch(`/api/admin/users/${id}`);
   if (!res.ok) notFound();
   const u = (await res.json()) as AdminUserDetail;
+
+  const sold = u.listings.filter((l) => l.status === "SOLD");
+  const active = u.listings.filter((l) => l.status === "ACTIVE");
 
   return (
     <div>
@@ -44,101 +41,69 @@ export default async function AdminUserDetailPage({
       <h1 className="mt-2 mb-6 text-28 font-semibold">{u.email}</h1>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Account */}
         <div className="rounded-card border border-border bg-surface p-5">
           <p className="mb-3 text-15 font-semibold">Аккаунт</p>
-          <Row label="Роль" value={roleLabel[u.role]} />
+          <Row label="Роль" value={roleLabel[u.role] ?? u.role} />
           <Row
             label="Статус"
             value={
-              <StatusPill tone={u.banned ? "error" : "success"} label={u.banned ? "Заблокирован" : "Активен"} />
+              <StatusPill tone={u.banned ? "error" : "success"}>
+                {u.banned ? "Заблокирован" : "Активен"}
+              </StatusPill>
             }
           />
           <Row
             label="Почта"
             value={
-              <StatusPill
-                tone={u.emailVerified ? "success" : "dim"}
-                label={u.emailVerified ? "Подтверждена" : "Не подтверждена"}
-              />
+              <StatusPill tone={u.emailVerified ? "success" : "warning"}>
+                {u.emailVerified ? "Подтверждена" : "Не подтверждена"}
+              </StatusPill>
             }
           />
-          <Row label="Регистрация" value={new Date(u.createdAt).toLocaleDateString("ru-RU")} />
-          {u.role !== "ADMIN" && <Row label="Баланс кошелька" value={formatTenge(u.walletBalance)} />}
+          <Row
+            label="Регистрация"
+            value={new Date(u.createdAt).toLocaleDateString("ru-RU")}
+          />
         </div>
 
-        {/* Creator profile */}
-        {u.creator && (
-          <div className="rounded-card border border-border bg-surface p-5">
-            <p className="mb-3 text-15 font-semibold">Профиль креатора</p>
-            <Row label="Имя" value={u.creator.name} />
-            <Row label="Username" value={`@${u.creator.username}`} />
-            <Row label="Город" value={u.creator.city} />
-            <Row label="Одобрен" value={u.creator.approved ? "Да" : "Нет"} />
-            <Row
-              label="Категории"
-              value={u.creator.categories.map((c) => categoryLabels[c]).join(", ") || "—"}
-            />
-            <Row label="Аудитория" value={formatNumber(u.creator.totalFollowers)} />
-            {u.creator.bio && (
-              <p className="mt-3 text-13 text-text-dim">{u.creator.bio}</p>
-            )}
-            <div className="mt-3 flex flex-col gap-1">
-              {u.creator.socials.map((s) => (
-                <a
-                  key={s.platform}
-                  href={s.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-13 text-accent hover:brightness-110"
-                >
-                  {platformLabels[s.platform]}: {formatNumber(s.followers ?? undefined)}
-                </a>
-              ))}
-            </div>
-          </div>
-        )}
+        <div className="rounded-card border border-border bg-surface p-5">
+          <p className="mb-3 text-15 font-semibold">Профиль</p>
+          {u.profile ? (
+            <>
+              <Row label="Имя" value={u.profile.displayName} />
+              <Row label="Телефон" value={u.profile.phone} />
+              <Row label="Город" value={u.profile.city} />
+              <Row label="О себе" value={u.profile.about ?? "—"} />
+            </>
+          ) : (
+            <p className="text-13 text-text-dim">Профиль ещё не заполнен.</p>
+          )}
+        </div>
 
-        {/* Brand profile */}
-        {u.brand && (
-          <div className="rounded-card border border-border bg-surface p-5">
-            <p className="mb-3 text-15 font-semibold">Профиль бренда</p>
-            <Row label="Компания" value={u.brand.companyName} />
-            <Row label="БИН" value={u.brand.bin} />
-            <Row label="Телефон" value={u.brand.phone} />
-            <Row label="Контакт" value={u.brand.contactName} />
-            <Row label="Одобрен" value={u.brand.approved ? "Да" : "Нет"} />
-            {u.brand.website && (
-              <a
-                href={u.brand.website}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-3 block text-13 text-accent hover:brightness-110"
-              >
-                {u.brand.website}
-              </a>
-            )}
-          </div>
-        )}
-
-        {/* Withdrawals */}
-        {u.withdrawals.length > 0 && (
-          <div className="rounded-card border border-border bg-surface p-5 lg:col-span-2">
-            <p className="mb-3 text-15 font-semibold">Заявки на вывод</p>
-            <ul className="divide-y divide-border">
-              {u.withdrawals.map((w) => (
-                <li key={w.id} className="flex items-center justify-between gap-3 py-3">
-                  <div className="min-w-0">
-                    <p className="text-15">{formatTenge(w.amount)}</p>
-                    <p className="truncate text-13 text-text-dim">{w.requisites}</p>
-                  </div>
-                  <StatusPill tone={wdStatus[w.status].tone} label={wdStatus[w.status].label} />
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        <div className="rounded-card border border-border bg-surface p-5">
+          <p className="mb-3 text-15 font-semibold">Объявления</p>
+          <Row label="Всего" value={u.listings.length} />
+          <Row label="Активных" value={active.length} />
+          <Row label="Продано" value={sold.length} />
+          <Row
+            label="Сумма проданного"
+            value={formatTenge(sold.reduce((acc, l) => acc + l.price, 0))}
+          />
+        </div>
       </div>
+
+      {u.listings.length > 0 && (
+        <section className="mt-8" aria-labelledby="user-listings">
+          <h2 id="user-listings" className="mb-4 text-18 font-semibold">
+            Все объявления
+          </h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {u.listings.map((l) => (
+              <ListingCard key={l.id} listing={l} showStatus />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

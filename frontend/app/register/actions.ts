@@ -1,7 +1,6 @@
 "use server";
 
 import { BACKEND_URL } from "@/lib/api";
-import type { Role } from "@/lib/types";
 
 export interface RegisterResult {
   ok: boolean;
@@ -10,10 +9,10 @@ export interface RegisterResult {
   fieldErrors?: Record<string, string>;
 }
 
+/** No role picker: every account can both sell and buy. */
 export async function registerUser(input: {
   email: string;
   password: string;
-  role: Role;
 }): Promise<RegisterResult> {
   const res = await fetch(`${BACKEND_URL}/api/auth/register`, {
     method: "POST",

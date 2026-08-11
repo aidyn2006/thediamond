@@ -1,15 +1,13 @@
 "use client";
 
-import { Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { z } from "zod";
 import { Logo } from "@/components/ui/Logo";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { cn } from "@/lib/cn";
-import { roleHome, type Role } from "@/lib/types";
 import { registerUser } from "./actions";
 
 const schema = z.object({
@@ -17,19 +15,9 @@ const schema = z.object({
   password: z.string().min(8, "Пароль от 8 символов"),
 });
 
-const ROLES: { value: Role; title: string; subtitle: string }[] = [
-  { value: "CREATOR", title: "Креатор", subtitle: "Зарабатываю на контенте" },
-  { value: "BRAND", title: "Бренд", subtitle: "Ищу креаторов" },
-];
-
-function RegisterForm() {
+export default function RegisterPage() {
   const router = useRouter();
-  const params = useSearchParams();
-  const initialRole = (params.get("role") as Role) ?? "CREATOR";
 
-  const [role, setRole] = useState<Role>(
-    initialRole === "BRAND" ? "BRAND" : "CREATOR",
-  );
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -51,7 +39,7 @@ function RegisterForm() {
     setErrors({});
     setLoading(true);
 
-    const result = await registerUser({ email, password, role });
+    const result = await registerUser({ email, password });
     if (!result.ok) {
       if (result.code === "EMAIL_TAKEN") {
         setFormError(
@@ -81,7 +69,8 @@ function RegisterForm() {
       router.push("/login");
       return;
     }
-    router.push(roleHome(role));
+    // Straight to onboarding: a member without a phone number can neither sell nor buy.
+    router.push("/onboarding");
   }
 
   return (
@@ -90,30 +79,10 @@ function RegisterForm() {
       <div className="w-full max-w-[400px]">
         <h1 className="mb-1 text-22 font-semibold">Создать аккаунт</h1>
         <p className="mb-6 text-15 text-text-dim">
-          Выберите, зачем вы здесь — это нельзя будет поменять позже.
+          Один аккаунт — можно и покупать, и продавать.
         </p>
 
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
-          <div className="grid grid-cols-2 gap-3">
-            {ROLES.map((r) => (
-              <button
-                key={r.value}
-                type="button"
-                onClick={() => setRole(r.value)}
-                className={cn(
-                  "flex flex-col rounded-card border bg-surface p-4 text-left transition-colors duration-150",
-                  role === r.value
-                    ? "border-accent"
-                    : "border-border hover:border-text-dim",
-                )}
-                aria-pressed={role === r.value}
-              >
-                <span className="text-15 font-semibold">{r.title}</span>
-                <span className="text-13 text-text-dim">{r.subtitle}</span>
-              </button>
-            ))}
-          </div>
-
           <Input
             label="Email"
             name="email"
@@ -150,13 +119,5 @@ function RegisterForm() {
         </p>
       </div>
     </main>
-  );
-}
-
-export default function RegisterPage() {
-  return (
-    <Suspense>
-      <RegisterForm />
-    </Suspense>
   );
 }

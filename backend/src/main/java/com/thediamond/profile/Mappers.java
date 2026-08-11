@@ -1,83 +1,72 @@
 package com.thediamond.profile;
 
-import com.thediamond.api.dto.ProfileDtos.BrandProfileResponse;
-import com.thediamond.api.dto.ProfileDtos.CreatorProfileResponse;
-import com.thediamond.api.dto.ProfileDtos.PublicCreatorProfile;
-import com.thediamond.api.dto.ProfileDtos.SocialLink;
-import com.thediamond.api.dto.SocialProofDtos.SocialProofResponse;
-import com.thediamond.domain.BrandProfile;
-import com.thediamond.domain.Category;
-import com.thediamond.domain.CreatorProfile;
+import com.thediamond.api.dto.ListingDtos.ListingSummary;
+import com.thediamond.api.dto.ListingDtos.PublicListing;
+import com.thediamond.api.dto.ProfileDtos.ProfileResponse;
+import com.thediamond.domain.Listing;
+import com.thediamond.domain.ListingImage;
+import com.thediamond.domain.UserProfile;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public final class Mappers {
 
     private Mappers() {}
 
-    public static CreatorProfileResponse toCreatorResponse(CreatorProfile p, boolean includeTelegram) {
-        return toCreatorResponse(p, includeTelegram, null);
-    }
-
-    public static CreatorProfileResponse toCreatorResponse(CreatorProfile p, boolean includeTelegram,
-                                                           SocialProofResponse socialProof) {
-        List<SocialLink> socials = new ArrayList<>();
-        if (p.getInstagramUrl() != null) socials.add(new SocialLink("INSTAGRAM", p.getInstagramUrl(), p.getInstagramFollowers()));
-        if (p.getTiktokUrl() != null) socials.add(new SocialLink("TIKTOK", p.getTiktokUrl(), p.getTiktokFollowers()));
-        if (p.getThreadsUrl() != null) socials.add(new SocialLink("THREADS", p.getThreadsUrl(), p.getThreadsFollowers()));
-        if (p.getYoutubeUrl() != null) socials.add(new SocialLink("YOUTUBE", p.getYoutubeUrl(), p.getYoutubeFollowers()));
-
-        List<Category> cats = p.getCategories().stream().sorted().toList();
-
-        return new CreatorProfileResponse(
+    public static ProfileResponse toProfileResponse(UserProfile p) {
+        return new ProfileResponse(
                 p.getId(),
                 p.getUser().getEmail(),
-                p.getName(),
-                p.getUsername(),
-                p.getAvatarUrl(),
-                p.getBio(),
+                p.getDisplayName(),
+                p.getPhone(),
                 p.getCity(),
-                p.getBirthDate(),
-                cats,
-                socials,
-                p.getTotalFollowers(),
-                includeTelegram ? p.getTelegramUrl() : null,
-                p.isApproved(),
-                socialProof
-        );
-    }
-
-    public static PublicCreatorProfile toPublicCreator(CreatorProfile p) {
-        List<SocialLink> socials = new ArrayList<>();
-        if (p.getInstagramUrl() != null) socials.add(new SocialLink("INSTAGRAM", p.getInstagramUrl(), p.getInstagramFollowers()));
-        if (p.getTiktokUrl() != null) socials.add(new SocialLink("TIKTOK", p.getTiktokUrl(), p.getTiktokFollowers()));
-        if (p.getThreadsUrl() != null) socials.add(new SocialLink("THREADS", p.getThreadsUrl(), p.getThreadsFollowers()));
-        if (p.getYoutubeUrl() != null) socials.add(new SocialLink("YOUTUBE", p.getYoutubeUrl(), p.getYoutubeFollowers()));
-        return new PublicCreatorProfile(
-                p.getId(),
-                p.getName(),
-                p.getUsername(),
                 p.getAvatarUrl(),
-                p.getBio(),
-                p.getCity(),
-                p.getCategories().stream().sorted().toList(),
-                socials,
-                p.getTotalFollowers(),
+                p.getAbout(),
                 p.getCreatedAt()
         );
     }
 
-    public static BrandProfileResponse toBrandResponse(BrandProfile b) {
-        return new BrandProfileResponse(
-                b.getId(),
-                b.getUser().getEmail(),
-                b.getCompanyName(),
-                b.getBin(),
-                b.getWebsite(),
-                b.getPhone(),
-                b.getContactName(),
-                b.isApproved()
+    public static ListingSummary toSummary(Listing l) {
+        return new ListingSummary(
+                l.getId(),
+                l.getTitle(),
+                l.getBrand(),
+                l.getModel(),
+                l.getStorageGb(),
+                l.getCondition(),
+                l.getBatteryHealth(),
+                l.getPrice(),
+                l.getCity(),
+                l.getCoverUrl(),
+                l.getStatus().name(),
+                l.getViews(),
+                l.getCreatedAt()
+        );
+    }
+
+    public static List<String> imageUrls(Listing l) {
+        return l.getImages().stream().map(ListingImage::getUrl).toList();
+    }
+
+    /** Public card — no seller phone, no moderation fields. */
+    public static PublicListing toPublicListing(Listing l, String sellerName) {
+        return new PublicListing(
+                l.getId(),
+                l.getTitle(),
+                l.getBrand(),
+                l.getModel(),
+                l.getStorageGb(),
+                l.getRamGb(),
+                l.getColor(),
+                l.getCondition(),
+                l.getBatteryHealth(),
+                l.getPrice(),
+                l.getCity(),
+                l.getDescription(),
+                imageUrls(l),
+                sellerName,
+                l.getSeller().getId(),
+                l.getCreatedAt()
         );
     }
 }

@@ -22,4 +22,11 @@ public class UploadController {
     public Map<String, String> uploadAvatar(@RequestParam("file") MultipartFile file) {
         return Map.of("url", storage.store(file));
     }
+
+    /** Listing photos. Same storage and validation as avatars, one file per call. */
+    @PostMapping("/photo")
+    @PreAuthorize("isAuthenticated()")
+    public Map<String, String> uploadPhoto(@RequestParam("file") MultipartFile file) {
+        return Map.of("url", storage.store(file));
+    }
 }

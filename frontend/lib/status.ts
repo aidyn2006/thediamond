@@ -1,39 +1,33 @@
 import type { StatusTone } from "@/components/ui/StatusPill";
 
-export type CampaignStatus =
+export type ListingStatus =
   | "DRAFT"
   | "PENDING_REVIEW"
   | "ACTIVE"
-  | "CLOSED"
+  | "SOLD"
+  | "ARCHIVED"
   | "REJECTED";
 
-export type ApplicationStatus =
-  | "APPLIED"
+export type DealStatus =
+  | "REQUESTED"
   | "ACCEPTED"
   | "DECLINED"
-  | "SUBMITTED"
-  | "APPROVED"
-  | "REJECTED";
+  | "COMPLETED"
+  | "CANCELLED";
 
-export const campaignStatusPill: Record<
-  CampaignStatus,
-  { label: string; tone: StatusTone }
-> = {
+export const listingStatusPill: Record<ListingStatus, { label: string; tone: StatusTone }> = {
   DRAFT: { label: "Черновик", tone: "dim" },
-  PENDING_REVIEW: { label: "На модерации", tone: "warning" },
-  ACTIVE: { label: "Активна", tone: "success" },
-  CLOSED: { label: "Закрыта", tone: "dim" },
-  REJECTED: { label: "Отклонена", tone: "error" },
+  PENDING_REVIEW: { label: "На проверке", tone: "warning" },
+  ACTIVE: { label: "Опубликовано", tone: "success" },
+  SOLD: { label: "Продано", tone: "accent" },
+  ARCHIVED: { label: "В архиве", tone: "dim" },
+  REJECTED: { label: "Отклонено", tone: "error" },
 };
 
-export const applicationStatusPill: Record<
-  ApplicationStatus,
-  { label: string; tone: StatusTone }
-> = {
-  APPLIED: { label: "Отклик отправлен", tone: "accent" },
-  ACCEPTED: { label: "Принят", tone: "success" },
-  DECLINED: { label: "Отклонён", tone: "error" },
-  SUBMITTED: { label: "Сдано на проверку", tone: "warning" },
-  APPROVED: { label: "Одобрено", tone: "success" },
-  REJECTED: { label: "Отклонено", tone: "error" },
+export const dealStatusPill: Record<DealStatus, { label: string; tone: StatusTone }> = {
+  REQUESTED: { label: "Ждёт ответа", tone: "warning" },
+  ACCEPTED: { label: "Принята", tone: "success" },
+  DECLINED: { label: "Отклонена", tone: "error" },
+  COMPLETED: { label: "Завершена", tone: "accent" },
+  CANCELLED: { label: "Отменена", tone: "dim" },
 };

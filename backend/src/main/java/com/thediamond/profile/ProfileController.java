@@ -1,6 +1,7 @@
 package com.thediamond.profile;
 
-import com.thediamond.api.dto.ProfileDtos.*;
+import com.thediamond.api.dto.ProfileDtos.ProfileRequest;
+import com.thediamond.api.dto.ProfileDtos.ProfileResponse;
 import com.thediamond.security.AuthPrincipal;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -8,7 +9,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/profile")
+@PreAuthorize("isAuthenticated()")
 public class ProfileController {
 
     private final ProfileService service;
@@ -17,31 +19,14 @@ public class ProfileController {
         this.service = service;
     }
 
-    // ---- Creator ----
-    @GetMapping("/creator/me")
-    @PreAuthorize("hasRole('CREATOR')")
-    public CreatorProfileResponse getCreatorMe(@AuthenticationPrincipal AuthPrincipal me) {
-        return service.getCreatorMe(me.userId());
+    @GetMapping("/me")
+    public ProfileResponse me(@AuthenticationPrincipal AuthPrincipal me) {
+        return service.me(me.userId());
     }
 
-    @PutMapping("/creator/me")
-    @PreAuthorize("hasRole('CREATOR')")
-    public CreatorProfileResponse upsertCreator(@AuthenticationPrincipal AuthPrincipal me,
-                                                @Valid @RequestBody CreatorProfileRequest req) {
-        return service.upsertCreator(me.userId(), req);
-    }
-
-    // ---- Brand ----
-    @GetMapping("/brand/me")
-    @PreAuthorize("hasRole('BRAND')")
-    public BrandProfileResponse getBrandMe(@AuthenticationPrincipal AuthPrincipal me) {
-        return service.getBrandMe(me.userId());
-    }
-
-    @PutMapping("/brand/me")
-    @PreAuthorize("hasRole('BRAND')")
-    public BrandProfileResponse upsertBrand(@AuthenticationPrincipal AuthPrincipal me,
-                                            @Valid @RequestBody BrandProfileRequest req) {
-        return service.upsertBrand(me.userId(), req);
+    @PutMapping("/me")
+    public ProfileResponse upsert(@AuthenticationPrincipal AuthPrincipal me,
+                                 @Valid @RequestBody ProfileRequest req) {
+        return service.upsert(me.userId(), req);
     }
 }

@@ -1,12 +1,18 @@
 package com.thediamond.publicapi;
 
-import com.thediamond.api.dto.ProfileDtos.PublicCreatorProfile;
-import com.thediamond.catalog.CatalogService;
-import com.thediamond.domain.Category;
-import com.thediamond.domain.CreatorProfile;
+import com.thediamond.api.dto.ListingDtos.ListingSummary;
+import com.thediamond.api.dto.ListingDtos.PublicListing;
+import com.thediamond.api.dto.ListingDtos.PublicSeller;
+import com.thediamond.domain.Listing;
+import com.thediamond.domain.ListingStatus;
+import com.thediamond.domain.PhoneBrand;
+import com.thediamond.domain.PhoneCondition;
+import com.thediamond.domain.UserProfile;
 import com.thediamond.error.ApiException;
+import com.thediamond.listing.ListingSpecs;
 import com.thediamond.profile.Mappers;
-import com.thediamond.repo.CreatorProfileRepository;
+import com.thediamond.repo.ListingRepository;
+import com.thediamond.repo.UserProfileRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,33 +22,67 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/** Unauthenticated, public-facing endpoints (see SecurityConfig permitAll on /api/public/**). */
+/**
+ * Unauthenticated, public-facing endpoints (see SecurityConfig permitAll on
+ * /api/public/**). This is the SEO surface: catalog, listing pages, seller pages
+ * and the sitemap all read from here. Never exposes a phone number.
+ */
 @RestController
 @RequestMapping("/api/public")
 public class PublicController {
 
-    private final CreatorProfileRepository creators;
-    private final CatalogService catalog;
+    private final ListingRepository listings;
+    private final UserProfileRepository profiles;
 
-    public PublicController(CreatorProfileRepository creators, CatalogService catalog) {
-        this.creators = creators;
-        this.catalog = catalog;
+    public PublicController(ListingRepository listings, UserProfileRepository profiles) {
+        this.listings = listings;
+        this.profiles = profiles;
     }
 
-    @GetMapping("/creators/{id}")
+    @GetMapping("/listings")
     @Transactional(readOnly = true)
-    public PublicCreatorProfile creator(@PathVariable Long id) {
-        CreatorProfile p = creators.findById(id)
-                .filter(CreatorProfile::isApproved)
-                .orElseThrow(() -> ApiException.notFound("Профиль не найден"));
-        return Mappers.toPublicCreator(p);
+    public List<ListingSummary> catalog(@RequestParam(required = false) PhoneBrand brand,
+                                        @RequestParam(required = false) PhoneCondition condition,
+                                        @RequestParam(required = false) String city,
+                                        @RequestParam(required = false) Integer minPrice,
+                                        @RequestParam(required = false) Integer maxPrice,
+                                        @RequestParam(required = false) Integer minStorage,
+                                        @RequestParam(required = false) String q) {
+        var filters = new ListingSpecs.Filters(brand, condition, city, minPrice, maxPrice, minStorage, q);
+        return listings.findAll(ListingSpecs.active(filters)).stream()
+                .map(Mappers::toSummary)
+                .toList();
     }
 
-    /** Approved creators for the public catalog + sitemap, optionally filtered. */
-    @GetMapping("/creators")
-    public List<PublicCreatorProfile> creatorList(
-            @RequestParam(required = false) Category category,
-            @RequestParam(required = false) String city) {
-        return catalog.publicList(category, city);
+    @GetMapping("/listings/{id}")
+    @Transactional(readOnly = true)
+    public PublicListing listing(@PathVariable Long id) {
+        Listing l = listings.findById(id)
+                .filter(x -> x.getStatus() == ListingStatus.ACTIVE || x.getStatus() == ListingStatus.SOLD)
+                .orElseThrow(() -> ApiException.notFound("Объявление не найдено"));
+        String sellerName = profiles.findByUserId(l.getSeller().getId())
+                .map(UserProfile::getDisplayName)
+                .orElse("Продавец");
+        return Mappers.toPublicListing(l, sellerName);
+    }
+
+    @GetMapping("/sellers/{id}")
+    @Transactional(readOnly = true)
+    public PublicSeller seller(@PathVariable Long id) {
+        UserProfile p = profiles.findByUserId(id)
+                .orElseThrow(() -> ApiException.notFound("Продавец не найден"));
+        List<ListingSummary> active = listings.findBySellerIdOrderByCreatedAtDesc(id).stream()
+                .filter(l -> l.getStatus() == ListingStatus.ACTIVE)
+                .map(Mappers::toSummary)
+                .toList();
+        return new PublicSeller(
+                id,
+                p.getDisplayName(),
+                p.getAvatarUrl(),
+                p.getCity(),
+                p.getAbout(),
+                p.getUser().getCreatedAt(),
+                active
+        );
     }
 }

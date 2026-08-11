@@ -1,13 +1,9 @@
 package com.thediamond.auth;
 
-import com.thediamond.domain.BrandProfile;
-import com.thediamond.domain.CreatorProfile;
 import com.thediamond.domain.User;
 import com.thediamond.error.ApiException;
 import com.thediamond.notify.InAppNotificationService;
 import com.thediamond.notify.NotificationService;
-import com.thediamond.repo.BrandProfileRepository;
-import com.thediamond.repo.CreatorProfileRepository;
 import com.thediamond.repo.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,8 +13,8 @@ import java.time.Duration;
 import java.time.Instant;
 
 /**
- * Email confirmation via a 6-digit code. On successful confirmation the user's
- * profile (creator or brand) is auto-approved — no admin moderation required.
+ * Email confirmation via a 6-digit code. Confirming unlocks posting; listings
+ * themselves are still moderated one by one.
  */
 @Service
 public class EmailVerificationService {
@@ -31,17 +27,12 @@ public class EmailVerificationService {
     private static final SecureRandom RANDOM = new SecureRandom();
 
     private final UserRepository users;
-    private final CreatorProfileRepository creators;
-    private final BrandProfileRepository brands;
     private final NotificationService email;
     private final InAppNotificationService inApp;
 
-    public EmailVerificationService(UserRepository users, CreatorProfileRepository creators,
-                                    BrandProfileRepository brands, NotificationService email,
+    public EmailVerificationService(UserRepository users, NotificationService email,
                                     InAppNotificationService inApp) {
         this.users = users;
-        this.creators = creators;
-        this.brands = brands;
         this.email = email;
         this.inApp = inApp;
     }
@@ -96,7 +87,8 @@ public class EmailVerificationService {
         user.setVerificationCodeExpires(null);
         user.setVerificationAttempts(0);
         users.save(user);
-        autoApproveProfiles(user);
+        inApp.send(user.getId(), "Почта подтверждена",
+                "Теперь можно выставить телефон на продажу — заполните объявление, и мы проверим его.");
     }
 
     private void invalidateCode(User user) {
@@ -104,27 +96,5 @@ public class EmailVerificationService {
         user.setVerificationCodeExpires(null);
         user.setVerificationAttempts(0);
         users.save(user);
-    }
-
-    /** Approve the user's existing profile (if any) now that their email is confirmed. */
-    @Transactional
-    public void autoApproveProfiles(User user) {
-        if (!user.isEmailVerified()) return;
-        CreatorProfile creator = creators.findByUserId(user.getId()).orElse(null);
-        if (creator != null && !creator.isApproved()) {
-            creator.setApproved(true);
-            creators.save(creator);
-            email.creatorProfileApproved(user.getEmail());
-            inApp.send(user.getId(), "Вас приняли как UGC-креатора",
-                    "Профиль подтверждён — теперь вы можете откликаться на кампании.");
-        }
-        BrandProfile brand = brands.findByUserId(user.getId()).orElse(null);
-        if (brand != null && !brand.isApproved()) {
-            brand.setApproved(true);
-            brands.save(brand);
-            email.brandProfileApproved(user.getEmail());
-            inApp.send(user.getId(), "Профиль компании одобрен",
-                    "Почта подтверждена — создайте первую кампанию.");
-        }
     }
 }

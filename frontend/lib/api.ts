@@ -1,7 +1,12 @@
 import { cache } from "react";
 import { auth } from "@/auth";
 import type { UserSummary } from "@/lib/types";
-import type { PublicCreatorProfile } from "@/lib/api-types";
+import type {
+  CatalogFilters,
+  ListingSummary,
+  PublicListing,
+  PublicSeller,
+} from "@/lib/api-types";
 
 export const BACKEND_URL =
   process.env.BACKEND_INTERNAL_URL ?? "http://localhost:8080";
@@ -29,51 +34,67 @@ export async function apiFetch(
   });
 }
 
-/** Fresh current-user snapshot from the backend (role, onboarding, approval). */
+/** Fresh current-user snapshot from the backend (role, onboarding, verification). */
 export async function getCurrentUser(): Promise<UserSummary | null> {
   const res = await apiFetch("/api/auth/me");
   if (!res.ok) return null;
   return (await res.json()) as UserSummary;
 }
 
+function toQuery(filters?: CatalogFilters): string {
+  const qs = new URLSearchParams();
+  Object.entries(filters ?? {}).forEach(([key, value]) => {
+    if (value != null && value !== "") qs.set(key, String(value));
+  });
+  return qs.toString() ? `?${qs}` : "";
+}
+
 /**
- * Public creator profile — no auth. Wrapped in React `cache()` so a single
- * request (generateMetadata + the page component) hits the backend only once.
- * Returns null on any failure so callers can `notFound()` cleanly.
+ * Active listings for the public catalog + sitemap. Never throws — an empty list
+ * on failure keeps SSR and `next build` green when the backend is down.
  */
-export const getPublicCreator = cache(
-  async (id: string): Promise<PublicCreatorProfile | null> => {
+export async function getPublicListings(
+  filters?: CatalogFilters,
+): Promise<ListingSummary[]> {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/public/listings${toQuery(filters)}`, {
+      next: { revalidate: 300 },
+    });
+    if (!res.ok) return [];
+    return (await res.json()) as ListingSummary[];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Public listing page. Wrapped in React `cache()` so generateMetadata and the page
+ * component share one backend call. Returns null on failure so callers `notFound()`.
+ */
+export const getPublicListing = cache(
+  async (id: string): Promise<PublicListing | null> => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/public/creators/${id}`, {
-        next: { revalidate: 3600 },
+      const res = await fetch(`${BACKEND_URL}/api/public/listings/${id}`, {
+        next: { revalidate: 300 },
       });
       if (!res.ok) return null;
-      return (await res.json()) as PublicCreatorProfile;
+      return (await res.json()) as PublicListing;
     } catch {
       return null;
     }
   },
 );
 
-/**
- * Approved public creators for the catalog + sitemap, optionally filtered by
- * category / city. Never throws — empty list on failure (backend down at build,
- * etc.) so SSR and `next build` stay green.
- */
-export async function getPublicCreators(
-  params?: { category?: string; city?: string },
-): Promise<PublicCreatorProfile[]> {
-  const qs = new URLSearchParams();
-  if (params?.category) qs.set("category", params.category);
-  if (params?.city) qs.set("city", params.city);
-  const suffix = qs.toString() ? `?${qs}` : "";
-  try {
-    const res = await fetch(`${BACKEND_URL}/api/public/creators${suffix}`, {
-      next: { revalidate: 3600 },
-    });
-    if (!res.ok) return [];
-    return (await res.json()) as PublicCreatorProfile[];
-  } catch {
-    return [];
-  }
-}
+export const getPublicSeller = cache(
+  async (id: string): Promise<PublicSeller | null> => {
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/public/sellers/${id}`, {
+        next: { revalidate: 3600 },
+      });
+      if (!res.ok) return null;
+      return (await res.json()) as PublicSeller;
+    } catch {
+      return null;
+    }
+  },
+);

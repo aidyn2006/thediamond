@@ -1,234 +1,155 @@
-import type { Category, Platform } from "@/lib/categories";
-import type { CampaignStatus, ApplicationStatus } from "@/lib/status";
+import type { PhoneBrand, PhoneCondition } from "@/lib/phones";
+import type { DealStatus, ListingStatus } from "@/lib/status";
 
-export interface SocialLink {
-  platform: Platform;
-  url: string;
-  followers: number | null;
-}
+/** Mirrors the backend DTOs in `com.thediamond.api.dto`. */
 
-export type SocialProofStatus = "PENDING" | "AUTO_APPROVED" | "APPROVED" | "REJECTED";
-
-export interface SocialProofResponse {
+export interface ListingSummary {
   id: number;
-  platform: Platform;
-  postUrl: string;
-  screenshotUrl: string | null;
-  verificationCode: string;
-  status: SocialProofStatus;
-  rejectReason: string | null;
-  createdAt: string;
-  reviewedAt: string | null;
-}
-
-export interface SocialProofState {
-  verificationCode: string;
-  proof: SocialProofResponse | null;
-}
-
-export interface CreatorProfileResponse {
-  id: number;
-  email: string;
-  name: string;
-  username: string;
-  avatarUrl: string | null;
-  bio: string | null;
+  title: string;
+  brand: PhoneBrand;
+  model: string;
+  storageGb: number | null;
+  condition: PhoneCondition;
+  batteryHealth: number | null;
+  price: number;
   city: string;
-  birthDate: string;
-  categories: Category[];
-  socials: SocialLink[];
-  totalFollowers: number;
-  telegramUrl: string | null;
-  approved: boolean;
-  socialProof: SocialProofResponse | null;
+  coverUrl: string | null;
+  status: ListingStatus;
+  views: number;
+  createdAt: string;
 }
 
-export interface BrandProfileResponse {
+export interface MyListingItem {
+  listing: ListingSummary;
+  dealRequests: number;
+  favorites: number;
+  rejectReason: string | null;
+}
+
+export interface SellerCard {
+  id: number;
+  displayName: string;
+  avatarUrl: string | null;
+  city: string | null;
+  /** Null until the seller accepts your purchase request. */
+  phone: string | null;
+  memberSince: string;
+  activeListings: number;
+}
+
+export interface ListingDetail {
+  id: number;
+  title: string;
+  brand: PhoneBrand;
+  model: string;
+  storageGb: number | null;
+  ramGb: number | null;
+  color: string | null;
+  condition: PhoneCondition;
+  batteryHealth: number | null;
+  price: number;
+  city: string;
+  description: string;
+  status: ListingStatus;
+  views: number;
+  createdAt: string;
+  images: string[];
+  seller: SellerCard;
+  isMine: boolean;
+  favorite: boolean;
+  myDealStatus: DealStatus | null;
+  canRequest: boolean;
+  requestBlockReason: string | null;
+}
+
+/** Unauthenticated listing card — no seller phone. */
+export interface PublicListing {
+  id: number;
+  title: string;
+  brand: PhoneBrand;
+  model: string;
+  storageGb: number | null;
+  ramGb: number | null;
+  color: string | null;
+  condition: PhoneCondition;
+  batteryHealth: number | null;
+  price: number;
+  city: string;
+  description: string;
+  images: string[];
+  sellerName: string;
+  sellerId: number;
+  createdAt: string;
+}
+
+export interface PublicSeller {
+  id: number;
+  displayName: string;
+  avatarUrl: string | null;
+  city: string | null;
+  about: string | null;
+  memberSince: string;
+  listings: ListingSummary[];
+}
+
+export interface DealItem {
+  id: number;
+  listing: ListingSummary;
+  status: DealStatus;
+  message: string | null;
+  counterpartName: string;
+  /** Null until the deal is accepted. */
+  counterpartPhone: string | null;
+  counterpartId: number;
+  iAmSeller: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProfileResponse {
   id: number;
   email: string;
-  companyName: string;
-  bin: string;
-  website: string | null;
+  displayName: string;
   phone: string;
-  contactName: string;
-  approved: boolean;
-}
-
-export interface Stats {
-  creators: number;
-  brands: number;
-  activeCampaigns: number;
-  applications: number;
+  city: string;
+  avatarUrl: string | null;
+  about: string | null;
+  createdAt: string;
 }
 
 export interface AdminUser {
   id: number;
   email: string;
-  role: "CREATOR" | "BRAND" | "ADMIN";
+  role: string;
   banned: boolean;
   createdAt: string;
-}
-
-export type WalletTransactionType =
-  | "REWARD"
-  | "CAMPAIGN_PAYOUT"
-  | "WITHDRAWAL"
-  | "REFUND"
-  | "ADJUSTMENT";
-
-export interface WalletTransaction {
-  id: number;
-  amount: number;
-  type: WalletTransactionType;
-  description: string | null;
-  createdAt: string;
-}
-
-export type WithdrawalStatus = "PENDING" | "PAID" | "REJECTED";
-
-export interface WithdrawalItem {
-  id: number;
-  amount: number;
-  status: WithdrawalStatus;
-  requisites: string;
-  rejectReason: string | null;
-  createdAt: string;
-  reviewedAt: string | null;
-}
-
-export interface WalletResponse {
-  balance: number;
-  minWithdrawal: number;
-  canWithdraw: boolean;
-  transactions: WalletTransaction[];
-  withdrawals: WithdrawalItem[];
-}
-
-export interface NotificationItem {
-  id: number;
-  title: string;
-  body: string;
-  read: boolean;
-  createdAt: string;
-}
-
-export interface NotificationList {
-  unread: number;
-  items: NotificationItem[];
 }
 
 export interface AdminUserDetail {
   userId: number;
   email: string;
-  role: "CREATOR" | "BRAND" | "ADMIN";
+  role: string;
   banned: boolean;
   emailVerified: boolean;
   createdAt: string;
-  walletBalance: number;
-  creator: CreatorProfileResponse | null;
-  brand: BrandProfileResponse | null;
-  withdrawals: WithdrawalItem[];
+  profile: ProfileResponse | null;
+  listings: ListingSummary[];
 }
 
-export interface PublicCreatorProfile {
-  id: number;
-  name: string;
-  username: string;
-  avatarUrl: string | null;
-  bio: string | null;
-  city: string;
-  categories: Category[];
-  socials: SocialLink[];
-  totalFollowers: number;
-  createdAt: string;
+export interface StatsResponse {
+  users: number;
+  activeListings: number;
+  pendingListings: number;
+  deals: number;
 }
 
-export interface CampaignSummary {
-  id: number;
-  title: string;
-  brandName: string;
-  category: Category;
-  platforms: Platform[];
-  rewardPerCreator: number;
-  creatorsNeeded: number;
-  slotsLeft: number;
-  deadline: string;
-  status: CampaignStatus;
-  createdAt: string;
-}
-
-export interface CampaignCounters {
-  applications: number;
-  accepted: number;
-  submitted: number;
-  approved: number;
-}
-
-export interface CampaignFull {
-  id: number;
-  title: string;
-  brandName: string;
-  category: Category;
-  platforms: Platform[];
-  rewardPerCreator: number;
-  creatorsNeeded: number;
-  slotsLeft: number;
-  deadline: string;
-  status: CampaignStatus;
-  createdAt: string;
-  description: string;
-  requirements: string;
-  rejectReason: string | null;
-  budget: number;
-}
-
-export interface BrandCampaignItem {
-  campaign: CampaignSummary;
-  counters: CampaignCounters;
-}
-
-export interface CampaignDetail {
-  id: number;
-  title: string;
-  brandName: string;
-  category: Category;
-  platforms: Platform[];
-  rewardPerCreator: number;
-  creatorsNeeded: number;
-  slotsLeft: number;
-  deadline: string;
-  status: CampaignStatus;
-  createdAt: string;
-  description: string;
-  requirements: string;
-  budget: number;
-  myApplicationStatus: ApplicationStatus | null;
-  canApply: boolean;
-  applyBlockReason: string | null;
-}
-
-export interface CampaignFeedItem {
-  campaign: CampaignSummary;
-  myApplicationStatus: ApplicationStatus | null;
-}
-
-export interface MyApplication {
-  id: number;
-  status: ApplicationStatus;
-  submissionUrl: string | null;
-  rejectReason: string | null;
-  resubmitUsed: boolean;
-  appliedAt: string;
-  campaign: CampaignSummary;
-}
-
-export interface BrandApplication {
-  id: number;
-  status: ApplicationStatus;
-  submissionUrl: string | null;
-  rejectReason: string | null;
-  resubmitUsed: boolean;
-  appliedAt: string;
-  submittedAt: string | null;
-  creator: CreatorProfileResponse;
+/** Catalog filter query, shared by the client filter bar and the server fetchers. */
+export interface CatalogFilters {
+  brand?: string;
+  condition?: string;
+  city?: string;
+  minPrice?: string;
+  maxPrice?: string;
+  minStorage?: string;
+  q?: string;
 }

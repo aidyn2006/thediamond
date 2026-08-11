@@ -1,15 +1,16 @@
 import type { NavItem } from "@/components/app/AppHeader";
 
-export const creatorNav: NavItem[] = [
-  { href: "/campaigns", label: "Кампании" },
-  { href: "/my-applications", label: "Мои отклики" },
-  { href: "/wallet", label: "Кошелёк" },
+/** One nav for everyone — the same account sells and buys. */
+export const memberNav: NavItem[] = [
+  { href: "/listings", label: "Каталог" },
+  { href: "/my-listings", label: "Мои объявления" },
+  { href: "/deals", label: "Сделки" },
+  { href: "/favorites", label: "Избранное" },
   { href: "/profile", label: "Профиль" },
 ];
 
-export const brandNav: NavItem[] = [
-  { href: "/dashboard", label: "Кабинет" },
-  { href: "/creators", label: "Креаторы" },
-  { href: "/wallet", label: "Кошелёк" },
-  { href: "/profile", label: "Профиль" },
+export const adminNav: NavItem[] = [
+  { href: "/admin", label: "Модерация" },
+  { href: "/admin/users", label: "Пользователи" },
+  { href: "/admin/stats", label: "Статистика" },
 ];

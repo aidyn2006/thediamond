@@ -10,11 +10,11 @@ public final class AuthDtos {
 
     private AuthDtos() {}
 
+    /** Everyone registers as a plain member — the same account sells and buys. */
     public record RegisterRequest(
             @NotBlank(message = "Укажите email") @Email(message = "Неверный формат email") String email,
             @NotBlank(message = "Придумайте пароль")
-            @Size(min = 8, max = 100, message = "Пароль от 8 символов") String password,
-            @NotNull(message = "Выберите роль") Role role
+            @Size(min = 8, max = 100, message = "Пароль от 8 символов") String password
     ) {}
 
     public record LoginRequest(
@@ -36,15 +36,14 @@ public final class AuthDtos {
             @Size(min = 8, max = 100, message = "Пароль от 8 символов") String password
     ) {}
 
+    /** {@code onboardingComplete} = contact profile filled, which is required to post. */
     public record UserSummary(
             Long id,
             String email,
             Role role,
             boolean banned,
             boolean emailVerified,
-            boolean onboardingComplete,
-            boolean approved,
-            boolean rewardTaskDone
+            boolean onboardingComplete
     ) {}
 
     public record AuthResponse(String token, UserSummary user) {}

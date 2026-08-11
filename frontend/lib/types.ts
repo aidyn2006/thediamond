@@ -1,4 +1,4 @@
-export type Role = "CREATOR" | "BRAND" | "ADMIN";
+export type Role = "USER" | "ADMIN";
 
 export interface UserSummary {
   id: number;
@@ -6,20 +6,11 @@ export interface UserSummary {
   role: Role;
   banned: boolean;
   emailVerified: boolean;
+  /** Contact profile filled — required before posting a listing or requesting a purchase. */
   onboardingComplete: boolean;
-  approved: boolean;
-  /** Creators only: false until they submit the advertise post. Gates the app until done. */
-  rewardTaskDone: boolean;
 }
 
 /** Where each role lands after login / from the app root. */
 export function roleHome(role: Role): string {
-  switch (role) {
-    case "CREATOR":
-      return "/campaigns";
-    case "BRAND":
-      return "/dashboard";
-    case "ADMIN":
-      return "/admin";
-  }
+  return role === "ADMIN" ? "/admin" : "/listings";
 }

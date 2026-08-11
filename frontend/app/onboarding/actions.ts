@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { apiFetch } from "@/lib/api";
 
 export interface ActionResult {
@@ -20,50 +21,20 @@ async function toResult(res: Response): Promise<ActionResult> {
   };
 }
 
-export interface CreatorProfileInput {
-  name: string;
-  username: string;
-  city: string;
-  birthDate: string;
-  categories: string[];
-  bio?: string;
-  avatarUrl?: string;
-  instagramUrl?: string;
-  tiktokUrl?: string;
-  threadsUrl?: string;
-  youtubeUrl?: string;
-  telegramUrl?: string;
-  instagramFollowers?: number | null;
-  tiktokFollowers?: number | null;
-  threadsFollowers?: number | null;
-  youtubeFollowers?: number | null;
-}
-
-export async function saveCreatorProfile(
-  input: CreatorProfileInput,
-): Promise<ActionResult> {
-  const res = await apiFetch("/api/creator/me", {
-    method: "PUT",
-    body: JSON.stringify(input),
-  });
-  return toResult(res);
-}
-
-export interface BrandProfileInput {
-  companyName: string;
-  bin: string;
-  website?: string;
+export interface ProfileInput {
+  displayName: string;
   phone: string;
-  contactName: string;
+  city: string;
+  avatarUrl?: string | null;
+  about?: string | null;
 }
 
-export async function saveBrandProfile(
-  input: BrandProfileInput,
-): Promise<ActionResult> {
-  const res = await apiFetch("/api/brand/me", {
+export async function saveProfile(input: ProfileInput): Promise<ActionResult> {
+  const res = await apiFetch("/api/profile/me", {
     method: "PUT",
     body: JSON.stringify(input),
   });
+  revalidatePath("/profile");
   return toResult(res);
 }
 

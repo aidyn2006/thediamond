@@ -1,10 +1,15 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getPublicCreator } from "@/lib/api";
-import { JsonLd } from "@/components/JsonLd";
-import { pageMetadata, profilePageJsonLd, breadcrumbJsonLd } from "@/lib/seo";
+import type { Metadata } from "next";
+import { auth } from "@/auth";
+import { AppHeader } from "@/components/app/AppHeader";
 import { PublicHeader } from "@/components/public/PublicHeader";
-import { categoryLabels, platformLabels, formatNumber } from "@/lib/categories";
+import { ListingCard } from "@/components/listing/ListingCard";
+import { JsonLd } from "@/components/JsonLd";
+import { Avatar } from "@/components/ui/Avatar";
+import { getPublicSeller } from "@/lib/api";
+import { memberNav } from "@/lib/nav";
+import { absoluteImage, absoluteUrl, pageMetadata } from "@/lib/seo";
+import type { PublicSeller } from "@/lib/api-types";
 
 export async function generateMetadata({
   params,
@@ -12,115 +17,92 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const p = await getPublicCreator(id);
-  if (!p) {
-    return { title: "Профиль не найден", robots: { index: false, follow: false } };
-  }
-
-  const cats = p.categories.map((c) => categoryLabels[c]);
-  const title = `${p.name} — креатор${p.city ? ` в ${p.city}` : ""}`;
-  const description = p.bio?.trim()
-    ? p.bio.trim()
-    : `${p.name} — креатор${p.city ? ` из ${p.city}` : ""}. ${
-        cats.length ? `${cats.join(", ")}. ` : ""
-      }Аудитория ${formatNumber(p.totalFollowers)}. Профиль на TheDiamond.`;
-
+  const seller = await getPublicSeller(id);
+  if (!seller) return pageMetadata({ title: "Продавец не найден", index: false });
   return pageMetadata({
-    title,
-    description,
-    path: `/u/${p.id}`,
+    title: `${seller.displayName} — объявления`,
+    description:
+      seller.about?.slice(0, 300) ??
+      `Телефоны от ${seller.displayName}${seller.city ? `, ${seller.city}` : ""}: ${seller.listings.length} активных объявлений.`,
+    path: `/u/${id}`,
     ogType: "profile",
   });
 }
 
-export default async function PublicCreatorPage({
+function personJsonLd(seller: PublicSeller) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: seller.displayName,
+    image: absoluteImage(seller.avatarUrl),
+    address: seller.city
+      ? { "@type": "PostalAddress", addressLocality: seller.city }
+      : undefined,
+    url: absoluteUrl(`/u/${seller.id}`),
+  };
+}
+
+export default async function SellerPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const session = await auth();
   const { id } = await params;
-  const p = await getPublicCreator(id);
-  if (!p) notFound();
+  const seller = await getPublicSeller(id);
+  if (!seller) notFound();
+
+  const since = new Date(seller.memberSince).toLocaleDateString("ru-RU", {
+    month: "long",
+    year: "numeric",
+  });
 
   return (
-    <div className="min-h-dvh">
-      <JsonLd
-        data={[
-          profilePageJsonLd(p),
-          breadcrumbJsonLd([
-            { name: "Главная", path: "/" },
-            { name: "Каталог", path: "/catalog" },
-            { name: p.name, path: `/u/${p.id}` },
-          ]),
-        ]}
-      />
+    <>
+      {session?.user ? (
+        <AppHeader email={session.user.email} items={memberNav} />
+      ) : (
+        <PublicHeader />
+      )}
 
-      <PublicHeader maxWidth="900px" />
-
-      <main id="main-content" tabIndex={-1} className="mx-auto max-w-[900px] px-6 py-10">
-        <div className="flex flex-col items-center text-center sm:flex-row sm:items-start sm:text-left sm:gap-6">
-          <div className="mb-4 h-24 w-24 shrink-0 overflow-hidden rounded-full border border-border bg-surface-2 sm:mb-0">
-            {p.avatarUrl ? (
-              // Above-the-fold LCP image — eager + high priority, explicit size to avoid CLS.
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={p.avatarUrl}
-                alt={p.name}
-                width={96}
-                height={96}
-                loading="eager"
-                fetchPriority="high"
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center font-display text-28 text-text-dim">
-                {p.name.charAt(0)}
-              </div>
-            )}
-          </div>
-          <div className="min-w-0">
-            <h1 className="text-28 font-semibold">{p.name}</h1>
-            <p className="text-15 text-text-dim">
-              @{p.username} · {p.city}
-            </p>
-            <p className="mt-1 text-15">
-              Аудитория: <span className="font-semibold">{formatNumber(p.totalFollowers)}</span>
+      <main id="main-content" className="mx-auto max-w-[1200px] px-6 py-8 md:px-10">
+        <header className="mb-8 flex flex-wrap items-center gap-4">
+          <Avatar src={seller.avatarUrl} name={seller.displayName} size={72} />
+          <div>
+            <h1 className="text-28 font-semibold">{seller.displayName}</h1>
+            <p className="mt-1 text-13 text-text-dim">
+              {[seller.city, `на сайте с ${since}`].filter(Boolean).join(" · ")}
             </p>
           </div>
-        </div>
+        </header>
 
-        {p.bio && <p className="mt-6 max-w-[60ch] text-15 text-text-dim">{p.bio}</p>}
-
-        {p.categories.length > 0 && (
-          <div className="mt-6 flex flex-wrap gap-2">
-            {p.categories.map((c) => (
-              <span
-                key={c}
-                className="rounded-pill border border-border bg-surface-2 px-3.5 py-2 text-13 font-medium text-text-dim"
-              >
-                {categoryLabels[c]}
-              </span>
-            ))}
-          </div>
+        {seller.about && (
+          <p className="mb-8 max-w-[640px] whitespace-pre-line text-15 leading-relaxed text-text-dim">
+            {seller.about}
+          </p>
         )}
 
-        {p.socials.length > 0 && (
-          <div className="mt-6 flex flex-col gap-2">
-            {p.socials.map((s) => (
-              <a
-                key={s.platform}
-                href={s.url}
-                target="_blank"
-                rel="noreferrer"
-                className="text-15 text-accent hover:brightness-110"
-              >
-                {platformLabels[s.platform]}
-                {s.followers != null && ` · ${formatNumber(s.followers)}`}
-              </a>
+        <h2 className="mb-4 text-18 font-semibold">
+          Объявления
+          <span className="ml-2 text-13 font-normal text-text-dim">
+            {seller.listings.length}
+          </span>
+        </h2>
+
+        {seller.listings.length === 0 ? (
+          <p className="rounded-card border border-border bg-surface p-6 text-13 text-text-dim">
+            У продавца сейчас нет активных объявлений.
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {seller.listings.map((l) => (
+              <ListingCard key={l.id} listing={l} />
             ))}
           </div>
         )}
       </main>
-    </div>
+
+      <JsonLd data={personJsonLd(seller)} />
+    </>
   );
 }

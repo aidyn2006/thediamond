@@ -5,8 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
- * Composes and dispatches the product's transactional emails (spec 1.7) as
- * branded HTML. All methods swallow errors so notifications never break the main flow.
+ * Composes and dispatches the marketplace's transactional emails as branded HTML.
+ * All methods swallow errors so notifications never break the main flow.
  */
 @Service
 public class NotificationService {
@@ -47,63 +47,41 @@ public class NotificationService {
         safeSend(to, "Сброс пароля — TheDiamond", html);
     }
 
-    // --- Creator ---
-    public void creatorProfileApproved(String to) {
-        safeSend(to, "Профиль одобрен", EmailTemplates.render("Профиль одобрен",
-                p("Ваш профиль на TheDiamond одобрен. Загляните в кампании и откликнитесь на подходящую.")));
+    // --- Listing moderation (to the seller) ---
+    public void listingApproved(String to, String title) {
+        safeSend(to, "Объявление опубликовано", EmailTemplates.render("Объявление опубликовано",
+                p("Ваше объявление «" + title + "» прошло проверку и теперь видно покупателям.")
+                        + p("Заявки на покупку придут в раздел «Сделки».")));
     }
 
-    public void creatorProfileRejected(String to, String reason) {
-        safeSend(to, "Профиль отклонён", EmailTemplates.render("Профиль отклонён",
-                p("К сожалению, ваш профиль пока не прошёл модерацию."
+    public void listingRejected(String to, String title, String reason) {
+        safeSend(to, "Объявление отклонено", EmailTemplates.render("Объявление отклонено",
+                p("Объявление «" + title + "» не прошло проверку."
                         + (reason != null && !reason.isBlank() ? " Причина: " + reason : ""))
-                        + p("Обновите данные профиля и отправьте на проверку снова.")));
+                        + p("Отредактируйте его и отправьте на проверку снова.")));
     }
 
-    public void applicationAccepted(String to, String campaignTitle) {
-        safeSend(to, "Ваш отклик приняли", EmailTemplates.render("Ваш отклик приняли",
-                p("Бренд принял ваш отклик на кампанию «" + campaignTitle + "».")
-                        + p("Выполните задание и сдайте ссылку на публикацию в разделе «Мои отклики».")));
+    // --- Deals ---
+    public void newDealRequest(String to, String buyerName, String title) {
+        safeSend(to, "Новая заявка на покупку", EmailTemplates.render("Новая заявка на покупку",
+                p(buyerName + " хочет купить «" + title + "».")
+                        + p("Примите заявку в разделе «Сделки» — после этого вы обменяетесь телефонами.")));
     }
 
-    public void workApproved(String to, String campaignTitle) {
-        safeSend(to, "Работа одобрена", EmailTemplates.render("Работа одобрена",
-                p("Ваша работа по кампании «" + campaignTitle + "» одобрена. Отличный результат!")));
+    public void dealAccepted(String to, String title, String sellerPhone) {
+        safeSend(to, "Продавец принял вашу заявку", EmailTemplates.render("Продавец принял вашу заявку",
+                p("Заявка на «" + title + "» принята.")
+                        + (sellerPhone != null && !sellerPhone.isBlank()
+                            ? p("Телефон продавца: <b>" + sellerPhone + "</b>")
+                            : "")
+                        + p("Свяжитесь с продавцом и договоритесь о встрече. Оплата проходит вне сайта — "
+                            + "проверяйте телефон при получении.")));
     }
 
-    public void workRejected(String to, String campaignTitle, String reason) {
-        safeSend(to, "Работу вернули на доработку", EmailTemplates.render("Работу вернули на доработку",
-                p("Работу по кампании «" + campaignTitle + "» отклонили. Причина: " + reason)
-                        + p("Вы можете сдать заново один раз в разделе «Мои отклики».")));
-    }
-
-    // --- Brand ---
-    public void brandProfileApproved(String to) {
-        safeSend(to, "Профиль компании одобрен", EmailTemplates.render("Профиль компании одобрен",
-                p("Профиль вашей компании одобрен. Создайте первую кампанию — и креаторы откликнутся.")));
-    }
-
-    public void brandProfileRejected(String to, String reason) {
-        safeSend(to, "Профиль компании отклонён", EmailTemplates.render("Профиль компании отклонён",
-                p("Профиль вашей компании пока не прошёл модерацию."
+    public void dealDeclined(String to, String title, String reason) {
+        safeSend(to, "Заявку отклонили", EmailTemplates.render("Заявку отклонили",
+                p("Продавец отклонил вашу заявку на «" + title + "»."
                         + (reason != null && !reason.isBlank() ? " Причина: " + reason : ""))
-                        + p("Обновите данные и отправьте на проверку снова.")));
-    }
-
-    public void campaignApproved(String to, String campaignTitle) {
-        safeSend(to, "Кампания одобрена", EmailTemplates.render("Кампания одобрена",
-                p("Кампания «" + campaignTitle + "» прошла модерацию и теперь видна креаторам.")));
-    }
-
-    public void campaignRejected(String to, String campaignTitle, String reason) {
-        safeSend(to, "Кампанию отклонили", EmailTemplates.render("Кампанию отклонили",
-                p("Кампанию «" + campaignTitle + "» отклонили. Причина: " + reason)
-                        + p("Отредактируйте её и отправьте на модерацию снова.")));
-    }
-
-    public void newApplication(String to, String creatorName, String campaignTitle) {
-        safeSend(to, "Новый отклик на кампанию", EmailTemplates.render("Новый отклик на кампанию",
-                p(creatorName + " откликнулся на вашу кампанию «" + campaignTitle + "».")
-                        + p("Посмотрите профиль и примите решение в кабинете.")));
+                        + p("Посмотрите другие предложения в каталоге.")));
     }
 }

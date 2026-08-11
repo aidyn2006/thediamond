@@ -1,11 +1,11 @@
 import { apiFetch } from "@/lib/api";
-import { formatNumber } from "@/lib/categories";
-import type { Stats } from "@/lib/api-types";
+import { formatNumber } from "@/lib/phones";
+import type { StatsResponse } from "@/lib/api-types";
 
-async function getStats(): Promise<Stats | null> {
+async function getStats(): Promise<StatsResponse | null> {
   const res = await apiFetch("/api/admin/stats");
   if (!res.ok) return null;
-  return (await res.json()) as Stats;
+  return (await res.json()) as StatsResponse;
 }
 
 function StatCard({ label, value }: { label: string; value: number }) {
@@ -28,10 +28,10 @@ export default async function AdminStatsPage() {
     <div>
       <h1 className="mb-6 text-28 font-semibold">Статистика</h1>
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label="Креаторов" value={stats.creators} />
-        <StatCard label="Брендов" value={stats.brands} />
-        <StatCard label="Активных кампаний" value={stats.activeCampaigns} />
-        <StatCard label="Откликов за всё время" value={stats.applications} />
+        <StatCard label="Участников" value={stats.users} />
+        <StatCard label="Активных объявлений" value={stats.activeListings} />
+        <StatCard label="Ждут проверки" value={stats.pendingListings} />
+        <StatCard label="Сделок за всё время" value={stats.deals} />
       </div>
     </div>
   );

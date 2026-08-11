@@ -19,17 +19,24 @@ export async function requireRole(role: Role) {
 }
 
 /**
- * Full gate for the working area: correct role + onboarding done + approved.
- * Sends the user to onboarding / pending as needed. Returns the fresh user.
+ * Gate for member screens: signed in, not an admin, contact profile filled.
+ * Sends the user to onboarding when the profile is still missing.
  */
-export async function requireApprovedRole(role: Role): Promise<UserSummary> {
-  await requireRole(role);
+export async function requireMember(): Promise<UserSummary> {
+  await requireRole("USER");
   const me = await getCurrentUser();
   if (!me) redirect("/login");
   if (!me.onboardingComplete) redirect("/onboarding");
-  if (!me.approved) redirect("/pending");
-  // Creators must complete the advertise task before using the app — shown every
-  // login until done. The /reward screen itself must NOT call this guard (would loop).
-  if (me.role === "CREATOR" && !me.rewardTaskDone) redirect("/reward");
+  return me;
+}
+
+/**
+ * Softer variant for screens that only need a session — browsing the catalog and
+ * favourites works before the profile is filled; posting and buying do not.
+ */
+export async function requireSignedIn(): Promise<UserSummary> {
+  await requireAuth();
+  const me = await getCurrentUser();
+  if (!me) redirect("/login");
   return me;
 }

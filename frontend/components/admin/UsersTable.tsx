@@ -9,9 +9,8 @@ import { StatusPill } from "@/components/ui/StatusPill";
 import { setUserBan } from "@/app/admin/actions";
 import type { AdminUser } from "@/lib/api-types";
 
-const roleLabel: Record<AdminUser["role"], string> = {
-  CREATOR: "Креатор",
-  BRAND: "Бренд",
+const roleLabel: Record<string, string> = {
+  USER: "Участник",
   ADMIN: "Админ",
 };
 
