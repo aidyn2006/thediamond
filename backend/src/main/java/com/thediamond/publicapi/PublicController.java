@@ -3,6 +3,7 @@ package com.thediamond.publicapi;
 import com.thediamond.api.dto.ListingDtos.ListingSummary;
 import com.thediamond.api.dto.ListingDtos.PublicListing;
 import com.thediamond.api.dto.ListingDtos.PublicSeller;
+import com.thediamond.api.dto.ListingDtos.SellerRef;
 import com.thediamond.domain.Listing;
 import com.thediamond.domain.ListingStatus;
 import com.thediamond.domain.PhoneBrand;
@@ -20,7 +21,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Unauthenticated, public-facing endpoints (see SecurityConfig permitAll on
@@ -64,6 +68,23 @@ public class PublicController {
                 .map(UserProfile::getDisplayName)
                 .orElse("Продавец");
         return Mappers.toPublicListing(l, sellerName);
+    }
+
+    /**
+     * Sellers worth putting in the sitemap — those with at least one active listing.
+     * {@code updatedAt} is their newest listing, which is what makes the page change.
+     */
+    @GetMapping("/sellers")
+    @Transactional(readOnly = true)
+    public List<SellerRef> sellers() {
+        Map<Long, Instant> newestListing = new LinkedHashMap<>();
+        // Listings arrive newest-first, so the first hit per seller is the freshest.
+        for (Listing l : listings.findByStatusOrderByCreatedAtDesc(ListingStatus.ACTIVE)) {
+            newestListing.putIfAbsent(l.getSeller().getId(), l.getCreatedAt());
+        }
+        return newestListing.entrySet().stream()
+                .map(e -> new SellerRef(e.getKey(), e.getValue()))
+                .toList();
     }
 
     @GetMapping("/sellers/{id}")

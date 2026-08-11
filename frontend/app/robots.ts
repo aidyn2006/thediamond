@@ -6,22 +6,19 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        // Public: "/" (landing) and "/u/*" (creator profiles). Everything else
-        // is auth-gated or thin and must stay out of the index.
+        // Public: "/" (landing), "/listings/*" (catalog + listing pages) and
+        // "/u/*" (seller pages). Everything else is auth-gated or thin.
         allow: "/",
         disallow: [
           "/admin",
           "/api/",
-          "/dashboard",
+          "/listings/new",
+          "/my-listings",
+          "/deals",
+          "/favorites",
           "/onboarding",
-          "/pending",
           "/profile",
-          "/my-applications",
-          "/campaigns",
-          "/creators",
-          "/wallet",
           "/notifications",
-          "/reward",
           "/login",
           "/register",
           "/forgot-password",

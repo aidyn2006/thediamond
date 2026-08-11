@@ -6,6 +6,7 @@ import type {
   ListingSummary,
   PublicListing,
   PublicSeller,
+  SellerRef,
 } from "@/lib/api-types";
 
 export const BACKEND_URL =
@@ -84,6 +85,19 @@ export const getPublicListing = cache(
     }
   },
 );
+
+/** Sellers with active listings — sitemap only. Empty list on failure, never throws. */
+export async function getPublicSellers(): Promise<SellerRef[]> {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/public/sellers`, {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return [];
+    return (await res.json()) as SellerRef[];
+  } catch {
+    return [];
+  }
+}
 
 export const getPublicSeller = cache(
   async (id: string): Promise<PublicSeller | null> => {

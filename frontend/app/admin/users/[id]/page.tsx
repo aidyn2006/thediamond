@@ -47,17 +47,19 @@ export default async function AdminUserDetailPage({
           <Row
             label="Статус"
             value={
-              <StatusPill tone={u.banned ? "error" : "success"}>
-                {u.banned ? "Заблокирован" : "Активен"}
-              </StatusPill>
+              <StatusPill
+                tone={u.banned ? "error" : "success"}
+                label={u.banned ? "Заблокирован" : "Активен"}
+              />
             }
           />
           <Row
             label="Почта"
             value={
-              <StatusPill tone={u.emailVerified ? "success" : "warning"}>
-                {u.emailVerified ? "Подтверждена" : "Не подтверждена"}
-              </StatusPill>
+              <StatusPill
+                tone={u.emailVerified ? "success" : "warning"}
+                label={u.emailVerified ? "Подтверждена" : "Не подтверждена"}
+              />
             }
           />
           <Row

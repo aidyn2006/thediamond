@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 import { loadOgFont } from "./_og/font";
 import { SITE_NAME } from "@/lib/seo";
 
-export const alt = "TheDiamond — контент, который работает";
+export const alt = "TheDiamond — маркетплейс телефонов в Казахстане";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -52,10 +52,10 @@ export default async function OpengraphImage() {
               maxWidth: 960,
             }}
           >
-            Контент, который работает
+            Телефоны от людей, а не от перекупов
           </div>
           <div style={{ marginTop: 28, fontSize: 32, color: "#9a9da7", maxWidth: 900 }}>
-            Бренды Казахстана находят UGC-креаторов, а креаторы — заработок.
+            Маркетплейс телефонов в Казахстане. Без комиссии.
           </div>
         </div>
 

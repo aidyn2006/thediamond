@@ -82,6 +82,12 @@ export interface PublicListing {
   createdAt: string;
 }
 
+/** Sitemap row for a seller with at least one active listing. */
+export interface SellerRef {
+  id: number;
+  updatedAt: string;
+}
+
 export interface PublicSeller {
   id: number;
   displayName: string;
@@ -104,6 +110,19 @@ export interface DealItem {
   iAmSeller: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface NotificationItem {
+  id: number;
+  title: string;
+  body: string;
+  read: boolean;
+  createdAt: string;
+}
+
+export interface NotificationList {
+  unread: number;
+  items: NotificationItem[];
 }
 
 export interface ProfileResponse {

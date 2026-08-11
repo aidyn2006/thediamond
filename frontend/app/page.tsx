@@ -6,7 +6,7 @@ import { ListingCard } from "@/components/listing/ListingCard";
 import { Button } from "@/components/ui/Button";
 import { getPublicListings } from "@/lib/api";
 import { roleHome } from "@/lib/types";
-import { PHONE_BRANDS, brandLabels } from "@/lib/phones";
+import { PHONE_BRANDS, brandLabels, brandSlugs } from "@/lib/phones";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata = pageMetadata({
@@ -60,7 +60,7 @@ export default async function HomePage() {
             {FEATURED_BRANDS.map((b) => (
               <Link
                 key={b}
-                href={`/listings?brand=${b}`}
+                href={`/listings/brand/${brandSlugs[b]}`}
                 className="rounded-btn border border-border px-4 py-2 text-15 text-text-dim transition-colors duration-150 hover:border-accent hover:text-text"
               >
                 {brandLabels[b]}

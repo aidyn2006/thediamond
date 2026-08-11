@@ -1,39 +1,49 @@
 import type { MetadataRoute } from "next";
-import { getPublicCreators } from "@/lib/api";
+import { getPublicListings, getPublicSellers } from "@/lib/api";
 import { SITE_URL } from "@/lib/seo";
-import { CATEGORIES, categorySlugs } from "@/lib/categories";
+import { PHONE_BRANDS, brandSlugs } from "@/lib/phones";
 
-// Re-generate at most hourly; new approved creators appear without a redeploy.
+// Re-generate at most hourly; new approved listings appear without a redeploy.
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const creators = await getPublicCreators();
+  const [listings, sellers] = await Promise.all([
+    getPublicListings(),
+    getPublicSellers(),
+  ]);
   const now = new Date();
 
   return [
     {
       url: SITE_URL,
       lastModified: now,
-      changeFrequency: "weekly",
+      changeFrequency: "daily",
       priority: 1,
     },
     {
-      url: `${SITE_URL}/catalog`,
+      url: `${SITE_URL}/listings`,
       lastModified: now,
       changeFrequency: "daily",
       priority: 0.9,
     },
-    ...CATEGORIES.map((c) => ({
-      url: `${SITE_URL}/catalog/${categorySlugs[c]}`,
+    ...PHONE_BRANDS.map((b) => ({
+      url: `${SITE_URL}/listings/brand/${brandSlugs[b]}`,
       lastModified: now,
+      changeFrequency: "daily" as const,
+      priority: 0.8,
+    })),
+    // Listings are the money pages: one URL each, freshest first.
+    ...listings.map((l) => ({
+      url: `${SITE_URL}/listings/${l.id}`,
+      lastModified: l.createdAt ? new Date(l.createdAt) : now,
       changeFrequency: "weekly" as const,
       priority: 0.7,
     })),
-    ...creators.map((c) => ({
-      url: `${SITE_URL}/u/${c.id}`,
-      lastModified: c.createdAt ? new Date(c.createdAt) : now,
+    ...sellers.map((s) => ({
+      url: `${SITE_URL}/u/${s.id}`,
+      lastModified: s.updatedAt ? new Date(s.updatedAt) : now,
       changeFrequency: "weekly" as const,
-      priority: 0.6,
+      priority: 0.5,
     })),
   ];
 }

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { categoryLabels } from "@/lib/categories";
-import type { PublicCreatorProfile } from "@/lib/api-types";
+import type { ListingSummary } from "@/lib/api-types";
 
 /**
  * Single source of truth for site-wide SEO. Pages compose their metadata with
@@ -11,9 +10,9 @@ import type { PublicCreatorProfile } from "@/lib/api-types";
 
 export const SITE_URL = "https://thediamond.kz";
 export const SITE_NAME = "TheDiamond";
-export const DEFAULT_TITLE = "TheDiamond — контент, который работает";
+export const DEFAULT_TITLE = "TheDiamond — телефоны от людей, а не от перекупов";
 export const DEFAULT_DESCRIPTION =
-  "Платформа, где бренды Казахстана находят UGC-креаторов и микроинфлюенсеров, а креаторы — заработок. Отклики на кампании, выплаты в тенге.";
+  "Маркетплейс телефонов в Казахстане: покупайте у частных продавцов и продавайте свой телефон без комиссии. Каждое объявление проходит проверку модератора.";
 export const OG_LOCALE = "ru_RU";
 export const CONTACT_EMAIL = "hello@thediamond.kz";
 
@@ -105,40 +104,6 @@ export function websiteJsonLd() {
   };
 }
 
-function personEntity(p: PublicCreatorProfile) {
-  const sameAs = p.socials.map((s) => s.url).filter(Boolean);
-  const image = absoluteImage(p.avatarUrl);
-  return {
-    "@type": "Person",
-    name: p.name,
-    alternateName: `@${p.username}`,
-    url: absoluteUrl(`/u/${p.id}`),
-    ...(image ? { image } : {}),
-    ...(p.bio ? { description: p.bio } : {}),
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: p.city,
-      addressCountry: "KZ",
-    },
-    ...(p.categories.length
-      ? { knowsAbout: p.categories.map((c) => categoryLabels[c]) }
-      : {}),
-    ...(sameAs.length ? { sameAs } : {}),
-  };
-}
-
-/** ProfilePage + embedded Person for a public creator profile. */
-export function profilePageJsonLd(p: PublicCreatorProfile) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "ProfilePage",
-    url: absoluteUrl(`/u/${p.id}`),
-    name: `${p.name} (@${p.username})`,
-    inLanguage: "ru-KZ",
-    mainEntity: personEntity(p),
-  };
-}
-
 /** BreadcrumbList from an ordered list of {name, path} crumbs. */
 export function breadcrumbJsonLd(items: { name: string; path: string }[]) {
   return {
@@ -153,17 +118,20 @@ export function breadcrumbJsonLd(items: { name: string; path: string }[]) {
   };
 }
 
-/** CollectionPage wrapping an ItemList of creator profiles (catalog + hubs). */
+/**
+ * CollectionPage wrapping an ItemList of listings (catalog + brand hubs). Each row
+ * carries its price so Google can show the range without crawling every listing.
+ */
 export function catalogJsonLd({
   name,
   description,
   path,
-  creators,
+  listings,
 }: {
   name: string;
   description: string;
   path: string;
-  creators: PublicCreatorProfile[];
+  listings: ListingSummary[];
 }) {
   return {
     "@context": "https://schema.org",
@@ -174,12 +142,12 @@ export function catalogJsonLd({
     inLanguage: "ru-KZ",
     mainEntity: {
       "@type": "ItemList",
-      numberOfItems: creators.length,
-      itemListElement: creators.slice(0, 50).map((c, i) => ({
+      numberOfItems: listings.length,
+      itemListElement: listings.slice(0, 50).map((l, i) => ({
         "@type": "ListItem",
         position: i + 1,
-        url: absoluteUrl(`/u/${c.id}`),
-        name: c.name,
+        url: absoluteUrl(`/listings/${l.id}`),
+        name: l.title,
       })),
     },
   };

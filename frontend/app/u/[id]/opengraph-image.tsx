@@ -1,14 +1,23 @@
 import { ImageResponse } from "next/og";
 import { loadOgFont, fetchImageDataUri } from "../../_og/font";
-import { getPublicCreator } from "@/lib/api";
+import { getPublicSeller } from "@/lib/api";
 import { absoluteImage, SITE_NAME } from "@/lib/seo";
-import { categoryLabels, formatNumber } from "@/lib/categories";
+import { formatTenge } from "@/lib/phones";
 
-export const alt = "Профиль креатора · TheDiamond";
+export const alt = "Профиль продавца · TheDiamond";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 const PRISM = "linear-gradient(135deg, #7fd4ff 0%, #c3b5ff 50%, #ffd9a0 100%)";
+
+/** "5 объявлений" / "1 объявление" — RU plural for the seller's active count. */
+function listingsLabel(n: number): string {
+  const mod100 = n % 100;
+  const mod10 = n % 10;
+  if (mod10 === 1 && mod100 !== 11) return `${n} объявление`;
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return `${n} объявления`;
+  return `${n} объявлений`;
+}
 
 export default async function OpengraphImage({
   params,
@@ -16,11 +25,16 @@ export default async function OpengraphImage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [font, p] = await Promise.all([loadOgFont(), getPublicCreator(id)]);
+  const [font, seller] = await Promise.all([loadOgFont(), getPublicSeller(id)]);
 
-  const name = p?.name ?? SITE_NAME;
-  const avatar = p?.avatarUrl ? await fetchImageDataUri(absoluteImage(p.avatarUrl)!) : null;
-  const cats = (p?.categories ?? []).slice(0, 3).map((c) => categoryLabels[c]);
+  const name = seller?.displayName ?? SITE_NAME;
+  const avatar = seller?.avatarUrl
+    ? await fetchImageDataUri(absoluteImage(seller.avatarUrl)!)
+    : null;
+  // Cheapest active listing — the one number that makes the card worth clicking.
+  const from = seller?.listings.length
+    ? Math.min(...seller.listings.map((l) => l.price))
+    : null;
 
   return new ImageResponse(
     (
@@ -54,7 +68,7 @@ export default async function OpengraphImage({
           </div>
         </div>
 
-        {/* profile row */}
+        {/* seller row */}
         <div style={{ display: "flex", alignItems: "center" }}>
           {avatar ? (
             // eslint-disable-next-line jsx-a11y/alt-text, @next/next/no-img-element
@@ -94,38 +108,19 @@ export default async function OpengraphImage({
             <div style={{ fontSize: 60, fontWeight: 600, lineHeight: 1.1, letterSpacing: "-0.02em" }}>
               {name}
             </div>
-            {p && (
+            {seller && (
               <div style={{ marginTop: 14, fontSize: 30, color: "#9a9da7" }}>
-                {`@${p.username}${p.city ? ` · ${p.city}` : ""}`}
+                {[seller.city, "продаёт телефоны"].filter(Boolean).join(" · ")}
               </div>
             )}
-            {p && (
+            {seller && (
               <div style={{ display: "flex", alignItems: "baseline", marginTop: 22, fontSize: 32 }}>
-                <span>Аудитория:</span>
-                <span style={{ fontWeight: 600, marginLeft: 8 }}>
-                  {formatNumber(p.totalFollowers)}
-                </span>
-              </div>
-            )}
-            {cats.length > 0 && (
-              <div style={{ display: "flex", marginTop: 26 }}>
-                {cats.map((c) => (
-                  <div
-                    key={c}
-                    style={{
-                      display: "flex",
-                      marginRight: 12,
-                      padding: "8px 18px",
-                      borderRadius: 999,
-                      border: "1px solid #2a2c34",
-                      background: "#17181d",
-                      fontSize: 24,
-                      color: "#9a9da7",
-                    }}
-                  >
-                    {c}
-                  </div>
-                ))}
+                <span>{listingsLabel(seller.listings.length)}</span>
+                {from != null && (
+                  <span style={{ fontWeight: 600, marginLeft: 12 }}>
+                    {`от ${formatTenge(from)}`}
+                  </span>
+                )}
               </div>
             )}
           </div>
