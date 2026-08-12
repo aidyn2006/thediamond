@@ -11,7 +11,8 @@ import { buttonClasses } from "@/components/ui/Button";
 import { getPublicListings } from "@/lib/api";
 import { memberNav } from "@/lib/nav";
 import { breadcrumbJsonLd, faqPageJsonLd, pageMetadata } from "@/lib/seo";
-import { brandSlugs, formatTenge } from "@/lib/phones";
+import { formatTenge } from "@/lib/phones";
+import { brandPath } from "@/lib/routes";
 
 export const metadata = pageMetadata({
   title: "Обменять айфон на другую модель — как это сделать в Казахстане",
@@ -90,7 +91,7 @@ export default async function ExchangePage() {
           >
             Выставить свой телефон
           </Link>
-          <Link href={`/listings/brand/${brandSlugs.APPLE}`} className={buttonClasses("secondary")}>
+          <Link href={brandPath("APPLE")} className={buttonClasses("secondary")}>
             {appleFrom != null ? `iPhone от ${formatTenge(appleFrom)}` : "Смотреть iPhone"}
           </Link>
         </div>

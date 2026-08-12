@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ListingSummary } from "@/lib/api-types";
 import { listingPath } from "@/lib/listing-url";
+import { languageAlternates, type Locale } from "@/lib/routes";
 import {
   brandLabels,
   conditionLabels,
@@ -45,6 +46,12 @@ type PageMetaInput = {
   /** Set false to keep the page out of the index (thin/auth pages). */
   index?: boolean;
   ogType?: "website" | "profile" | "article";
+  /**
+   * Same page in the other locales, as a locale → path builder. Pass the matching
+   * lib/routes builder and hreflang is emitted automatically once a second locale goes
+   * live; until then `languageAlternates()` returns undefined and nothing is written.
+   */
+  altPaths?: (locale: Locale) => string;
 };
 
 /**
@@ -58,8 +65,12 @@ export function pageMetadata({
   path = "/",
   index = true,
   ogType = "website",
+  altPaths,
 }: PageMetaInput): Metadata {
   const url = absoluteUrl(path);
+  const languages = altPaths
+    ? languageAlternates((l) => absoluteUrl(altPaths(l)))
+    : undefined;
   // og/twitter titles are set explicitly (Next doesn't back-fill them once a page
   // supplies its own `openGraph` object). `title` is omitted entirely when absent
   // so the root layout's `title.default` still applies to the <title> tag.
@@ -67,7 +78,7 @@ export function pageMetadata({
   return {
     ...(title ? { title } : {}),
     description,
-    alternates: { canonical: url },
+    alternates: { canonical: url, ...(languages ? { languages } : {}) },
     ...(index ? {} : { robots: { index: false, follow: false } }),
     openGraph: {
       title: ogTitle,
@@ -102,6 +113,11 @@ export function organizationJsonLd() {
   };
 }
 
+/**
+ * WebSite + SearchAction. The `potentialAction` is what lets Google render a search box
+ * inside our sitelinks — it has to point at a real, crawlable query URL, which is why
+ * the target is the catalog's own `q` parameter rather than an internal API route.
+ */
 export function websiteJsonLd() {
   return {
     "@context": "https://schema.org",
@@ -109,6 +125,59 @@ export function websiteJsonLd() {
     name: SITE_NAME,
     url: SITE_URL,
     inLanguage: "ru-KZ",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${SITE_URL}/listings?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+}
+
+/**
+ * Seller profile as a Person, with the rating attached only when there are real reviews.
+ * An AggregateRating with `reviewCount: 0` (or an invented value) is a structured-data
+ * violation, so callers pass null until the seller has actually been rated.
+ */
+export function sellerJsonLd({
+  id,
+  name,
+  city,
+  memberSince,
+  image,
+  rating,
+}: {
+  id: number | string;
+  name: string;
+  city?: string | null;
+  memberSince?: string | null;
+  image?: string | null;
+  rating?: { value: number; count: number } | null;
+}) {
+  const url = absoluteUrl(`/u/${id}`);
+  return {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name,
+    url,
+    ...(image ? { image: absoluteImage(image) } : {}),
+    ...(city
+      ? { address: { "@type": "PostalAddress", addressLocality: city, addressCountry: "KZ" } }
+      : {}),
+    ...(memberSince ? { memberOf: { "@type": "Organization", name: SITE_NAME, url: SITE_URL } } : {}),
+    ...(rating && rating.count > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: rating.value,
+            reviewCount: rating.count,
+            bestRating: 5,
+            worstRating: 1,
+          },
+        }
+      : {}),
   };
 }
 

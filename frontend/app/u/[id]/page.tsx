@@ -8,8 +8,7 @@ import { JsonLd } from "@/components/JsonLd";
 import { Avatar } from "@/components/ui/Avatar";
 import { getPublicSeller } from "@/lib/api";
 import { memberNav } from "@/lib/nav";
-import { absoluteImage, absoluteUrl, pageMetadata } from "@/lib/seo";
-import type { PublicSeller } from "@/lib/api-types";
+import { pageMetadata, sellerJsonLd } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -27,19 +26,6 @@ export async function generateMetadata({
     path: `/u/${id}`,
     ogType: "profile",
   });
-}
-
-function personJsonLd(seller: PublicSeller) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    name: seller.displayName,
-    image: absoluteImage(seller.avatarUrl),
-    address: seller.city
-      ? { "@type": "PostalAddress", addressLocality: seller.city }
-      : undefined,
-    url: absoluteUrl(`/u/${seller.id}`),
-  };
 }
 
 export default async function SellerPage({
@@ -102,7 +88,18 @@ export default async function SellerPage({
         )}
       </main>
 
-      <JsonLd data={personJsonLd(seller)} />
+      {/* `rating` stays null until the backend actually stores seller reviews — an
+          invented AggregateRating is a structured-data violation, not a shortcut. */}
+      <JsonLd
+        data={sellerJsonLd({
+          id: seller.id,
+          name: seller.displayName,
+          city: seller.city,
+          memberSince: seller.memberSince,
+          image: seller.avatarUrl,
+          rating: null,
+        })}
+      />
     </>
   );
 }

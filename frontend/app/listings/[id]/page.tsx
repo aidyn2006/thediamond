@@ -22,7 +22,8 @@ import {
   type ListingSeoInput,
 } from "@/lib/seo";
 import { listingPath, parseListingId } from "@/lib/listing-url";
-import { cityByName, cityPath } from "@/lib/geo";
+import { cityByName } from "@/lib/geo";
+import { brandCityPath, brandPath, catalogPath, cityPath, modelPath } from "@/lib/routes";
 import { modelSlugOf } from "@/lib/models";
 import { listingStatusPill } from "@/lib/status";
 import {
@@ -157,7 +158,7 @@ export default async function ListingPage({
           <span className="mx-2" aria-hidden="true">
             /
           </span>
-          <Link href={`/listings/brand/${brandSlugs[view.brand]}`} className="hover:text-text">
+          <Link href={brandPath(view.brand)} className="hover:text-text">
             {brandLabels[view.brand]}
           </Link>
           {cityHub && (
@@ -312,7 +313,7 @@ export default async function ListingPage({
                 Другие {brandLabels[view.brand]}
               </h2>
               <Link
-                href={`/listings/brand/${brandSlugs[view.brand]}`}
+                href={brandPath(view.brand)}
                 className="text-13 font-semibold text-accent underline underline-offset-2"
               >
                 Все {brandLabels[view.brand]}
@@ -330,7 +331,7 @@ export default async function ListingPage({
             checklist are exactly what a visitor (and a crawler) wants next. */}
         <nav aria-label="Похожие подборки" className="mt-10 flex flex-wrap gap-x-5 gap-y-2 text-13">
           <Link
-            href={`/listings/model/${modelSlugOf(view)}`}
+            href={modelPath(modelSlugOf(view))}
             className="text-accent underline underline-offset-2"
           >
             Все {brandLabels[view.brand]} {view.model} б/у
@@ -342,7 +343,7 @@ export default async function ListingPage({
           )}
           {cityHub && (
             <Link
-              href={`/listings/brand/${brandSlugs[view.brand]}/${cityHub.slug}`}
+              href={brandCityPath(view.brand, cityHub)}
               className="text-accent underline underline-offset-2"
             >
               {brandLabels[view.brand]} {cityHub.in}
@@ -361,10 +362,10 @@ export default async function ListingPage({
         data={[
           listingJsonLd(seo),
           breadcrumbJsonLd([
-            { name: "Каталог", path: "/listings" },
+            { name: "Каталог", path: catalogPath() },
             {
               name: brandLabels[view.brand],
-              path: `/listings/brand/${brandSlugs[view.brand]}`,
+              path: brandPath(view.brand),
             },
             { name: view.title, path: canonical },
           ]),

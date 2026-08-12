@@ -13,6 +13,7 @@ import { memberNav } from "@/lib/nav";
 import { breadcrumbJsonLd, faqPageJsonLd, pageMetadata } from "@/lib/seo";
 import { groupByModel } from "@/lib/models";
 import { formatTenge } from "@/lib/phones";
+import { modelPath } from "@/lib/routes";
 
 export const metadata = pageMetadata({
   title: "Продать телефон в Казахстане — срочно и без комиссии",
@@ -130,7 +131,7 @@ export default async function SellPage() {
               {models.map((m) => (
                 <li key={m.slug}>
                   <Link
-                    href={`/listings/model/${m.slug}`}
+                    href={modelPath(m.slug)}
                     className="inline-flex items-center gap-2 rounded-pill bg-surface-2 px-4 py-2 text-13 text-text transition-colors duration-150 hover:bg-border"
                   >
                     {m.label}
