@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { chipClasses } from "@/lib/chips";
 import { PHONE_BRANDS, brandLabels, type PhoneBrand } from "@/lib/phones";
-import { brandPath, catalogPath } from "@/lib/routes";
+import { ui } from "@/lib/i18n";
+import { DEFAULT_LOCALE, brandPath, catalogPath, type Locale } from "@/lib/routes";
 import type { CatalogFilters } from "@/lib/api-types";
 
 /**
@@ -15,15 +16,18 @@ import type { CatalogFilters } from "@/lib/api-types";
 export function BrandChips({
   params,
   active,
+  locale = DEFAULT_LOCALE,
 }: {
   params?: CatalogFilters;
   active?: PhoneBrand | null;
+  locale?: Locale;
 }) {
+  const t = ui(locale);
   const filterMode = params != null;
 
   function href(brand: PhoneBrand | null): string {
     if (!filterMode) {
-      return brand ? brandPath(brand) : catalogPath();
+      return brand ? brandPath(brand, locale) : catalogPath(locale);
     }
     const qs = new URLSearchParams();
     Object.entries(params ?? {}).forEach(([key, value]) => {
@@ -31,14 +35,14 @@ export function BrandChips({
     });
     if (brand) qs.set("brand", brand);
     const s = qs.toString();
-    return s ? `${catalogPath()}?${s}` : catalogPath();
+    return s ? `${catalogPath(locale)}?${s}` : catalogPath(locale);
   }
 
   return (
-    <nav aria-label="Бренды" className="-mx-6 px-6 md:-mx-10 md:px-10">
+    <nav aria-label={t.chips.brands} className="-mx-6 px-6 md:-mx-10 md:px-10">
       <div className="flex gap-2 overflow-x-auto pb-1">
         <Link href={href(null)} className={chipClasses(!active)} aria-current={!active || undefined}>
-          Все телефоны
+          {t.chips.allPhones}
         </Link>
         {PHONE_BRANDS.map((b) => (
           <Link

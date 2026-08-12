@@ -6,6 +6,7 @@ import { groupByModel } from "@/lib/models";
 import { GUIDES } from "@/lib/guides";
 import {
   CITY_HUBS,
+  ENABLED_LOCALES,
   PHONE_BRANDS,
   brandCityPath,
   brandPath,
@@ -18,6 +19,7 @@ import {
   modelPath,
   sellPath,
   sellerPath,
+  type Locale,
 } from "@/lib/routes";
 
 // Re-generate at most hourly; new approved listings appear without a redeploy.
@@ -41,8 +43,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const brandCityPairs = new Set(listings.map((l) => `${l.brand}|${l.city}`));
   const models = groupByModel(listings);
 
+  // The bilingual half of the surface: landing + the four hub families exist in every
+  // enabled locale, so they are emitted once per locale. Everything below them (guides,
+  // /sell, /exchange, listings, sellers) is Russian-only and stays single-entry — a
+  // sitemap row for a page that doesn't exist is worse than no row at all.
+  const perLocale = (build: (l: Locale) => string) => ENABLED_LOCALES.map(build);
+
   return [
-    { url: abs(homePath()), lastModified: now, changeFrequency: "daily", priority: 1 },
+    ...perLocale((l) => homePath(l)).map((path) => ({
+      url: abs(path),
+      lastModified: now,
+      changeFrequency: "daily" as const,
+      priority: path === homePath("ru") ? 1 : 0.9,
+    })),
     { url: abs(catalogPath()), lastModified: now, changeFrequency: "daily", priority: 0.9 },
     { url: abs(sellPath()), lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: abs(exchangePath()), lastModified: now, changeFrequency: "monthly", priority: 0.6 },
@@ -53,35 +66,43 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "yearly" as const,
       priority: 0.6,
     })),
-    ...PHONE_BRANDS.map((b) => ({
-      url: abs(brandPath(b)),
-      lastModified: now,
-      changeFrequency: "daily" as const,
-      priority: 0.8,
-    })),
+    ...PHONE_BRANDS.flatMap((b) =>
+      ENABLED_LOCALES.map((l) => ({
+        url: abs(brandPath(b, l)),
+        lastModified: now,
+        changeFrequency: "daily" as const,
+        priority: 0.8,
+      })),
+    ),
     // City hubs: every city stays listed (they're the geo landing pages), but the ones
     // with stock get a higher priority.
-    ...CITY_HUBS.map((c) => ({
-      url: abs(cityPath(c)),
-      lastModified: now,
-      changeFrequency: "daily" as const,
-      priority: citiesWithStock.has(c.name) ? 0.8 : 0.4,
-    })),
+    ...CITY_HUBS.flatMap((c) =>
+      ENABLED_LOCALES.map((l) => ({
+        url: abs(cityPath(c, l)),
+        lastModified: now,
+        changeFrequency: "daily" as const,
+        priority: citiesWithStock.has(c.name) ? 0.8 : 0.4,
+      })),
+    ),
     // Brand × city only where such a listing actually exists.
     ...CITY_HUBS.flatMap((c) =>
-      PHONE_BRANDS.filter((b) => brandCityPairs.has(`${b}|${c.name}`)).map((b) => ({
-        url: abs(brandCityPath(b, c)),
+      PHONE_BRANDS.filter((b) => brandCityPairs.has(`${b}|${c.name}`)).flatMap((b) =>
+        ENABLED_LOCALES.map((l) => ({
+          url: abs(brandCityPath(b, c, l)),
+          lastModified: now,
+          changeFrequency: "daily" as const,
+          priority: 0.7,
+        })),
+      ),
+    ),
+    ...models.flatMap((m) =>
+      ENABLED_LOCALES.map((l) => ({
+        url: abs(modelPath(m.slug, l)),
         lastModified: now,
         changeFrequency: "daily" as const,
         priority: 0.7,
       })),
     ),
-    ...models.map((m) => ({
-      url: abs(modelPath(m.slug)),
-      lastModified: now,
-      changeFrequency: "daily" as const,
-      priority: 0.7,
-    })),
     // Listings are the money pages: one canonical slug URL each, freshest first.
     ...listings.map((l) => ({
       url: abs(listingPath(l)),

@@ -10,6 +10,8 @@ import {
   formatTenge,
   storageLabel,
 } from "@/lib/phones";
+import { ui } from "@/lib/i18n";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/routes";
 import type { ListingSummary } from "@/lib/api-types";
 
 /**
@@ -29,13 +31,16 @@ export function ListingCard({
   heart = false,
   favorite = false,
   priority = false,
+  locale = DEFAULT_LOCALE,
 }: {
   listing: ListingSummary;
   showStatus?: boolean;
   heart?: boolean;
   favorite?: boolean;
   priority?: boolean;
+  locale?: Locale;
 }) {
+  const t = ui(locale);
   const status = listingStatusPill[listing.status];
   const specs = [
     listing.storageGb ? storageLabel(listing.storageGb) : null,
@@ -66,7 +71,7 @@ export function ListingCard({
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-13 text-text-dim">
-              без фото
+              {t.card.noPhoto}
             </div>
           )}
 

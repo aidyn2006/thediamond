@@ -15,10 +15,19 @@ import {
   faqPageJsonLd,
   pageMetadata,
 } from "@/lib/seo";
-import { cityByName } from "@/lib/geo";
-import { brandPath, catalogPath, cityPath, modelPath } from "@/lib/routes";
-import { brandLabels, formatTenge, storageLabel } from "@/lib/phones";
-import { modelRuAlias, type ModelHub as ModelHubData } from "@/lib/models";
+import { cityByName, cityForms } from "@/lib/geo";
+import { modelHubCopy } from "@/lib/hub-copy";
+import { ui } from "@/lib/i18n";
+import {
+  DEFAULT_LOCALE,
+  brandPath,
+  catalogPath,
+  cityPath,
+  modelPath,
+  type Locale,
+} from "@/lib/routes";
+import { brandLabels, storageLabel } from "@/lib/phones";
+import type { ModelHub as ModelHubData } from "@/lib/models";
 
 /**
  * One page per model people actually sell ("iPhone 13", "Redmi Note 12"), built from
@@ -26,63 +35,45 @@ import { modelRuAlias, type ModelHub as ModelHubData } from "@/lib/models";
  * are the highest-intent ones in the tail. Lives at /<model-slug>.
  */
 
-function title(hub: ModelHubData) {
-  const alias = modelRuAlias(hub.brand, hub.model);
-  return `${hub.label} б/у — купить${alias ? `, ${alias.toLowerCase()} цена` : ""}`;
+function stats(hub: ModelHubData) {
+  const withBattery = hub.listings.filter((l) => l.batteryHealth != null);
+  return {
+    maxPrice: Math.max(...hub.listings.map((l) => l.price)),
+    storages: [...new Set(hub.listings.map((l) => l.storageGb).filter(Boolean))]
+      .sort((a, b) => (a as number) - (b as number))
+      .map((gb) => storageLabel(gb as number)),
+    avgBattery: withBattery.length
+      ? Math.round(
+          withBattery.reduce((sum, l) => sum + (l.batteryHealth ?? 0), 0) / withBattery.length,
+        )
+      : null,
+  };
 }
 
-function description(hub: ModelHubData) {
-  const alias = modelRuAlias(hub.brand, hub.model);
-  return `${hub.listings.length} объявлений ${hub.label} б/у от ${formatTenge(hub.minPrice)}${
-    alias ? ` (${alias} бу)` : ""
-  }. Память, состояние корпуса и ёмкость аккумулятора в каждой карточке. Покупка напрямую у владельца, без комиссии.`;
-}
-
-export function modelHubMetadata(hub: ModelHubData): Metadata {
+export function modelHubMetadata(
+  hub: ModelHubData,
+  locale: Locale = DEFAULT_LOCALE,
+): Metadata {
+  const copy = modelHubCopy(hub, locale, stats(hub));
   return pageMetadata({
-    title: title(hub),
-    description: description(hub),
-    path: modelPath(hub.slug),
+    title: copy.title,
+    description: copy.description,
+    path: modelPath(hub.slug, locale),
+    altPaths: (l) => modelPath(hub.slug, l),
+    locale,
   });
 }
 
-export async function ModelHub({ hub }: { hub: ModelHubData }) {
+export async function ModelHub({
+  hub,
+  locale = DEFAULT_LOCALE,
+}: {
+  hub: ModelHubData;
+  locale?: Locale;
+}) {
   const session = await auth();
-
-  const alias = modelRuAlias(hub.brand, hub.model);
-  const storages = [...new Set(hub.listings.map((l) => l.storageGb).filter(Boolean))]
-    .sort((a, b) => (a as number) - (b as number))
-    .map((gb) => storageLabel(gb as number));
-  const withBattery = hub.listings.filter((l) => l.batteryHealth != null);
-  const avgBattery = withBattery.length
-    ? Math.round(
-        withBattery.reduce((sum, l) => sum + (l.batteryHealth ?? 0), 0) / withBattery.length,
-      )
-    : null;
-  const maxPrice = Math.max(...hub.listings.map((l) => l.price));
-
-  const qa = [
-    {
-      q: `Сколько стоит ${hub.label} б/у?`,
-      a: `В каталоге сейчас ${hub.listings.length} шт. по цене от ${formatTenge(
-        hub.minPrice,
-      )} до ${formatTenge(maxPrice)}. На цену влияют память${
-        storages.length > 1 ? ` (${storages.join(", ")})` : ""
-      }, состояние корпуса и ёмкость аккумулятора${
-        avgBattery != null ? ` — в среднем ${avgBattery}% по этим объявлениям` : ""
-      }.`,
-    },
-    {
-      q: `Как проверить ${hub.label} перед покупкой?`,
-      a: `Сверьте IMEI на корпусе, в настройках и в чеке, посмотрите ёмкость аккумулятора, проверьте камеры, микрофон, динамики и датчики, убедитесь, что экран не менян. Полный чек-лист — в разборе «Как проверить телефон перед покупкой б/у».`,
-    },
-    {
-      q: alias ? `Что ищут как «${alias} бу»?` : `Что важно знать о ${hub.label} б/у?`,
-      a: alias
-        ? `Это тот же ${hub.label}: в объявлениях модель написана латиницей, а в поиске её чаще набирают как «${alias.toLowerCase()}». На этой странице собраны все активные объявления по этой модели.`
-        : `Смотрите не только на цену: память, состояние корпуса и ёмкость аккумулятора меняют реальную стоимость сильнее, чем год выпуска.`,
-    },
-  ];
+  const t = ui(locale);
+  const copy = modelHubCopy(hub, locale, stats(hub));
 
   const cities = [...new Set(hub.listings.map((l) => l.city))]
     .map((name) => cityByName[name])
@@ -93,19 +84,22 @@ export async function ModelHub({ hub }: { hub: ModelHubData }) {
       {session?.user ? (
         <AppHeader email={session.user.email} items={memberNav} />
       ) : (
-        <PublicHeader />
+        <PublicHeader
+          locale={locale}
+          altHref={modelPath(hub.slug, locale === "ru" ? "kk" : "ru")}
+        />
       )}
-      <CategoryBar signedIn={!!session?.user} />
+      <CategoryBar signedIn={!!session?.user} locale={locale} />
 
       <main id="main-content" className="mx-auto max-w-[1200px] px-6 py-8 md:px-10">
-        <nav aria-label="Хлебные крошки" className="mb-4 text-13 text-text-dim">
-          <Link href={catalogPath()} className="hover:text-text">
-            Каталог
+        <nav aria-label={t.common.breadcrumbs} className="mb-4 text-13 text-text-dim">
+          <Link href={catalogPath(locale)} className="hover:text-text">
+            {t.common.catalog}
           </Link>
           <span className="mx-2" aria-hidden="true">
             /
           </span>
-          <Link href={brandPath(hub.brand)} className="hover:text-text">
+          <Link href={brandPath(hub.brand, locale)} className="hover:text-text">
             {brandLabels[hub.brand]}
           </Link>
           <span className="mx-2" aria-hidden="true">
@@ -114,36 +108,38 @@ export async function ModelHub({ hub }: { hub: ModelHubData }) {
           <span className="text-text">{hub.model}</span>
         </nav>
 
-        <h1 className="text-28 font-bold md:text-40">{hub.label} б/у</h1>
+        <h1 className="text-28 font-bold md:text-40">{copy.h1}</h1>
         <p className="mt-3 max-w-[680px] text-15 leading-relaxed text-text-dim">
-          {hub.listings.length} объявлений от {formatTenge(hub.minPrice)} до{" "}
-          {formatTenge(maxPrice)}
-          {storages.length > 0 ? `, память: ${storages.join(", ")}` : ""}
-          {avgBattery != null ? `, средняя ёмкость аккумулятора ${avgBattery}%` : ""}.{" "}
-          {alias ? `Эту модель часто ищут как «${alias.toLowerCase()} бу купить». ` : ""}
-          Все объявления проверены модератором, платите продавцу при встрече — сайт
-          комиссию не берёт.
+          {copy.intro}
         </p>
 
         <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
           {hub.listings.map((l, i) => (
-            <ListingCard key={l.id} listing={l} heart={!!session?.user} priority={i < 6} />
+            <ListingCard
+              key={l.id}
+              listing={l}
+              heart={!!session?.user}
+              priority={i < 6}
+              locale={locale}
+            />
           ))}
         </div>
 
         {cities.length > 0 && (
           <section aria-labelledby="cities" className="mt-12">
             <h2 id="cities" className="mb-4 text-22 font-bold md:text-28">
-              {hub.label} по городам
+              {copy.citiesHeading}
             </h2>
             <ul className="flex flex-wrap gap-2">
               {cities.map((c) => (
                 <li key={c.slug}>
                   <Link
-                    href={cityPath(c)}
+                    href={cityPath(c, locale)}
                     className="inline-flex rounded-pill bg-surface-2 px-4 py-2 text-13 text-text transition-colors duration-150 hover:bg-border"
                   >
-                    {hub.label} {c.in}
+                    {locale === "kk"
+                      ? `${cityForms(c, locale).in} ${hub.label}`
+                      : `${hub.label} ${cityForms(c, locale).in}`}
                   </Link>
                 </li>
               ))}
@@ -151,25 +147,26 @@ export async function ModelHub({ hub }: { hub: ModelHubData }) {
           </section>
         )}
 
-        <FaqBlock qa={qa} title={`${hub.label}: частые вопросы`} />
+        <FaqBlock qa={copy.faq} title={copy.faqTitle} locale={locale} />
       </main>
 
-      <SiteFooter />
+      <SiteFooter locale={locale} />
 
       <JsonLd
         data={[
           catalogJsonLd({
-            name: title(hub),
-            description: description(hub),
-            path: modelPath(hub.slug),
+            name: copy.title,
+            description: copy.description,
+            path: modelPath(hub.slug, locale),
             listings: hub.listings,
+            locale,
           }),
           breadcrumbJsonLd([
-            { name: "Каталог", path: catalogPath() },
-            { name: brandLabels[hub.brand], path: brandPath(hub.brand) },
-            { name: hub.model, path: modelPath(hub.slug) },
+            { name: t.common.catalog, path: catalogPath(locale) },
+            { name: brandLabels[hub.brand], path: brandPath(hub.brand, locale) },
+            { name: hub.model, path: modelPath(hub.slug, locale) },
           ]),
-          faqPageJsonLd(qa),
+          faqPageJsonLd(copy.faq),
         ]}
       />
     </>

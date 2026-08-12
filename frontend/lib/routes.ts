@@ -28,11 +28,13 @@ export type Locale = (typeof LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = "ru";
 
 /**
- * Locales whose pages actually exist. `kk` is described throughout this file so the
- * URL scheme is settled, but it stays out of this list until the pages ship —
- * emitting hreflang for a locale that 404s is worse than emitting none.
+ * Locales whose pages actually exist, i.e. whose URLs hreflang may point at.
+ *
+ * Only the SEO surface is bilingual: the landing page and the four hub families. The
+ * guides, /sell, /exchange, the listing page and the whole member area are Russian-only,
+ * and those pages simply pass no `altPaths`, so no hreflang is emitted for them.
  */
-export const ENABLED_LOCALES: readonly Locale[] = ["ru"];
+export const ENABLED_LOCALES: readonly Locale[] = ["ru", "kk"];
 
 export const LOCALE_META: Record<
   Locale,
@@ -56,8 +58,13 @@ export function splitLocale(pathname: string): { locale: Locale; rest: string } 
   return { locale: m[1] as Locale, rest: pathname.slice(m[0].length) || "/" };
 }
 
+/**
+ * Joins the locale prefix to a path. The root needs care: "/kk" + "/" would produce
+ * "/kk/", which Next redirects to "/kk" — and a canonical pointing at a redirect is a
+ * canonical Google discards.
+ */
 const withLocale = (locale: Locale, path: string) =>
-  `${LOCALE_PREFIX[locale]}${path}` || "/";
+  `${LOCALE_PREFIX[locale]}${path === "/" ? "" : path}` || "/";
 
 /* ------------------------------------------------------------------ */
 /* Hub slugs                                                           */

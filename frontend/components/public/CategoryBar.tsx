@@ -1,18 +1,31 @@
 import Link from "next/link";
 import { cn } from "@/lib/cn";
-import { brandPath, catalogPath, exchangePath, guidesPath } from "@/lib/routes";
+import { ui } from "@/lib/i18n";
+import {
+  DEFAULT_LOCALE,
+  brandPath,
+  catalogPath,
+  exchangePath,
+  guidesPath,
+  sellPath,
+  type Locale,
+} from "@/lib/routes";
 
 /** Brands worth a permanent slot in the nav — the rest live in the chip row. */
-const LINKS: { href: string; label: string; highlight?: boolean }[] = [
-  { href: catalogPath(), label: "Все телефоны" },
-  { href: brandPath("APPLE"), label: "iPhone" },
-  { href: brandPath("SAMSUNG"), label: "Samsung" },
-  { href: brandPath("XIAOMI"), label: "Xiaomi" },
-  { href: brandPath("HONOR"), label: "Honor" },
-  { href: exchangePath(), label: "Обмен" },
-  { href: guidesPath(), label: "Полезное" },
-  { href: `${catalogPath()}?maxPrice=100000`, label: "До 100 000 ₸", highlight: true },
-];
+function links(locale: Locale) {
+  const t = ui(locale);
+  return [
+    { href: catalogPath(locale), label: t.bar.allPhones },
+    { href: brandPath("APPLE", locale), label: "iPhone" },
+    { href: brandPath("SAMSUNG", locale), label: "Samsung" },
+    { href: brandPath("XIAOMI", locale), label: "Xiaomi" },
+    { href: brandPath("HONOR", locale), label: "Honor" },
+    // Explainer pages have no Kazakh twin yet, so they keep the unprefixed path.
+    { href: exchangePath(), label: t.bar.exchange },
+    { href: guidesPath(), label: t.bar.guides },
+    { href: `${catalogPath(locale)}?maxPrice=100000`, label: t.bar.under100k, highlight: true },
+  ];
+}
 
 function tabClasses(active: boolean) {
   return cn(
@@ -29,15 +42,19 @@ function tabClasses(active: boolean) {
 export function CategoryBar({
   signedIn = false,
   active = "buy",
+  locale = DEFAULT_LOCALE,
 }: {
   signedIn?: boolean;
   active?: "buy" | "sell";
+  locale?: Locale;
 }) {
+  const t = ui(locale);
+  const LINKS = links(locale);
   return (
     <div className="bg-text">
       <div className="mx-auto flex max-w-[1200px] flex-col gap-2 px-4 py-2 md:flex-row md:items-center md:gap-6 md:px-10 md:py-2.5">
         <nav
-          aria-label="Категории каталога"
+          aria-label={t.bar.catalogNav}
           className="hidden items-center gap-5 overflow-x-auto md:flex"
         >
           {LINKS.map((l) => (
@@ -58,24 +75,24 @@ export function CategoryBar({
 
         <div
           role="group"
-          aria-label="Купить или продать"
+          aria-label={t.bar.modeGroup}
           className="flex gap-1 rounded-pill bg-surface/10 p-1 md:ml-auto"
         >
           <Link
-            href="/listings"
+            href={catalogPath(locale)}
             aria-current={active === "buy" ? "page" : undefined}
             className={tabClasses(active === "buy")}
           >
-            Купить
+            {t.bar.buy}
           </Link>
           {/* Guests land on the /sell explainer (it's the page that ranks and converts);
               members skip straight to the form. */}
           <Link
-            href={signedIn ? "/listings/new" : "/sell"}
+            href={signedIn ? "/listings/new" : sellPath()}
             aria-current={active === "sell" ? "page" : undefined}
             className={tabClasses(active === "sell")}
           >
-            Продать
+            {t.bar.sell}
           </Link>
         </div>
       </div>

@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { Unbounded, Manrope } from "next/font/google";
 import { JsonLd } from "@/components/JsonLd";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
+import { LOCALE_META, isLocale, DEFAULT_LOCALE } from "@/lib/routes";
 import {
   SITE_URL,
   SITE_NAME,
@@ -87,12 +89,17 @@ export const viewport: Viewport = {
   themeColor: "#f4fbf8",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  // Set by the middleware from the URL prefix — a server component cannot read the
+  // pathname, and <html lang> has to match the language the page is actually written in.
+  const requested = (await headers()).get("x-locale") ?? DEFAULT_LOCALE;
+  const locale = isLocale(requested) ? requested : DEFAULT_LOCALE;
+
   return (
     <html
-      lang="ru"
+      lang={LOCALE_META[locale].htmlLang}
       className={`h-full ${unbounded.variable} ${manrope.variable}`}
     >
       <body className="min-h-full">

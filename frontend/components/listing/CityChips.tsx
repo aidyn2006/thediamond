@@ -1,8 +1,16 @@
 import Link from "next/link";
 import { chipClasses } from "@/lib/chips";
-import type { CityInfo } from "@/lib/geo";
+import { cityForms, type CityInfo } from "@/lib/geo";
 import type { PhoneBrand } from "@/lib/phones";
-import { CITY_HUBS, brandCityPath, catalogPath, cityPath } from "@/lib/routes";
+import { ui } from "@/lib/i18n";
+import {
+  CITY_HUBS,
+  DEFAULT_LOCALE,
+  brandCityPath,
+  catalogPath,
+  cityPath,
+  type Locale,
+} from "@/lib/routes";
 
 /**
  * City row. On a brand hub it links brand×city pages ("iPhone в Астане"), elsewhere
@@ -12,22 +20,25 @@ import { CITY_HUBS, brandCityPath, catalogPath, cityPath } from "@/lib/routes";
 export function CityChips({
   active,
   brand,
-  allHref = catalogPath(),
+  allHref,
+  locale = DEFAULT_LOCALE,
 }: {
   active?: CityInfo | null;
   /** Set to link brand×city pages instead of plain city hubs. */
   brand?: PhoneBrand;
   allHref?: string;
+  locale?: Locale;
 }) {
+  const t = ui(locale);
   function href(city: CityInfo): string {
-    return brand ? brandCityPath(brand, city) : cityPath(city);
+    return brand ? brandCityPath(brand, city, locale) : cityPath(city, locale);
   }
 
   return (
-    <nav aria-label="Города" className="-mx-6 px-6 md:-mx-10 md:px-10">
+    <nav aria-label={t.chips.cities} className="-mx-6 px-6 md:-mx-10 md:px-10">
       <div className="flex gap-2 overflow-x-auto pb-1">
-        <Link href={allHref} className={chipClasses(!active)}>
-          Все города
+        <Link href={allHref ?? catalogPath(locale)} className={chipClasses(!active)}>
+          {t.chips.allCities}
         </Link>
         {CITY_HUBS.map((c) => (
           <Link
@@ -36,7 +47,7 @@ export function CityChips({
             className={chipClasses(active?.slug === c.slug)}
             aria-current={active?.slug === c.slug || undefined}
           >
-            {c.name}
+            {cityForms(c, locale).name}
           </Link>
         ))}
       </div>

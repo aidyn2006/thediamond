@@ -1,19 +1,25 @@
+import { ui } from "@/lib/i18n";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/routes";
+
 /**
  * Visible FAQ. Pair it with `faqPageJsonLd(qa)` on the same page — Google wants the
  * answers in the HTML, not only in the structured data.
  */
 export function FaqBlock({
-  title = "Частые вопросы",
+  title,
   qa,
+  locale = DEFAULT_LOCALE,
 }: {
   title?: string;
   qa: { q: string; a: string }[];
+  locale?: Locale;
 }) {
+  const heading = title ?? ui(locale).common.faqTitle;
   if (qa.length === 0) return null;
   return (
     <section aria-labelledby="faq" className="mt-12">
       <h2 id="faq" className="mb-4 text-22 font-bold md:text-28">
-        {title}
+        {heading}
       </h2>
       <dl className="flex flex-col gap-4">
         {qa.map((item) => (

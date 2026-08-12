@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ListingCard } from "./ListingCard";
 import { buttonClasses } from "@/components/ui/Button";
+import { ui } from "@/lib/i18n";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/routes";
 import type { ListingSummary } from "@/lib/api-types";
 
 /**
@@ -13,8 +15,9 @@ export function ListingSection({
   title,
   href,
   listings,
-  seeAll = "Смотреть все",
+  seeAll,
   heart = false,
+  locale = DEFAULT_LOCALE,
 }: {
   title: string;
   /** Where the heading link and the button go — usually a pre-filtered catalog URL. */
@@ -22,7 +25,9 @@ export function ListingSection({
   listings: ListingSummary[];
   seeAll?: string;
   heart?: boolean;
+  locale?: Locale;
 }) {
+  const t = ui(locale);
   if (listings.length === 0) return null;
 
   return (
@@ -33,21 +38,27 @@ export function ListingSection({
           href={href}
           className="shrink-0 text-13 font-semibold text-accent underline underline-offset-2 md:text-15"
         >
-          Посмотреть все
+          {t.home.seeAll}
         </Link>
       </div>
 
       {/* Two-up on phones, one full row of six on wide screens — same rhythm as the
           catalog grid, so a section never reads as a different component. */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-        {listings.map((l) => (
-          <ListingCard key={l.id} listing={l} heart={heart} />
+        {listings.map((l, i) => (
+          <ListingCard
+            key={l.id}
+            listing={l}
+            heart={heart}
+            priority={i < 6}
+            locale={locale}
+          />
         ))}
       </div>
 
       <div className="flex justify-center">
         <Link href={href} className={buttonClasses("secondary")}>
-          {seeAll}
+          {seeAll ?? t.home.seeAll}
         </Link>
       </div>
     </section>

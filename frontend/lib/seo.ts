@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { ListingSummary } from "@/lib/api-types";
 import { listingPath } from "@/lib/listing-url";
-import { languageAlternates, type Locale } from "@/lib/routes";
+import { DEFAULT_LOCALE, LOCALE_META, languageAlternates, type Locale } from "@/lib/routes";
 import {
   brandLabels,
   conditionLabels,
@@ -52,6 +52,8 @@ type PageMetaInput = {
    * live; until then `languageAlternates()` returns undefined and nothing is written.
    */
   altPaths?: (locale: Locale) => string;
+  /** Language this page is written in — drives og:locale. */
+  locale?: Locale;
 };
 
 /**
@@ -66,6 +68,7 @@ export function pageMetadata({
   index = true,
   ogType = "website",
   altPaths,
+  locale = DEFAULT_LOCALE,
 }: PageMetaInput): Metadata {
   const url = absoluteUrl(path);
   const languages = altPaths
@@ -85,7 +88,7 @@ export function pageMetadata({
       description,
       url,
       siteName: SITE_NAME,
-      locale: OG_LOCALE,
+      locale: LOCALE_META[locale].ogLocale,
       type: ogType,
     },
     twitter: {
@@ -204,11 +207,13 @@ export function catalogJsonLd({
   description,
   path,
   listings,
+  locale = DEFAULT_LOCALE,
 }: {
   name: string;
   description: string;
   path: string;
   listings: ListingSummary[];
+  locale?: Locale;
 }) {
   return {
     "@context": "https://schema.org",
@@ -216,7 +221,7 @@ export function catalogJsonLd({
     name,
     description,
     url: absoluteUrl(path),
-    inLanguage: "ru-KZ",
+    inLanguage: LOCALE_META[locale].hreflang,
     mainEntity: {
       "@type": "ItemList",
       numberOfItems: listings.length,
