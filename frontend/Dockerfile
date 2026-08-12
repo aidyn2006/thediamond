@@ -12,6 +12,10 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 # AUTH_SECRET is only needed at runtime; a dummy keeps next build happy if referenced
 ENV AUTH_SECRET=build-time-placeholder
+# NEXT_PUBLIC_* is inlined into the client bundle at build time, so the GA id has to
+# be a build arg — setting it in `environment:` at runtime would have no effect.
+ARG NEXT_PUBLIC_GA_ID=
+ENV NEXT_PUBLIC_GA_ID=$NEXT_PUBLIC_GA_ID
 RUN npm run build
 
 # --- runtime ---

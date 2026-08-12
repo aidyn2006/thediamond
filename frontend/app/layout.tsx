@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Unbounded, Manrope } from "next/font/google";
 import { JsonLd } from "@/components/JsonLd";
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import {
   SITE_URL,
   SITE_NAME,
@@ -96,6 +97,7 @@ export default function RootLayout({
         </a>
         {children}
         <JsonLd data={[organizationJsonLd(), websiteJsonLd()]} />
+        <GoogleAnalytics />
       </body>
     </html>
   );

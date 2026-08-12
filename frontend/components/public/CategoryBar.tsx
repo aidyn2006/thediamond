@@ -1,17 +1,17 @@
 import Link from "next/link";
 import { cn } from "@/lib/cn";
-import { brandSlugs } from "@/lib/phones";
+import { brandPath, catalogPath, exchangePath, guidesPath } from "@/lib/routes";
 
 /** Brands worth a permanent slot in the nav — the rest live in the chip row. */
 const LINKS: { href: string; label: string; highlight?: boolean }[] = [
-  { href: "/listings", label: "Все телефоны" },
-  { href: `/listings/brand/${brandSlugs.APPLE}`, label: "iPhone" },
-  { href: `/listings/brand/${brandSlugs.SAMSUNG}`, label: "Samsung" },
-  { href: `/listings/brand/${brandSlugs.XIAOMI}`, label: "Xiaomi" },
-  { href: `/listings/brand/${brandSlugs.HONOR}`, label: "Honor" },
-  { href: "/exchange", label: "Обмен" },
-  { href: "/guides", label: "Полезное" },
-  { href: "/listings?maxPrice=100000", label: "До 100 000 ₸", highlight: true },
+  { href: catalogPath(), label: "Все телефоны" },
+  { href: brandPath("APPLE"), label: "iPhone" },
+  { href: brandPath("SAMSUNG"), label: "Samsung" },
+  { href: brandPath("XIAOMI"), label: "Xiaomi" },
+  { href: brandPath("HONOR"), label: "Honor" },
+  { href: exchangePath(), label: "Обмен" },
+  { href: guidesPath(), label: "Полезное" },
+  { href: `${catalogPath()}?maxPrice=100000`, label: "До 100 000 ₸", highlight: true },
 ];
 
 function tabClasses(active: boolean) {

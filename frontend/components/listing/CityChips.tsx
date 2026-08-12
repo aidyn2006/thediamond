@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { chipClasses } from "@/lib/chips";
-import { CITY_HUBS, brandCityPath, cityPath, type CityInfo } from "@/lib/geo";
+import type { CityInfo } from "@/lib/geo";
+import type { PhoneBrand } from "@/lib/phones";
+import { CITY_HUBS, brandCityPath, catalogPath, cityPath } from "@/lib/routes";
 
 /**
  * City row. On a brand hub it links brand×city pages ("iPhone в Астане"), elsewhere
@@ -9,16 +11,16 @@ import { CITY_HUBS, brandCityPath, cityPath, type CityInfo } from "@/lib/geo";
  */
 export function CityChips({
   active,
-  brandSlug,
-  allHref = "/listings",
+  brand,
+  allHref = catalogPath(),
 }: {
   active?: CityInfo | null;
   /** Set to link brand×city pages instead of plain city hubs. */
-  brandSlug?: string;
+  brand?: PhoneBrand;
   allHref?: string;
 }) {
   function href(city: CityInfo): string {
-    return brandSlug ? brandCityPath(brandSlug, city) : cityPath(city);
+    return brand ? brandCityPath(brand, city) : cityPath(city);
   }
 
   return (

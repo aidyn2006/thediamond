@@ -1,17 +1,16 @@
 import Link from "next/link";
 import { Logo } from "@/components/ui/Logo";
-import { brandSlugs } from "@/lib/phones";
-import { CITY_HUBS, cityPath } from "@/lib/geo";
+import { CITY_HUBS, brandPath, catalogPath, cityPath } from "@/lib/routes";
 
 const COLUMNS: { title: string; links: { href: string; label: string }[] }[] = [
   {
     title: "Каталог",
     links: [
-      { href: "/listings", label: "Все телефоны" },
-      { href: `/listings/brand/${brandSlugs.APPLE}`, label: "iPhone" },
-      { href: `/listings/brand/${brandSlugs.SAMSUNG}`, label: "Samsung" },
-      { href: `/listings/brand/${brandSlugs.XIAOMI}`, label: "Xiaomi" },
-      { href: "/listings?maxPrice=100000", label: "До 100 000 ₸" },
+      { href: catalogPath(), label: "Все телефоны" },
+      { href: brandPath("APPLE"), label: "iPhone" },
+      { href: brandPath("SAMSUNG"), label: "Samsung" },
+      { href: brandPath("XIAOMI"), label: "Xiaomi" },
+      { href: `${catalogPath()}?maxPrice=100000`, label: "До 100 000 ₸" },
     ],
   },
   {

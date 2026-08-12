@@ -1,29 +1,12 @@
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
-
-const PUBLIC_PATHS = [
-  "/",
-  "/login",
-  "/register",
-  // Password-reset flow — reached by logged-OUT users (link on /login, link from
-  // the reset email). Must stay public or the whole flow bounces back to /login.
-  "/forgot-password",
-  "/reset-password",
-  // Default OG image — must be reachable by unauthenticated social/crawler bots.
-  // (Dotted metadata routes like /robots.txt, /sitemap.xml, /manifest.webmanifest,
-  // /icon.png are already excluded by the matcher below; this one has no dot.)
-  "/opengraph-image",
-  // Public catalog — the marketplace's main SEO surface.
-  "/listings",
-];
-// path prefixes that anyone (incl. logged-out visitors) may open
-const PUBLIC_PREFIXES = ["/u/", "/listings/"];
+import { isPublicPath } from "@/lib/routes";
 
 export default auth((req) => {
   const { pathname } = req.nextUrl;
-  const isPublic =
-    PUBLIC_PATHS.includes(pathname) ||
-    PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+  // The public surface is defined once, in lib/routes.ts — the SEO hubs live at the
+  // root under keyword slugs, so an allow-list of literal paths cannot express it.
+  const isPublic = isPublicPath(pathname);
 
   // /listings/* is public for reading, but posting and editing are not. Those pages
   // also call requireMember() server-side; this keeps the redirect instant.

@@ -1,7 +1,7 @@
 /**
  * City hubs — the geo layer of the SEO surface. Kazakh city queries are always typed
  * with a city name ("айфон бу цена Астана"), so every city gets its own indexable
- * page at /listings/city/<slug> and a brand×city page under the brand hub.
+ * page (/telefony-<slug>) plus a brand×city page (/kupit-iphone-<slug>).
  *
  * `in` / `from` are the declined forms Russian copy needs — templating "в Астана"
  * reads like machine text, which is exactly what these pages must not look like.
@@ -52,10 +52,5 @@ export const cityByName: Record<string, CityInfo> = Object.fromEntries(
   CITY_HUBS.map((c) => [c.name, c]),
 );
 
-export function cityPath(city: CityInfo): string {
-  return `/listings/city/${city.slug}`;
-}
-
-export function brandCityPath(brandSlug: string, city: CityInfo): string {
-  return `/listings/brand/${brandSlug}/${city.slug}`;
-}
+// Path builders for these hubs live in lib/routes.ts — this module stays pure data so
+// the route registry can import it without a cycle.

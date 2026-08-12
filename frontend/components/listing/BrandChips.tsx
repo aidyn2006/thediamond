@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { chipClasses } from "@/lib/chips";
-import { PHONE_BRANDS, brandLabels, brandSlugs, type PhoneBrand } from "@/lib/phones";
+import { PHONE_BRANDS, brandLabels, type PhoneBrand } from "@/lib/phones";
+import { brandPath, catalogPath } from "@/lib/routes";
 import type { CatalogFilters } from "@/lib/api-types";
 
 /**
@@ -22,7 +23,7 @@ export function BrandChips({
 
   function href(brand: PhoneBrand | null): string {
     if (!filterMode) {
-      return brand ? `/listings/brand/${brandSlugs[brand]}` : "/listings";
+      return brand ? brandPath(brand) : catalogPath();
     }
     const qs = new URLSearchParams();
     Object.entries(params ?? {}).forEach(([key, value]) => {
@@ -30,7 +31,7 @@ export function BrandChips({
     });
     if (brand) qs.set("brand", brand);
     const s = qs.toString();
-    return s ? `/listings?${s}` : "/listings";
+    return s ? `${catalogPath()}?${s}` : catalogPath();
   }
 
   return (
