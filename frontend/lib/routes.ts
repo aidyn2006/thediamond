@@ -114,7 +114,19 @@ const HUB_SLUG: Record<Locale, { city: string; buy: string }> = {
 /* ------------------------------------------------------------------ */
 
 export const homePath = (locale: Locale = DEFAULT_LOCALE) => withLocale(locale, "/");
-export const catalogPath = (locale: Locale = DEFAULT_LOCALE) => withLocale(locale, "/listings");
+
+/**
+ * The catalog is NOT localised yet (its filter UI is a separate chunk of work), so this
+ * deliberately ignores the locale and always returns the Russian path.
+ *
+ * The parameter stays in the signature on purpose: every hub calls `catalogPath(locale)`
+ * for its breadcrumb, and the day `app/kk/listings` exists this becomes a one-line change
+ * — `withLocale(locale, "/listings")` — instead of a hunt through the components.
+ * Returning "/kk/listings" today would 404: `listings` is a reserved root segment, so the
+ * catch-all refuses it rather than mistaking it for a hub slug.
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const catalogPath = (_locale: Locale = DEFAULT_LOCALE) => "/listings";
 export const sellPath = (locale: Locale = DEFAULT_LOCALE) => withLocale(locale, "/sell");
 export const exchangePath = (locale: Locale = DEFAULT_LOCALE) => withLocale(locale, "/exchange");
 export const guidesPath = (locale: Locale = DEFAULT_LOCALE) => withLocale(locale, "/guides");
