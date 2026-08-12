@@ -1,8 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
-/** Listing photos: one big frame plus thumbnails. Falls back to a placeholder. */
+/**
+ * Listing photos: one big frame plus thumbnails. Falls back to a placeholder.
+ *
+ * The main frame is the listing page's LCP element, so it loads with `priority` while
+ * the thumbnails stay lazy — they are 64px squares and never worth a round trip up front.
+ */
 export function PhotoGallery({ images, alt }: { images: string[]; alt: string }) {
   const [active, setActive] = useState(0);
 
@@ -16,12 +22,14 @@ export function PhotoGallery({ images, alt }: { images: string[]; alt: string })
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="overflow-hidden rounded-card border border-border bg-surface">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-card border border-border bg-surface">
+        <Image
           src={images[active]}
           alt={`${alt} — фото ${active + 1}`}
-          className="aspect-[4/3] w-full object-contain"
+          fill
+          sizes="(min-width: 1024px) 640px, 100vw"
+          priority
+          className="object-contain"
         />
       </div>
       {images.length > 1 && (
@@ -37,8 +45,14 @@ export function PhotoGallery({ images, alt }: { images: string[]; alt: string })
                 i === active ? "border-accent" : "border-border"
               }`}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={url} alt="" className="h-16 w-16 object-cover" />
+              <Image
+                src={url}
+                alt=""
+                width={64}
+                height={64}
+                sizes="64px"
+                className="h-16 w-16 object-cover"
+              />
             </button>
           ))}
         </div>

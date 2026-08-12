@@ -66,6 +66,9 @@ services:
       AUTH_TRUST_HOST: "true"
       AUTH_URL: https://${DOMAIN}
       BACKEND_INTERNAL_URL: http://backend:8080
+      # Read at runtime — a restart is enough, no rebuild needed.
+      GOOGLE_SITE_VERIFICATION: ${GOOGLE_SITE_VERIFICATION:-}
+      YANDEX_VERIFICATION: ${YANDEX_VERIFICATION:-}
     depends_on:
       - backend
 

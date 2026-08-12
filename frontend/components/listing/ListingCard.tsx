@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { StatusPill } from "@/components/ui/StatusPill";
 import { FavoriteHeart } from "./FavoriteHeart";
 import { listingPath } from "@/lib/listing-url";
@@ -18,17 +19,22 @@ import type { ListingSummary } from "@/lib/api-types";
  * `showStatus` is for the seller's own screens (in the public catalog every card is
  * ACTIVE, so the pill would be noise); `heart` is only passed on signed-in screens,
  * where favouriting actually works.
+ *
+ * `priority` marks the cards above the fold: on a catalog page the LCP element is one of
+ * the first photos, and lazy-loading it costs a full round trip before anything paints.
  */
 export function ListingCard({
   listing,
   showStatus = false,
   heart = false,
   favorite = false,
+  priority = false,
 }: {
   listing: ListingSummary;
   showStatus?: boolean;
   heart?: boolean;
   favorite?: boolean;
+  priority?: boolean;
 }) {
   const status = listingStatusPill[listing.status];
   const specs = [
@@ -48,14 +54,15 @@ export function ListingCard({
       >
         <div className="relative aspect-[4/5] w-full overflow-hidden bg-bg">
           {listing.coverUrl ? (
-            // Backend uploads are served from an arbitrary origin, so plain <img>
-            // avoids configuring next/image remote patterns per deployment.
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            // `sizes` mirrors the grid below (2 → 3 → 4 → 6 columns); without it the
+            // browser assumes 100vw and downloads a desktop-sized photo onto a phone.
+            <Image
               src={listing.coverUrl}
               alt={listing.title}
-              className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.03]"
-              loading="lazy"
+              fill
+              sizes="(min-width: 1280px) 16vw, (min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+              priority={priority}
+              className="object-cover transition-transform duration-200 group-hover:scale-[1.03]"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-13 text-text-dim">

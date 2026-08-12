@@ -64,6 +64,13 @@ export const metadata: Metadata = {
     title: DEFAULT_TITLE,
     description: DEFAULT_DESCRIPTION,
   },
+  // Ownership proof for Search Console and Yandex.Webmaster. Both accept a meta tag on
+  // the site root; leaving a var unset simply omits its tag, so this is safe to ship
+  // before the accounts exist.
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION,
+    yandex: process.env.YANDEX_VERIFICATION,
+  },
   robots: {
     index: true,
     follow: true,
