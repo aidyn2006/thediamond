@@ -76,7 +76,7 @@ export function DealRow({ deal }: { deal: DealItem }) {
         </Link>
       )}
 
-      <div className="flex-1">
+      <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-3">
           <Link href={listingPath(deal.listing)} className="text-15 text-text hover:text-accent">
             {deal.listing.title}

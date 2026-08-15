@@ -109,7 +109,9 @@ export function ListingCard({
             {listing.city}
           </span>
           <p className="text-13 text-text-dim">{specs}</p>
-          <p className="mt-auto pt-1 text-22 font-bold leading-none tabular">
+          {/* Two columns on a phone leave ~124px of text: a seven-figure price only
+              fits once the display size steps down. */}
+          <p className="mt-auto whitespace-nowrap pt-1 text-17 font-bold leading-none tabular sm:text-22">
             {formatTenge(listing.price)}
           </p>
         </div>

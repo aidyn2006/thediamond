@@ -61,10 +61,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* room for the floating mobile tab bar so it never covers the last row of content */
+/* Room for the floating mobile tab bar so it never covers the last row of content.
+   Scoped to pages that actually render the bar (members only) — on the public pages
+   the same rule left a dead strip under the footer. */
 @media (max-width: 767px) {
-  body {
-    padding-bottom: 5.5rem;
+  body:has([data-mobile-tabbar]) {
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
   }
 }
 

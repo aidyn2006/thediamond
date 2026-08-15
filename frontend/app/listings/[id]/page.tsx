@@ -177,8 +177,12 @@ export default async function ListingPage({
           <span className="text-text">{view.title}</span>
         </nav>
 
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
-          <div className="flex flex-col gap-6">
+        {/* Three blocks, explicitly placed: on a phone they stack photos → price →
+            specs, so the CTA is one thumb-flick from the title instead of below a
+            screenful of description. On lg the aside moves back into its own column
+            and spans both rows. */}
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+          <div className="flex flex-col gap-6 lg:col-start-1 lg:row-start-1">
             <PhotoGallery images={view.images} alt={view.title} />
 
             <div>
@@ -196,32 +200,9 @@ export default async function ListingPage({
                 )}
               </p>
             </div>
-
-            <section aria-labelledby="specs">
-              <h2 id="specs" className="mb-3 text-18 font-semibold">
-                Характеристики
-              </h2>
-              <dl className="grid grid-cols-1 gap-x-8 gap-y-2 sm:grid-cols-2">
-                {specs.map(([label, value]) => (
-                  <div key={label} className="flex justify-between gap-4 border-b border-border py-2">
-                    <dt className="text-13 text-text-dim">{label}</dt>
-                    <dd className="text-13 text-text">{value}</dd>
-                  </div>
-                ))}
-              </dl>
-            </section>
-
-            <section aria-labelledby="description">
-              <h2 id="description" className="mb-3 text-18 font-semibold">
-                Описание
-              </h2>
-              <p className="whitespace-pre-line text-15 leading-relaxed text-text-dim">
-                {view.description}
-              </p>
-            </section>
           </div>
 
-          <aside className="flex flex-col gap-4 lg:sticky lg:top-6 lg:self-start">
+          <aside className="flex flex-col gap-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-start lg:sticky lg:top-6">
             <div className="rounded-card border border-border bg-surface p-5">
               <p className="text-28 font-semibold">{formatTenge(view.price)}</p>
               {sold && (
@@ -304,6 +285,31 @@ export default async function ListingPage({
               до передачи денег.
             </p>
           </aside>
+
+          <div className="flex flex-col gap-6 lg:col-start-1 lg:row-start-2">
+            <section aria-labelledby="specs">
+              <h2 id="specs" className="mb-3 text-18 font-semibold">
+                Характеристики
+              </h2>
+              <dl className="grid grid-cols-1 gap-x-8 gap-y-2 sm:grid-cols-2">
+                {specs.map(([label, value]) => (
+                  <div key={label} className="flex justify-between gap-4 border-b border-border py-2">
+                    <dt className="text-13 text-text-dim">{label}</dt>
+                    <dd className="text-13 text-text">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+
+            <section aria-labelledby="description">
+              <h2 id="description" className="mb-3 text-18 font-semibold">
+                Описание
+              </h2>
+              <p className="whitespace-pre-line break-words text-15 leading-relaxed text-text-dim">
+                {view.description}
+              </p>
+            </section>
+          </div>
         </div>
 
         {related.length > 0 && (

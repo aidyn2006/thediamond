@@ -66,8 +66,10 @@ export async function Landing({ locale = DEFAULT_LOCALE }: { locale?: Locale }) 
         {/* Dark band + white sheet: the phones start high on the page and the pitch
             rides along in the banner instead of owning a full screen. */}
         <div className="bg-text pb-14 pt-4">
+          {/* The banner is inset inside an already-padded container: on a 360px screen
+              its own px-6 would leave the headline 264px wide. */}
           <div className="mx-auto max-w-[1200px] px-6 md:px-10">
-            <section className="rounded-card bg-prism px-6 py-10 md:px-12 md:py-14">
+            <section className="rounded-card bg-prism px-5 py-8 sm:px-6 sm:py-10 md:px-12 md:py-14">
               <h1 className="max-w-[640px] text-28 font-bold leading-tight text-text md:text-40">
                 {t.home.h1}
               </h1>

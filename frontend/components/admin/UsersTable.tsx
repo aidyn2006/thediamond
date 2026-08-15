@@ -43,43 +43,47 @@ export function UsersTable({ rows }: { rows: AdminUser[] }) {
         <Input label="Поиск по email" name="search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="creator.kz" />
       </form>
 
-      <table className="w-full">
-        <thead>
-          <tr className="border-b border-border text-left text-13 uppercase tracking-[0.04em] text-text-dim">
-            <th className="py-2 font-medium">Email</th>
-            <th className="py-2 font-medium">Роль</th>
-            <th className="py-2 font-medium">Статус</th>
-            <th className="py-2" />
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((u) => (
-            <tr key={u.id} className="border-b border-border">
-              <td className="h-[52px] py-2 text-15">
-                <Link href={`/admin/users/${u.id}`} className="text-accent hover:brightness-110">
-                  {u.email}
-                </Link>
-              </td>
-              <td className="py-2 text-15 text-text-dim">{roleLabel[u.role]}</td>
-              <td className="py-2">
-                <StatusPill tone={u.banned ? "error" : "success"} label={u.banned ? "Заблокирован" : "Активен"} />
-              </td>
-              <td className="py-2 text-right">
-                {u.role !== "ADMIN" && (
-                  <Button
-                    variant={u.banned ? "secondary" : "destructive"}
-                    className="h-9 px-3 text-13"
-                    disabled={pending && busyId === u.id}
-                    onClick={() => toggle(u)}
-                  >
-                    {u.banned ? "Разблокировать" : "Заблокировать"}
-                  </Button>
-                )}
-              </td>
+      {/* Email + role + status + action never fit a phone. The table keeps its own
+          minimum width and scrolls inside this box, so it can't drag the page sideways. */}
+      <div className="-mx-6 overflow-x-auto px-6 md:mx-0 md:px-0">
+        <table className="w-full min-w-[560px]">
+          <thead>
+            <tr className="border-b border-border text-left text-13 uppercase tracking-[0.04em] text-text-dim">
+              <th className="py-2 font-medium">Email</th>
+              <th className="py-2 font-medium">Роль</th>
+              <th className="py-2 font-medium">Статус</th>
+              <th className="py-2" />
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map((u) => (
+              <tr key={u.id} className="border-b border-border">
+                <td className="h-[52px] py-2 text-15">
+                  <Link href={`/admin/users/${u.id}`} className="text-accent hover:brightness-110">
+                    {u.email}
+                  </Link>
+                </td>
+                <td className="py-2 text-15 text-text-dim">{roleLabel[u.role]}</td>
+                <td className="py-2">
+                  <StatusPill tone={u.banned ? "error" : "success"} label={u.banned ? "Заблокирован" : "Активен"} />
+                </td>
+                <td className="py-2 text-right">
+                  {u.role !== "ADMIN" && (
+                    <Button
+                      variant={u.banned ? "secondary" : "destructive"}
+                      className="h-9 whitespace-nowrap px-3 text-13"
+                      disabled={pending && busyId === u.id}
+                      onClick={() => toggle(u)}
+                    >
+                      {u.banned ? "Разблокировать" : "Заблокировать"}
+                    </Button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

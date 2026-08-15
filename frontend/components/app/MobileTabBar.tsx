@@ -46,7 +46,10 @@ export function MobileTabBar({ items }: { items: NavItem[] }) {
   return (
     <nav
       aria-label="Мобильная навигация"
-      className="fixed inset-x-3 bottom-3 z-30 flex items-center justify-around rounded-pill bg-text px-2 py-2 shadow-[0_6px_24px_rgba(0,0,0,0.28)] md:hidden"
+      // globals.css keys the body's bottom padding off this attribute, so the bar
+      // reserves its own space instead of every page paying for it.
+      data-mobile-tabbar=""
+      className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-30 flex items-center justify-around rounded-pill bg-text px-2 py-2 shadow-[0_6px_24px_rgba(0,0,0,0.28)] md:hidden"
     >
       {items.map((item) => {
         const active = pathname === item.href || pathname.startsWith(item.href + "/");

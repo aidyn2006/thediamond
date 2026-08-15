@@ -68,7 +68,7 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-text/40 p-6"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-text/40 p-4 sm:p-6"
       onClick={onClose}
     >
       <div
@@ -77,7 +77,9 @@ export function Modal({
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className="w-full max-w-[440px] rounded-card border border-border bg-surface p-6 shadow-[0_8px_32px_rgba(0,0,0,0.45)] outline-none"
+        // Six filter fields are taller than a landscape phone: the dialog scrolls
+        // itself rather than letting «Показать» fall off the screen.
+        className="max-h-[calc(100dvh-2rem)] w-full max-w-[440px] overflow-y-auto rounded-card border border-border bg-surface p-5 shadow-[0_8px_32px_rgba(0,0,0,0.45)] outline-none sm:p-6"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 id={titleId} className="mb-4 text-17 font-semibold">

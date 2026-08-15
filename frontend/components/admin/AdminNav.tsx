@@ -8,7 +8,13 @@ import { adminNav } from "@/lib/nav";
 export function AdminNav() {
   const pathname = usePathname();
   return (
-    <nav aria-label="Навигация админки" className="flex flex-col gap-1">
+    // Admin screens get no mobile tab bar (AppHeader is rendered without nav items),
+    // so on a phone this row IS the navigation: it scrolls sideways instead of
+    // stacking four full-width buttons above every page.
+    <nav
+      aria-label="Навигация админки"
+      className="-mx-6 flex gap-1 overflow-x-auto px-6 md:mx-0 md:flex-col md:overflow-visible md:px-0"
+    >
       {adminNav.map((item) => {
         const active =
           item.href === "/admin"
@@ -20,7 +26,7 @@ export function AdminNav() {
             href={item.href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "rounded-btn px-3 py-2 text-15 transition-colors duration-150",
+              "whitespace-nowrap rounded-btn px-3 py-2 text-15 transition-colors duration-150",
               active ? "bg-surface text-text" : "text-text-dim hover:text-text",
             )}
           >
