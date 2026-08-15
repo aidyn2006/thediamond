@@ -53,7 +53,10 @@ services:
         condition: service_healthy
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_GA_ID: ${NEXT_PUBLIC_GA_ID:-}
     restart: unless-stopped
     ports:
       - "127.0.0.1:${FRONTEND_HOST_PORT:-3002}:3000"
@@ -62,6 +65,8 @@ services:
       AUTH_TRUST_HOST: "true"
       AUTH_URL: https://${DOMAIN}
       BACKEND_INTERNAL_URL: http://backend:8080
+      GOOGLE_SITE_VERIFICATION: ${GOOGLE_SITE_VERIFICATION:-}
+      YANDEX_VERIFICATION: ${YANDEX_VERIFICATION:-}
     depends_on:
       - backend
 
