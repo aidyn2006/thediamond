@@ -25,17 +25,20 @@ export function PublicHeader({
 
   return (
     <header className="border-b border-border">
+      {/* Logo + language switch + two CTAs need ~400px at full size; a 360px phone
+          offers 312. Everything in this row shrinks a step below `sm` instead of
+          overflowing, which used to scroll the whole page sideways. */}
       <div
-        className="mx-auto flex h-16 items-center justify-between px-6 md:px-10"
+        className="mx-auto flex h-14 items-center justify-between gap-2 px-4 sm:h-16 sm:gap-3 sm:px-6 md:px-10"
         style={{ maxWidth }}
       >
-        <Logo />
-        <nav aria-label={t.header.nav} className="flex items-center gap-3">
+        <Logo compact />
+        <nav aria-label={t.header.nav} className="flex shrink-0 items-center gap-2 sm:gap-3">
           {altHref && <LocaleSwitch locale={locale} href={altHref} />}
-          <Link href="/login" className={buttonClasses("ghost")}>
+          <Link href="/login" className={buttonClasses("ghost", false, "sm")}>
             {t.header.login}
           </Link>
-          <Link href="/register" className={buttonClasses("primary")}>
+          <Link href="/register" className={buttonClasses("primary", false, "sm")}>
             {t.header.register}
           </Link>
         </nav>

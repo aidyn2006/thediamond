@@ -29,7 +29,7 @@ export function LocaleSwitch({
       hrefLang={LOCALE_META[other].hreflang}
       rel="alternate"
       lang={LOCALE_META[other].htmlLang}
-      className="rounded-pill border border-border px-3 py-1.5 text-13 font-semibold text-text-dim transition-colors duration-150 hover:border-accent hover:text-text"
+      className="shrink-0 whitespace-nowrap rounded-pill border border-border px-3 py-1.5 text-13 font-semibold text-text-dim transition-colors duration-150 hover:border-accent hover:text-text"
     >
       {ui(other).langLabel}
     </Link>

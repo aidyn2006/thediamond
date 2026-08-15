@@ -53,16 +53,19 @@ export function CategoryBar({
   return (
     <div className="bg-text">
       <div className="mx-auto flex max-w-[1200px] flex-col gap-2 px-4 py-2 md:flex-row md:items-center md:gap-6 md:px-10 md:py-2.5">
+        {/* The row scrolls sideways on a phone instead of disappearing: hiding it left
+            the mobile bar with nothing but the buy/sell switch, and the catalog
+            entry points are the reason this bar exists. */}
         <nav
           aria-label={t.bar.catalogNav}
-          className="hidden items-center gap-5 overflow-x-auto md:flex"
+          className="-mx-4 flex items-center gap-4 overflow-x-auto px-4 md:mx-0 md:gap-5 md:px-0"
         >
           {LINKS.map((l) => (
             <Link
               key={l.href}
               href={l.href}
               className={cn(
-                "whitespace-nowrap text-15 transition-colors duration-150",
+                "whitespace-nowrap text-13 transition-colors duration-150 md:text-15",
                 l.highlight
                   ? "font-semibold text-mint hover:brightness-110"
                   : "text-surface/80 hover:text-surface",
